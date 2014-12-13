@@ -1,0 +1,4 @@
+config/personal_config.js
+logs/*
+node_modules/*
+
