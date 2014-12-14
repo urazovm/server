@@ -137,7 +137,7 @@ function PreloadDataClass() {
 		* @author pcemma	
 	*/
 
-	this.checkVersion = function check_version(version, need_version)
+	this.checkVersion = function(version, need_version)
 	{
 		if(!need_version) 
 			need_version = this.globalConstants.clientVersion;
@@ -202,7 +202,7 @@ function PreloadDataClass() {
 		this.createGlobalUsers();
 		
 		// собираем все константы
-		// this.globalConstants = this.createGlobalConstants();
+		this.globalConstants = this.createGlobalConstants();
 	
 		// create DATA array
 		this.createGlobalData();

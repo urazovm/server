@@ -194,7 +194,7 @@ function Router() {
 		console.log("remove user", userId);
 		if (GLOBAL.USERS[userId]){
 			// REMOVE USERS GROM ONLINE USERS OF STATE
-			delete GLOBAL.STATES[GLOBAL.USERS[userId].data.castle.K].users[userId];
+			// delete GLOBAL.STATES[GLOBAL.USERS[userId].data.castle.K].users[userId];
 		
 			// CLEAR AREAS ARRAY FROM THIS USER
 			for (var areaId in GLOBAL.USERS[userId].usersAreas)
@@ -226,7 +226,7 @@ function Router() {
 
 		if(user_id)
 		{
-			// TODO придумать как будет себя вести вся система когда ползьваотеля дыбил(как наш разраб Максим!) или еще хуже как Антон и не играет(свернул приложение)! 
+			// TODO придумать как будет себя вести вся система когда ползьваотеля
 			if(!GLOBAL.USERS[user_id]){
 				console.log("NO USER ARRAY!");
 				GLOBAL.USERS[user_id] = new_user;
@@ -243,7 +243,7 @@ function Router() {
 			}
 			
 			// ADD USER TO ONLINE USERS OF STATE
-			GLOBAL.STATES[GLOBAL.USERS[user_id].data.castle.K].users[user_id] = user_id;
+			// GLOBAL.STATES[GLOBAL.USERS[user_id].data.castle.K].users[user_id] = user_id;
 			
 			// SEND DATA TO CLIENT
 			sendDataToUser(response, {f: 'authorization', p: {

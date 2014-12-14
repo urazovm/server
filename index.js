@@ -48,6 +48,7 @@ ServerClass = require("./class/ServerClass.js");
 RouterClass = require("./class/RouterClass.js");
 DbClass = require("./class/DBClass.js");
 PreloadDataClass = require("./class/PreloadDataClass.js");
+UserClass = require("./class/UserClass.js");
 
 
 
@@ -77,8 +78,8 @@ d.run(function() {
 	server.startSocket();	
 	console.log("\n\n -------------------------------------------------------------\n",
 				"SERVER START TIME:"+Date()+" \n",
-				// "client version: ", GLOBAL.globalConstants.clientVersion+" \n", 
-				// "Data version: ", GLOBAL.globalConstants.globalDataVersion+" \n",
+				"client version: ", GLOBAL.globalConstants.clientVersion+" \n", 
+				"Data version: ", GLOBAL.globalConstants.globalDataVersion+" \n",
 				"-------------------------------------------------------------\n\n");
 });
 
