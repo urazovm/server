@@ -1,34 +1,11 @@
 console.log("SERVER CLASS is connected");	
-var http = require("http");
+// var http = require("http");
 var url = require("url");
-
-
 
 
 function ServerClass() {
 	var router = new RouterClass();
 	// router.crontab();
-	
-	
-	/*
-		* Description:
-		*	Function стартуем http server
-		*	
-		*
-		*
-		*	return:
-		*
-		* @since  31.03.14
-		* @author pcemma
-	*/
-	this.startHttp = function()
-	{
-		// create server
-		http.createServer(this.onHttpRequest).listen(config.port_config.port_number);
-		console.log("HTTP Server has started.");
-	}
-	
-	
 	
 	/*
 		* Description:
@@ -49,44 +26,6 @@ function ServerClass() {
 	}
 	
 	
-
-	
-	
-	
-	/*
-		* Description:
-		*	Function обработчик http сервера
-		*		
-		*	@request:
-		*	@response:
-		*
-		*	return:
-		*
-		* @since  31.03.14
-		* @author pcemma
-	*/
-	this.onHttpRequest = function(request, response){
-		
-		var postData = "";
-		var pathname = url.parse(request.url).pathname;
-		// console.log("Request for " + pathname + " received.");
-		
-		d.add(request);
-		d.add(response);
-		
-		request.setEncoding("utf8");
-		request.addListener("data", function(postDataChunk) {
-			postData += postDataChunk;
-			// console.log("Received POST data chunk '"+ postDataChunk + "'.");
-		});
-		request.addListener("end", function() {
-			router.route(pathname, response, postData);
-		});
-	}
-	
-	
-	
-	
 	/*
 		* Description:
 		*	Function обработчик socket сервера
@@ -103,11 +42,13 @@ function ServerClass() {
 
 		var oData = "";
 		
+		// добавили сокет в домайн
 		d.add(socket);
 		
 		//connect
 		socket.on('connect', function () 
 		{
+			// проверка на подключение пустого сокета. пустые сокеты которые открыли соединение но не прсилали команды авторизациинадо выкидывать
 			socket.empty_connection = true;
 			socket.timer_for_off_empty_socket = setTimeout(function(){lib.close_socket(socket);}, 10000)
 
@@ -128,6 +69,8 @@ function ServerClass() {
 			var testCommand = testData.slice(6,testData.lenght)
 
 			// if ( testByte <= Number( testCommand.NumberByByte(testByte) ) ){
+			
+			// ВОЗМОЖНО ПРОВЕРКУ АНДО ПОМЕСТИТЬ В ВАЙЛ
 			if ( Number( testCommand.length ) >= Number( testCommand.NumberByByte(testByte) ) ){
 				while(oData.length > 0)
 				{
@@ -137,22 +80,14 @@ function ServerClass() {
 					n = oData.slice(0,number_of_char);
 					oData = oData.substring(number_of_char);
 
-					var data = n;
-					var params = {};
-			
-					params = JSON.parse(data);
-					if( GLOBAL.USERS[params.userId] && GLOBAL.USERS[params.userId].verifyHash == params.verifyHash )
-					{
-						
-						// off flag if client send data for auth
-						socket.empty_connection = false;
-						clearTimeout(socket.timer_for_off_empty_socket);
-						
-						GLOBAL.USERS[params.userId].socket = socket;
-						
-						// lib.socket_write(GLOBAL.USERS[params.userId].socket, {});
-						GLOBAL.USERS[params.userId].socketWrite({p: 0});
+					var data = JSON.parse(n);
+					// console.log(data);
+					
+					// Для авторизации надо передать сокет
+					if(data.route == "authorization" || data.route == "getGlobalData"){
+						data.p.socket = socket;
 					}
+					router.route(data.route, data.p);
 				}
 			}
 		});
@@ -189,8 +124,8 @@ function ServerClass() {
 		});
 		
 	}
-}
 
+}
 
 module.exports = ServerClass;
 

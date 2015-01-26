@@ -27,97 +27,198 @@ function User() {
 	*/
 	User.prototype.socketWrite = function (params)
 	{
-		var string_params = JSON.stringify(params);
-		var bytes_count = lib.return_bytes(string_params);
-		if(this.socket)
+		if(this.socket){
+			var string_params = JSON.stringify(params);
+			var bytes_count = lib.return_bytes(string_params);
 			this.socket.write(bytes_count+string_params);
+		}
 	}
 		
 	
 	/*
 		* Description:
-		*	function check user 
+		*	function Проверяет есть ли пользователь с таким емайл и паролем в базе. если есть, возвращает ид этого пользователя
 		*	
-		*	@params: array, array of params
-		*			{
-		*				auto_login	- str, login of user
-		*			}
+		*	@autoConfigData:
+		*		@email:		str, email of the user
+		*		@password:	str, password of the user
+		*
 		*
 		*	return: int/boolean, user_id if user exist, false if not!
 		*
-		* @since  14.12.14
-		* @author pcemma, t
+		* @since  25.01.15
+		* @author pcemma
 	*/
-	User.prototype.check = function(params)
+	User.prototype.check = function(autoConfigData)
 	{
-		// TODO add check user code!
+		console.log(autoConfigData);
 		var userId;
-		
-		if(params.auto_login){
-		// old user. only return userId
-			var req = SQL.querySync("SELECT `game_Users`.`id` FROM `game_Users` WHERE `game_Users`.`Login` = '"+params.auto_login+"'");
+		if(
+			autoConfigData && 
+			autoConfigData.email && autoConfigData.email != "" &&
+			autoConfigData.password && autoConfigData.password != ""
+		){
+			var req = SQL.querySync("SELECT `game_Users`.`id` FROM `game_Users` WHERE `game_Users`.`email` = '"+SQL.mysqlRealEscapeString((autoConfigData.email.toLowerCase()))+"' AND `password` = '"+crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex')+"' ");
+			
 			var row = req.fetchAllSync();
-
 			if(row[0])
 				userId = row[0].id;
-
-			this.login = params.auto_login;
-		}else{
-		// new user. need to create begin data to array and db!
-			var currentTime = Math.floor(+new Date() / 1000);
-			var query = "";
-			
-			// TODO: maybe in own function this code.
-			userId = SQL.lastInsertIdSync("INSERT INTO `game_Users` (`id`, `login`) VALUES (NULL, '')");
-			var login = "guest"+userId;
-			this.login = login;
-			// update Login
-			SQL.querySync("UPDATE `game_Users` SET `login` = '"+login+"' WHERE `id` = "+userId);
-			
-			
-			// UserData
-			SQL.querySync("INSERT INTO `game_UsersData` (`id`, `userId`) VALUES (NULL, "+userId+") ");
-			
-			
-			// UserCounters
-			// query = ""
-			// for(var i in GLOBAL.DATA.counters){
-				// query += " (NULL,"+userId+","+GLOBAL.DATA.counters[i].id+",0),";
-			// }
-			// query = query.substring(0, query.length-1);
-			// SQL.querySync("INSERT INTO `game_UsersCounters`(`id`, `userId`, `counterId`, `count`) VALUES "+query);			
-			
-			
-			
 		}
 		return userId;
 	}
 	
-		
+	
 	/*
 		* Description:
-		*	Get users info from UserData, User table
+		*	function проверяет есть в базе пользователь с таким емайлом. Так же в функцию включена валидация емайла
 		*	
-		*	
-		*	return: 
+		*	@autoConfigData:	array
+		*		@email:			str, email of the user
+		*	@takingIntoUser:	bool, флаг отвечает учитывать ли что емейл - это емейл того игрока, ктороый проверяет
 		*
-		* @since  11.02.14
+		*	return: flag:		boolean, да - если нашли такого юзера с таким же емайлом, нет - если не нашли
+		*
+		* @since  25.01.15
 		* @author pcemma
 	*/
-	User.prototype.getUserInfo = function()
+	User.prototype.chekEmail = function(autoConfigData, takingIntoUser)
 	{
-		// USER DATA 
-		var req = SQL.querySync("	SELECT `ud`.* "+
-								"	FROM  `game_UsersData`  `ud`"+
-								"	WHERE `ud`.`userId` = "+this.userId);
-								
-								
-
-		var rows = req.fetchAllSync();
-		// for(var key in rows[0]){
-			// this.data[key] = rows[0][key];
-		// }
+		console.log("chekEmail");
+		console.log(autoConfigData);
+		var flag = false;
+		if(
+			autoConfigData && 
+			autoConfigData.email && autoConfigData.email != "" &&
+			lib.validateEmail(autoConfigData.email)
+		){
+			var req = SQL.querySync("SELECT `game_Users`.`id` FROM `game_Users` WHERE `game_Users`.`email` = '"+SQL.mysqlRealEscapeString((autoConfigData.email.toLowerCase()))+"' ");
+			var row = req.fetchAllSync();
+			if(row[0]){
+				if(row[0].id == this.userId && takingIntoUser){
+					flag = true;
+				}
+			}
+			else{
+				flag = true;
+			}
+		}
+		return flag;
 	}
+	
+	
+	/*
+		* Description:
+		*	function Изменяет данные пользователя емайл и пароль, а так же тип пользователя в зависимости от дейсвтия.
+		*	
+		*	@autoConfigData:
+		*		@email:		str, email of the user
+		*		@password:	str, password of the user
+		*
+		*
+		* @since  25.01.15
+		* @author pcemma
+	*/
+	User.prototype.changeEmailAndPassword = function(autoConfigData)
+	{
+		console.log("changeEmailAndPassword");
+		console.log(autoConfigData);
+		if(
+			autoConfigData && 
+			autoConfigData.email && autoConfigData.email != "" &&
+			lib.validateEmail(autoConfigData.email) &&
+			autoConfigData.password && autoConfigData.password != ""
+		){
+			if(this.userType == 1)
+				this.userType = 2;
+			SQL.querySync("UPDATE `game_Users`SET `userType` = "+this.userType+", `email` = '"+SQL.mysqlRealEscapeString((autoConfigData.email.toLowerCase()))+"', `password` = '"+crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex')+"' WHERE `game_Users`.`id` = "+this.userId);
+		}
+	}
+	
+	
+	/*
+		* Description:
+		*	function Создаем нового пользователя. Заполняем все необходимые данные в базе данных. 
+		*	
+		*
+		*	@params:				array
+		*		@autoConfigData: 	array
+		*			@email:			str, email of the user
+		*			@password:		str, password of the user
+		*		@uid:				
+		*		@langLocale:		
+		*		@device:		
+		*		@deviceSystemVersion:		
+		*		@deviceToken:		
+		*		@clientVersion:		
+		*	
+		*
+		*
+		*
+		*
+		*
+		*
+		* @since  25.01.15
+		* @author pcemma
+	*/
+	User.prototype.addNewUser = function(params)
+	{
+		// new user. need to create begin data to array and db!
+		console.log(params);
+		console.log()
+		var userId 		= SQL.lastInsertIdSync("INSERT INTO `game_Users` (`id`) VALUES (NULL)"), 
+			login		= "guest"+userId, 
+			email 		= login+"@bew.net", 
+			password 	= Math.random().toString(36).substr(2, 10), 
+			userType 	= 1,
+			currentTime = Math.floor(+new Date() / 1000),
+			query 		= "";
+		
+		this.userId = userId;
+		console.log("userId", this.userId);
+		
+		if(
+			params.autoConfigData &&
+			params.autoConfigData.email && params.autoConfigData.email != "" &&
+			params.autoConfigData.password && params.autoConfigData.password != ""
+		){
+			email = params.autoConfigData.email.toLowerCase();
+			password = params.autoConfigData.password;
+			userType = 3;
+		}
+		
+		// Обновляем данные для авторизации в базе
+		SQL.querySync("UPDATE `game_Users` SET "+
+								"`Login` = '"+login+"', "+
+								"`email` = '"+SQL.mysqlRealEscapeString(email)+"', "+
+								"`password` = '"+crypto.createHash('md5').update(String(password)).digest('hex')+"', "+
+								"`userType` = "+userType+", "+
+								"`registrationDate` = "+currentTime+", "+
+								
+								"`uid` = '"+SQL.mysqlRealEscapeString((params.uid) ? params.uid : "")+"', "+
+								"`langLocale` = '"+SQL.mysqlRealEscapeString((params.langLocale) ? params.langLocale : "")+"', "+
+								"`device` = '"+SQL.mysqlRealEscapeString((params.device) ? params.device : "")+"', "+
+								"`deviceSystemVersion` = '"+SQL.mysqlRealEscapeString((params.deviceSystemVersion) ? params.deviceSystemVersion : "")+"', "+
+								"`deviceToken` = '"+SQL.mysqlRealEscapeString((params.deviceToken) ? params.deviceToken : "")+"', "+
+								
+								"`ip` = '"+SQL.mysqlRealEscapeString((params.ip) ? params.ip : "")+"', "+
+								"`country` = '"+SQL.mysqlRealEscapeString((params.ip) ? lib.getCountryByIp(params.ip) : "")+"', "+
+								"`clientVersion` = '"+SQL.mysqlRealEscapeString((params.clientVersion) ? params.clientVersion : "")+"' "+
+								
+								"WHERE `id` = "+userId);
+		
+		
+		
+		
+		// UserData
+		// SQL.querySync("INSERT INTO `game_UsersData`(`id`, `user_id`, `last_resource_time_update`, `dailyAllianceEndTime`) VALUES (NULL, "+userId+", "+currentTime+", "+(currentTime + GLOBAL.globalConstants.dailyAllianceEndTime)+")");
+		
+		
+		
+		
+		return {userId: userId, login: login, email: email, password: password};
+	}
+	
+	
 
 
 
@@ -138,34 +239,9 @@ function User() {
 	*/
 	User.prototype.auth = function(params)
 	{
-		
-		
-		this.userId = (params.userId && params.userId != 0) ? params.userId : this.userId;
-		if(this.userId != 0){
-		
-			// USER COUNTERS
-			// this.data.counters = EQM.getCounters(this.userId);
-			
-			// GET user's data
-			this.getUserInfo();
-			
-			
-
-			
-			// GET BONUSES
-			// this.data.bonuses = BM.getBonuses({userId: this.userId});
-			// this.data.bonusesInProgress = BM.getBonusesInProgress({userId: this.userId});
-			// this.data.tempBonuses = BM.getTempBonuses({userId: this.userId});
-		
-			
-			
-		
-			console.log(this.data);
-			// TODO: make function to create verify hash
-			this.verifyHash = 1;
-			
-			this.ping = Math.floor(+new Date() / 1000);
-		}
+		// Get verifyHash
+		this.verifyHash = crypto.createHash('md5').update(String(+new Date()) + config.secretHashString + String(this.userId)).digest('hex');
+		this.ping = Math.floor(+new Date() / 1000);
 	}
 	
 	

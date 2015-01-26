@@ -1,9 +1,15 @@
 console.log("DB CLASS is connected");	
 var mysql = require("mysql-libmysqlclient");
 
-
-function DBClass() {
+function DBClass(params) {
+	this.connectionsCount = 5;
 	this.bdList = {};
+	
+	params = params || {};	
+	
+	this.bd_name = params.bd_name || config.bd_config.bd_name;
+	this.user_name = params.user_name || config.bd_config.user_name;
+	this.user_password = params.user_password || config.bd_config.user_password;
 	
 	/*
 		* Description:
@@ -18,7 +24,7 @@ function DBClass() {
 	this.createDbConnection = function()
 	{	
 		var conn = mysql.createConnectionSync();
-		conn.connectSync('127.0.0.1', config.bd_config.user_name, config.bd_config.user_password, config.bd_config.bd_name);
+		conn.connectSync('127.0.0.1', this.user_name, this.user_password, this.bd_name);
 		conn.querySync("set names utf8");
 		conn.avail = 0;
 		return conn;
@@ -37,13 +43,12 @@ function DBClass() {
 	this.createBdList = function()
 	{
 		var temp_array = {};
-		for (var i = 1; i < 30; i++ )
+		for (var i = 1; i < this.connectionsCount; i++ )
 		{
 			temp_array[i] = this.createDbConnection();
 		}
 		return temp_array;		
 	}
-	
 	
 	
 	/*
@@ -59,11 +64,9 @@ function DBClass() {
 	{
 		// console.log("pingMysqlSession is called!!!!");
 		for(var key in this.bdList)
-			// this.bdList[key].querySync("SELECT `id` FROM  `game_Buildings` ");
+			this.bdList[key].querySync("SELECT `id` FROM  `game_Buildings` ");
 		setTimeout(function(that){ that.pingMysqlSession() }, 600000, this);
 	}
-	
-	
 	
 	
 	/*
@@ -100,7 +103,6 @@ function DBClass() {
 	}
 	
 
-	
 	/*
 		* Description:
 		*	function check what session is free and make db request on this session
@@ -132,6 +134,45 @@ function DBClass() {
 			this.bdList[n].avail = 0;
 			return this.bdList[n].lastInsertIdSync();
 		}
+	}
+	
+	
+	/*
+		* Description:
+		*	function делает ескейп строки - защита от инъекций
+		*	
+		*
+		*	@query:	str
+		*
+		*
+		*	return: object, a query result
+		*
+		* @since  23.01.15
+		* @author pcemma
+	*/
+	this.mysqlRealEscapeString = function(str) {
+		return str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
+			switch (char) {
+				case "\0":
+					return "\\0";
+				case "\x08":
+					return "\\b";
+				case "\x09":
+					return "\\t";
+				case "\x1a":
+					return "\\z";
+				case "\n":
+					return "\\n";
+				case "\r":
+					return "\\r";
+				case "\"":
+				case "'":
+				case "\\":
+				case "%":
+					return "\\"+char; // prepends a backslash to backslash, percent,
+									  // and double/single quotes
+			}
+		});
 	}
 	
 	

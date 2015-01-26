@@ -1,5 +1,8 @@
 domain = require('domain');
 net = require('net');
+crypto = require('crypto');
+geoip = require('./lib/geoip/geoip');
+
 
 d = domain.create();
 d.on('error', function(er) 
@@ -65,16 +68,9 @@ GLOBAL.initialize();
 
 
 
-// bot on server
-// GLOBAL.USERS[1] = new UserClass();
-
-
-
-
 // start server
 d.run(function() {
 	var server = new ServerClass();
-	server.startHttp();
 	server.startSocket();	
 	console.log("\n\n -------------------------------------------------------------\n",
 				"SERVER START TIME:"+Date()+" \n",
@@ -82,6 +78,11 @@ d.run(function() {
 				"Data version: ", GLOBAL.globalConstants.globalDataVersion+" \n",
 				"-------------------------------------------------------------\n\n");
 });
+
+
+
+
+
 
 
 // var tempUser = new UserClass();

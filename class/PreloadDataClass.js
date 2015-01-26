@@ -2,6 +2,27 @@ console.log("PreloadData CLASS is connected");
 	
 function PreloadDataClass() {
 
+
+	this.initialize = function()
+	{
+		// create STATES array
+		// this.createGlobalStates();
+		
+		// create USERS array
+		this.createGlobalUsers();
+		
+		// собираем все константы
+		this.globalConstants = this.createGlobalConstants();
+	
+		// create DATA array
+		this.createGlobalData();
+		
+		//собираем массив ошибок
+		this.errorsLists = this.getErrorsLists();
+	}
+
+
+
 	/**************** STATES ************/
 
 	/*
@@ -35,7 +56,6 @@ function PreloadDataClass() {
 
 	/**************** DATA ARRAY FUNCTIONS ************/	
 	
-
 	/*
 		* Description:
 		*	Create the Global data array and fill it.
@@ -54,7 +74,67 @@ function PreloadDataClass() {
 		this.HELP = {};
 		
 		
+		
+		this.DATA.items = this.getItems();
+		
+		console.log(this.DATA.items);
 	}
+	
+	
+	/*
+		* Description:
+		*	Собирает список предметов (данные о предметах)
+		*	
+		*	
+		*	
+		*
+		* @since  22.12.14
+		* @author pcemma
+	*/
+	this.getItems = function()
+	{
+		var items = {};
+		var req = SQL.querySync("SELECT `game_Items`.* "+
+								"FROM `game_Items`");
+		
+		
+		var rows = req.fetchAllSync();
+		for (var i=0, length = rows.length - 1; i <= length; i += 1){
+			items[String(rows[i].id)] = {
+											id: String(rows[i].id),
+											name: rows[i].name,
+											weight: rows[i].weight,
+											imageId: rows[i].imageId,
+											recipe: (rows[i].receipId) ? rows[i].receipId : null,
+											categories: rows[i].category.split(","),
+											needStats: {},
+											giveStats:{},
+											attachments: {},
+											
+										};
+		}
+		
+		return items;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	/**************** USERS ************/
 
@@ -193,26 +273,6 @@ function PreloadDataClass() {
 	}
 	
 	
-	this.initialize = function()
-	{
-		// create STATES array
-		// this.createGlobalStates();
-		
-		// create USERS array
-		this.createGlobalUsers();
-		
-		// собираем все константы
-		this.globalConstants = this.createGlobalConstants();
-	
-		// create DATA array
-		this.createGlobalData();
-		
-		
-		//собираем массив ошибок
-		this.errorsLists = this.getErrorsLists();
-	}
-	
-
 
 	
 }
