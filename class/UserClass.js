@@ -58,6 +58,7 @@ function User() {
 			autoConfigData.email && autoConfigData.email != "" &&
 			autoConfigData.password && autoConfigData.password != ""
 		){
+			console.log("SELECT `game_Users`.`id` FROM `game_Users` WHERE `game_Users`.`email` = '"+SQL.mysqlRealEscapeString((autoConfigData.email.toLowerCase()))+"' AND `password` = '"+crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex')+"' ");
 			var req = SQL.querySync("SELECT `game_Users`.`id` FROM `game_Users` WHERE `game_Users`.`email` = '"+SQL.mysqlRealEscapeString((autoConfigData.email.toLowerCase()))+"' AND `password` = '"+crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex')+"' ");
 			
 			var row = req.fetchAllSync();
@@ -167,7 +168,7 @@ function User() {
 		console.log()
 		var userId 		= SQL.lastInsertIdSync("INSERT INTO `game_Users` (`id`) VALUES (NULL)"), 
 			login		= "guest"+userId, 
-			email 		= login+"@bew.net", 
+			email 		= login+"@"+(+new Date())+"bew.net", 
 			password 	= Math.random().toString(36).substr(2, 10), 
 			userType 	= 1,
 			currentTime = Math.floor(+new Date() / 1000),

@@ -62,28 +62,24 @@ function Router() {
 		* @since  31.03.14
 		* @author pcemma
 	*/
-	this['makeClientsErrorLogs'] = function (response, data) {
+	this['makeClientsErrorLogs'] = function (data) {
 		console.log("data.error_message",data);
-		data.functionName	 = escape(data.functionName	);
-		data.error = escape(data.error);
-		var find_error = false;
+		var find_error 		= false;
 		
 		for(var key in GLOBAL.errorsLists.clientsErrorsList)
 		{
 			if(GLOBAL.errorsLists.clientsErrorsList[key].functionName == data.functionName && GLOBAL.errorsLists.clientsErrorsList[key].error == data.error)
 			{
 				console.log("find error!!!!!!!!!!!");
-				if(GLOBAL.checkVersion(escape(data.clientVersion), GLOBAL.errorsLists.clientsErrorsList[key].clientVersion) )
+				if(GLOBAL.checkVersion(data.clientVersion, GLOBAL.errorsLists.clientsErrorsList[key].clientVersion) )
 				{
 					console.log("Version is >>>>>= !!!!!!!!!!!");
-					console.log("GLOBAL.errorsLists.clientsErrorsList[key].state", GLOBAL.errorsLists.clientsErrorsList[key].state);
 					if(GLOBAL.errorsLists.clientsErrorsList[key].state == 1)
 					{
 						GLOBAL.errorsLists.clientsErrorsList[key].state = 2;
-						GLOBAL.errorsLists.clientsErrorsList[key].clientVersion = escape(data.clientVersion);
+						GLOBAL.errorsLists.clientsErrorsList[key].clientVersion = data.clientVersion;
 					}
-					console.log("GLOBAL.errorsLists.clientsErrorsList[key].state", GLOBAL.errorsLists.clientsErrorsList[key].state);
-					SQL.querySync("UPDATE `game_ErrorsClientList` SET `state` = "+GLOBAL.errorsLists.clientsErrorsList[key].state+", `clientVersion` = '"+escape(data.clientVersion)+"' WHERE `id` = "+key);
+					SQL.querySync("UPDATE `game_ErrorsClientList` SET `state` = "+GLOBAL.errorsLists.clientsErrorsList[key].state+", `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"' WHERE `id` = "+key);
 				}
 				find_error = true;
 				break;
@@ -91,13 +87,13 @@ function Router() {
 		}
 		if(!find_error)
 		{
-			var error_id = SQL.lastInsertIdSync("INSERT INTO `game_ErrorsClientList` SET `functionName` = '"+data.functionName+"', `error` = '"+data.error+"', `clientVersion` = '"+escape(data.clientVersion)+"', state = 0 ");
-			GLOBAL.errorsLists.clientsErrorsList[error_id] = {functionName: data.functionName, error: data.error, clientVersion:escape(data.clientVersion), state: 0};
+			var error_id = SQL.lastInsertIdSync("INSERT INTO `game_ErrorsClientList` SET `functionName` = '"+SQL.mysqlRealEscapeString(data.functionName)+"', `error` = '"+SQL.mysqlRealEscapeString(data.error)+"', `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"', state = 0 ");
+			GLOBAL.errorsLists.clientsErrorsList[error_id] = {functionName: data.functionName, error: data.error, clientVersion: data.clientVersion, state: 0};
 		}
 		// update errors log
-		SQL.querySync("INSERT INTO `game_ErrorsClient` SET `date` = UNIX_TIMESTAMP(), `functionName` = '"+data.functionName+"', `error` = '"+data.error+"', `clientVersion` = '"+escape(data.clientVersion)+"', userId ="+data.userId);
-		response.end();
+		SQL.querySync("INSERT INTO `game_ErrorsClient` SET `date` = UNIX_TIMESTAMP(), `functionName` = '"+SQL.mysqlRealEscapeString(data.functionName)+"', `error` = '"+SQL.mysqlRealEscapeString(data.error)+"', `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"', userId ="+data.userId);
 	}
+		
 		
 	
 	/*

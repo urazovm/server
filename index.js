@@ -3,7 +3,6 @@ net = require('net');
 crypto = require('crypto');
 geoip = require('./lib/geoip/geoip');
 
-
 d = domain.create();
 d.on('error', function(er) 
 {
@@ -52,6 +51,9 @@ RouterClass = require("./class/RouterClass.js");
 DbClass = require("./class/DBClass.js");
 PreloadDataClass = require("./class/PreloadDataClass.js");
 UserClass = require("./class/UserClass.js");
+
+BattleManagerClass = require("./class/BattleManagerClass.js");
+
 
 
 

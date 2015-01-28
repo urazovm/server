@@ -257,17 +257,15 @@ function PreloadDataClass() {
 		exports.serverErrorsList = {};
 		
 		// clients errors
-		// var req = SQL.querySync("SELECT * FROM  `game_ErrorsClientList` ");
-		// var row = req.fetchAllSync();
-		// for(key in row)
-			// exports.clientsErrorsList[row[key].id] = {functionName: row[key].functionName, error: row[key].error, state: row[key].state, clientVersion: row[key].clientVersion};
+		var req = SQL.querySync("SELECT * FROM  `game_ErrorsClientList` ");
+		var row = req.fetchAllSync();
+		for(key in row)
+			exports.clientsErrorsList[row[key].id] = {functionName: row[key].functionName, error: row[key].error, state: row[key].state, clientVersion: row[key].clientVersion};
 		
-		
-		
-		// var req = SQL.querySync("SELECT * FROM  `game_ErrorsServerList` ");
-		// var row = req.fetchAllSync();
-		// for(key in row)
-			// exports.serverErrorsList[row[key].id] = {functionName: row[key].functionName, error: row[key].error, state: row[key].state, clientVersion: row[key].clientVersion};
+		var req = SQL.querySync("SELECT * FROM  `game_ErrorsServerList` ");
+		var row = req.fetchAllSync();
+		for(key in row)
+			exports.serverErrorsList[row[key].id] = {functionName: row[key].functionName, error: row[key].error, state: row[key].state, clientVersion: row[key].clientVersion};
 		
 		return exports;
 	}
