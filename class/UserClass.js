@@ -5,7 +5,9 @@ function User() {
 	this.userId = 0;
 	
 	// USER DATA
-	this.data = {	
+	this.data = {
+
+					
 				};
 				
 
@@ -19,16 +21,16 @@ function User() {
 		* Description:
 		*	Отправляет по сокету данные клиенту 
 		*	
-		*	@params: array, array of params
+		*	@data: array, array of params
 		*			
 		*
 		* @since  22.04.14
 		* @author pcemma
 	*/
-	User.prototype.socketWrite = function (params)
+	User.prototype.socketWrite = function (data)
 	{
 		if(this.socket){
-			var string_params = JSON.stringify(params);
+			var string_params = JSON.stringify(data);
 			var bytes_count = lib.return_bytes(string_params);
 			this.socket.write(bytes_count+string_params);
 		}
@@ -141,7 +143,7 @@ function User() {
 		*	function Создаем нового пользователя. Заполняем все необходимые данные в базе данных. 
 		*	
 		*
-		*	@params:				array
+		*	@data:				array
 		*		@autoConfigData: 	array
 		*			@email:			str, email of the user
 		*			@password:		str, password of the user
@@ -161,10 +163,10 @@ function User() {
 		* @since  25.01.15
 		* @author pcemma
 	*/
-	User.prototype.addNewUser = function(params)
+	User.prototype.addNewUser = function(data)
 	{
 		// new user. need to create begin data to array and db!
-		console.log(params);
+		console.log(data);
 		console.log()
 		var userId 		= SQL.lastInsertIdSync("INSERT INTO `game_Users` (`id`) VALUES (NULL)"), 
 			login		= "guest"+userId, 
@@ -178,12 +180,12 @@ function User() {
 		console.log("userId", this.userId);
 		
 		if(
-			params.autoConfigData &&
-			params.autoConfigData.email && params.autoConfigData.email != "" &&
-			params.autoConfigData.password && params.autoConfigData.password != ""
+			data.autoConfigData &&
+			data.autoConfigData.email && data.autoConfigData.email != "" &&
+			data.autoConfigData.password && data.autoConfigData.password != ""
 		){
-			email = params.autoConfigData.email.toLowerCase();
-			password = params.autoConfigData.password;
+			email = data.autoConfigData.email.toLowerCase();
+			password = data.autoConfigData.password;
 			userType = 3;
 		}
 		
@@ -195,15 +197,15 @@ function User() {
 								"`userType` = "+userType+", "+
 								"`registrationDate` = "+currentTime+", "+
 								
-								"`uid` = '"+SQL.mysqlRealEscapeString((params.uid) ? params.uid : "")+"', "+
-								"`langLocale` = '"+SQL.mysqlRealEscapeString((params.langLocale) ? params.langLocale : "")+"', "+
-								"`device` = '"+SQL.mysqlRealEscapeString((params.device) ? params.device : "")+"', "+
-								"`deviceSystemVersion` = '"+SQL.mysqlRealEscapeString((params.deviceSystemVersion) ? params.deviceSystemVersion : "")+"', "+
-								"`deviceToken` = '"+SQL.mysqlRealEscapeString((params.deviceToken) ? params.deviceToken : "")+"', "+
+								"`uid` = '"+SQL.mysqlRealEscapeString((data.uid) ? data.uid : "")+"', "+
+								"`langLocale` = '"+SQL.mysqlRealEscapeString((data.langLocale) ? data.langLocale : "")+"', "+
+								"`device` = '"+SQL.mysqlRealEscapeString((data.device) ? data.device : "")+"', "+
+								"`deviceSystemVersion` = '"+SQL.mysqlRealEscapeString((data.deviceSystemVersion) ? data.deviceSystemVersion : "")+"', "+
+								"`deviceToken` = '"+SQL.mysqlRealEscapeString((data.deviceToken) ? data.deviceToken : "")+"', "+
 								
-								"`ip` = '"+SQL.mysqlRealEscapeString((params.ip) ? params.ip : "")+"', "+
-								"`country` = '"+SQL.mysqlRealEscapeString((params.ip) ? lib.getCountryByIp(params.ip) : "")+"', "+
-								"`clientVersion` = '"+SQL.mysqlRealEscapeString((params.clientVersion) ? params.clientVersion : "")+"' "+
+								"`ip` = '"+SQL.mysqlRealEscapeString((data.ip) ? data.ip : "")+"', "+
+								"`country` = '"+SQL.mysqlRealEscapeString((data.ip) ? lib.getCountryByIp(data.ip) : "")+"', "+
+								"`clientVersion` = '"+SQL.mysqlRealEscapeString((data.clientVersion) ? data.clientVersion : "")+"' "+
 								
 								"WHERE `id` = "+userId);
 		
@@ -230,7 +232,7 @@ function User() {
 		* Description:
 		*	function auth user
 		*	
-		*	@params:	array, array of params
+		*	@data:	array, array of params
 		*	@userId:	int, id of the user for auth
 		*	
 		*	return: 
@@ -238,11 +240,24 @@ function User() {
 		* @since  10.02.14
 		* @author pcemma
 	*/
-	User.prototype.auth = function(params)
+	User.prototype.auth = function(data)
 	{
+		
+		this.userId = data.userId;
+		
 		// Get verifyHash
 		this.verifyHash = crypto.createHash('md5').update(String(+new Date()) + config.secretHashString + String(this.userId)).digest('hex');
 		this.ping = Math.floor(+new Date() / 1000);
+		
+		
+		
+		
+		
+		//TODO: перенести это в кеш!!! Тут должна сработаь функция взятия из кеша всех данных.
+		
+		
+		
+		
 	}
 	
 	

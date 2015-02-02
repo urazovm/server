@@ -46,14 +46,14 @@ config = require("./config/personal_config.js");
 lib =  require("./lib/lib.js"); 
 
 // classes	
-ServerClass = require("./class/ServerClass.js");
-RouterClass = require("./class/RouterClass.js");
-DbClass = require("./class/DBClass.js");
-PreloadDataClass = require("./class/PreloadDataClass.js");
-UserClass = require("./class/UserClass.js");
+ServerClass 		= require("./class/ServerClass.js");
+RouterClass 		= require("./class/RouterClass.js");
+DbClass 			= require("./class/DBClass.js");
+PreloadDataClass 	= require("./class/PreloadDataClass.js");
+UserClass 			= require("./class/UserClass.js");
 
-BattleManagerClass = require("./class/BattleManagerClass.js");
-
+BattleManagerClass 	= require("./class/BattleManagerClass.js");
+BattleClass			= require("./class/BattleClass.js");
 
 
 
@@ -63,6 +63,7 @@ BattleManagerClass = require("./class/BattleManagerClass.js");
 // start sql pool connection
 SQL = new DbClass();
 
+battlesManager = new BattleManagerClass();
 
 // fill global data array
 GLOBAL = new PreloadDataClass();

@@ -205,7 +205,7 @@ function Router() {
 			
 			GLOBAL.USERS[userId] = newUser;
 			GLOBAL.USERS[userId].auth(data);
-			
+			GLOBAL.USERS[userId].socket = data.socket;
 			
 			// SEND DATA TO CLIENT
 			sendData =  {
@@ -229,6 +229,58 @@ function Router() {
 			data.socket.write(bytes_count+string_params);
 		}
 	}
+	
+	
+	
+	
+	
+	
+	
+	/**************** BATTLE ****************/
+	
+	
+	/*
+		* Description:
+		*	function Создает битву
+		*	
+		*	@data: 	object, Data from client
+		*	
+		*
+		* @since  31.01.15
+		* @author pcemma
+	*/
+	this['createBattle'] = function (data) {
+		console.log(data);
+		if(data){
+			battlesManager.createBattle();
+		
+		}
+	}
+	
+	
+	/*
+		* Description:
+		*	function Проверяет про инфу о битве, в случае если битва идет добавляет игрока к битве 
+		*				Если битва закончена то возвращает инфу о том что битвы такой нет.
+		*	
+		*	@data: 	object, Data from client
+		*	
+		*
+		* @since  31.01.15
+		* @author pcemma
+	*/
+	this['enterBattle'] = function (data) {
+		console.log(data);
+		if(data){
+			battlesManager.enterBattle({id: data.id, user: GLOBAL.USERS[data.userId]});
+		}
+	}
+	
+	
+	
+	
+	
+	
 	
 	
 	/*
