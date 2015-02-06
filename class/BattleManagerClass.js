@@ -26,10 +26,6 @@ function BMClass() {
 	}
 	
 	
-
-	
-	
-	
 	/*
 		* Description:
 		*	function вход в битву 
@@ -50,7 +46,29 @@ function BMClass() {
 	}
 	
 	
+	/*
+		* Description: двигает героя (ползователя) в поле боя
+		*	@data: arr
+		*		@id: 		int, ид боя
+		*		@hexId: 	str, вида x.y
+		*
+		*
+		* @since  06.02.15
+		* @author pcemma
+	*/
+	BMClass.prototype.moveHero = function(data)
+	{
+		if(
+			data && data.id &&
+			this.battles[data.id] && this.battles[data.id].check()
+		){
+			this.battles[data.id].moveHero(data);
+		}
+	}
 	
+	
+	
+	//TODO: удалить создание боя с ид 1 для теста!
 	this.createBattle();
 }
 

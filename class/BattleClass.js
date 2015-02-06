@@ -73,7 +73,7 @@ function BattleClass() {
 		
 		// отправляем пользователю, те данные что уже есть. положение всех воинов наполе боя
 		hero.socketWrite({
-							f: "createBattle", 
+							f: "battleCreate", 
 							p: this.getBattleStatus()
 						});
 		
@@ -120,6 +120,41 @@ function BattleClass() {
 								}
 						});
 	}
+	
+	
+	
+	/*
+		* Description: двигает героя (ползователя) в поле боя
+		*	@data: arr
+		*		@id: 		int, ид боя
+		*		@hexId: 	str, вида x.y
+		*
+		*
+		* @since  06.02.15
+		* @author pcemma
+	*/
+	BattleClass.prototype.moveHero = function(data)
+	{
+		// TODO: Проверка на возможность делать ход
+		// TODO: Проверка на то что гекс в который хотят передвинуть свободен и находится в радиусе шага
+		
+		
+		//Проверяем на то что такой гекс вообщеесть!
+		if(this.hexes[data.hexId]){
+			this.heroes[data.userId].position = data.hexId;
+			this.socketWrite({
+								f: "battleMoveHero", 
+								p: {
+									userId: data.userId,
+									hexId: data.hexId
+								}
+							});
+		
+		}
+		
+	}
+	
+	
 	
 	
 	

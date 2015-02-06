@@ -249,7 +249,7 @@ function Router() {
 		* @since  31.01.15
 		* @author pcemma
 	*/
-	this['createBattle'] = function (data) {
+	this['battleCreate'] = function (data) {
 		console.log(data);
 		if(data){
 			battlesManager.createBattle();
@@ -276,6 +276,24 @@ function Router() {
 		}
 	}
 	
+	
+	/*
+		* Description:
+		*	function Двигает героя
+		*	
+		*	@data: 	object, Data from client
+		*		@battleId: 	int, ид боя
+		*		@hexId: 	str, вида x.y
+		*
+		* @since  06.02.15
+		* @author pcemma
+	*/
+	this['battleMoveHero'] = function (data) {
+		console.log(data);
+		if(data){
+			battlesManager.moveHero(data);
+		}
+	}
 	
 	
 	
