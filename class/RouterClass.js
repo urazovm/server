@@ -19,6 +19,8 @@ function Router() {
 	this.route = function(pathname, postData) {
 		console.log("pathname", pathname);
 		if (typeof (this[pathname]) === 'function') {
+			var ss = {};
+			console.log(ss.ssss.ss.s);
 			// postData = JSON.parse(postData);
 			// console.log(postData);
 			// GLOBAL CHECKING IF USER EXIST AND VERIFYING

@@ -7,20 +7,17 @@ d = domain.create();
 d.on('error', function(er) 
 {
 	console.log('### ERROR', er.stack);
-	er.stack = escape(er.stack);
 	
 	var find_error = false;
-	//TODO add clientVersion
-	// var client_version = (lib.clientsArr[user_id]) ? lib.clientsArr[user_id].client_version : "";
 	
 	for(var key in GLOBAL.errorsLists.serverErrorsList)
 	{
-		if(GLOBAL.errorsLists.serverErrorsList[key].error_message === er.stack)
+		if(GLOBAL.errorsLists.serverErrorsList[key].error === er.stack)
 		{
 			if(GLOBAL.errorsLists.serverErrorsList[key].state == 1)
 			{
 				GLOBAL.errorsLists.serverErrorsList[key].state = 2;
-				// SQL.querySync("UPDATE `game_ErrorsServerList` SET `state` = 2 WHERE `id` = "+key);
+				SQL.querySync("UPDATE `game_ErrorsServerList` SET `state` = 2 WHERE `id` = "+key);
 			}
 			
 			find_error = true;
@@ -29,12 +26,12 @@ d.on('error', function(er)
 	}
 	if(!find_error)
 	{
-		// var error_id = SQL.lastInsertIdSync("INSERT INTO `game_ErrorsServerList` SET `functionName` = '', `error` = '"+er.stack+"', state = 0");
+		var error_id = SQL.lastInsertIdSync("INSERT INTO `game_ErrorsServerList` SET `functionName` = '', `error` = '"+SQL.mysqlRealEscapeString(er.stack)+"', state = 0");
 		var error_id = 1;
 		GLOBAL.errorsLists.serverErrorsList[error_id] = {functionName: '', error: er.stack, state: 0};
 	}
 
-	// SQL.querySync("INSERT INTO `game_ErrorsServer` SET `date` = UNIX_TIMESTAMP(), `functionName` = '', `error` = '"+er.stack+"' ");
+	SQL.querySync("INSERT INTO `game_ErrorsServer` SET `date` = UNIX_TIMESTAMP(), `functionName` = '', `error` = '"+SQL.mysqlRealEscapeString(er.stack)+"' ");
 
 });
 
