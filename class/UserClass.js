@@ -243,18 +243,15 @@ function User() {
 	User.prototype.auth = function(data)
 	{
 		
-		this.userId = data.userId;
+		
 		
 		// Get verifyHash
 		this.verifyHash = crypto.createHash('md5').update(String(+new Date()) + config.secretHashString + String(this.userId)).digest('hex');
 		this.ping = Math.floor(+new Date() / 1000);
 		
 		
-		
-		
-		
 		//TODO: перенести это в кеш!!! Тут должна сработаь функция взятия из кеша всех данных.
-		
+		this.userId = data.userId;
 		
 		
 		

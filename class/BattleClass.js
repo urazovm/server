@@ -59,6 +59,10 @@ function BattleClass() {
 	}
 	
 	
+	
+	
+	
+	
 	/*
 		* Description:
 		*	function Добавляет героя в битву
@@ -78,49 +82,49 @@ function BattleClass() {
 						});
 		
 		
+		if(!this.heroes[String(hero.userId)] || lib.objectSize(this.heroes[String(hero.userId)]) <= 0){
 		
-		
-		var teamId = 1,
-			position = "0.0";
+			var teamId = 1,
+				position = "0.0";
+				
+				
+			this.heroes[String(hero.userId)] = hero;
+			
+			// это времено, раскидываем по одному в команду.
+			if(this.teams[1].length <= this.teams[2].length){
+				this.teams[1].push(hero.userId);
+				var x = 0,
+					y = Math.floor(Math.random() * (4 + 1));
+				position = x+"."+y;
+			}
+			else{
+				this.teams[2].push(hero.userId);
+				teamId = 2;
+				var x = 8,
+					y = Math.floor(Math.random() * (4 + 1));
+				position = x+"."+y;
+			}
 			
 			
-		this.heroes[String(hero.userId)] = hero;
-		
-		// это времено, раскидываем по одному в команду.
-		if(this.teams[1].length <= this.teams[2].length){
-			this.teams[1].push(hero.userId);
-			var x = 0,
-				y = Math.floor(Math.random() * (4 + 1));
-			position = x+"."+y;
+			
+			// Тут апдейта массива юзера с данными о битве
+			this.heroes[String(hero.userId)].battleId = this.id;
+			this.heroes[String(hero.userId)].teamId = teamId;
+			this.heroes[String(hero.userId)].position = position;
+			
+			
+			
+			// тут должна отправляться вся инфа о пользователе. ид, логин, вещи, хп, манна,на какой позиции, команда, 
+			this.socketWrite({
+								f: "battleAddHero", 
+								p: {
+									id: String(hero.userId),
+									teamId: teamId,
+									position: position
+									}
+							});
 		}
-		else{
-			this.teams[2].push(hero.userId);
-			teamId = 2;
-			var x = 8,
-				y = Math.floor(Math.random() * (4 + 1));
-			position = x+"."+y;
-		}
-		
-		
-		
-		// Тут апдейта массива юзера с данными о битве
-		this.heroes[String(hero.userId)].battleId = this.id;
-		this.heroes[String(hero.userId)].teamId = teamId;
-		this.heroes[String(hero.userId)].position = position;
-		
-		
-		
-		// тут должна отправляться вся инфа о пользователе. ид, логин, вещи, хп, манна,на какой позиции, команда, 
-		this.socketWrite({
-							f: "battleAddHero", 
-							p: {
-								id: String(hero.userId),
-								teamId: teamId,
-								position: position
-								}
-						});
 	}
-	
 	
 	
 	/*
@@ -138,14 +142,20 @@ function BattleClass() {
 		// TODO: Проверка на возможность делать ход
 		// TODO: Проверка на то что гекс в который хотят передвинуть свободен и находится в радиусе шага
 		
+		console.log("\n B moveHero");
+		console.log(data);
 		
 		//Проверяем на то что такой гекс вообщеесть!
 		if(this.hexes[data.hexId]){
 			this.heroes[data.userId].position = data.hexId;
+			
+			console.log("this.hero ", this.heroes[data.userId].position);
+			console.log("USER ", GLOBAL.USERS[data.userId].position);
+			
 			this.socketWrite({
 								f: "battleMoveHero", 
 								p: {
-									userId: data.userId,
+									userId: String(data.userId),
 									hexId: data.hexId
 								}
 							});
@@ -231,11 +241,12 @@ function BattleClass() {
 	*/
 	BattleClass.prototype.socketWrite = function(data)
 	{
-		console.log(this.heroes);
+		console.log("\n\n BattleClass.prototype.socketWrite");
 		for(var i in this.heroes){
-			console.log("i", i);
+			console.log("heroId", i);
 			this.heroes[i].socketWrite(data);
 		}
+		console.log("--------------- \n\n");
 	}
 	
 	

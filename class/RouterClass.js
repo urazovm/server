@@ -195,15 +195,11 @@ function Router() {
 			data.userId = userId;
 			// TODO придумать как будет себя вести вся система когда ползьваотеля дыбил не играет(свернул приложение)! 
 			
-			if(GLOBAL.USERS[userId]){
-				console.log("EXIST USER ARRAY!");
-				// NEED TO DELETE ARRAY, BECAUSE IT CONTAINS OLD DATA!!!!
-				this.removeUserFromServer(userId);
-			}
-			else	
+			if(!GLOBAL.USERS[userId] || lib.objectSize(GLOBAL.USERS[userId]) <= 0){
 				console.log("NO USER ARRAY!");
-			
-			GLOBAL.USERS[userId] = newUser;
+				GLOBAL.USERS[userId] = newUser;
+			}
+			//TODO: auth должна возвращать поидее массив с данными для клиента. в кеше все данные есть, если их нет то при auth они создатуся в кеше
 			GLOBAL.USERS[userId].auth(data);
 			GLOBAL.USERS[userId].socket = data.socket;
 			
@@ -289,6 +285,7 @@ function Router() {
 		* @author pcemma
 	*/
 	this['battleMoveHero'] = function (data) {
+		console.log("\n battleMoveHero");
 		console.log(data);
 		if(data){
 			battlesManager.moveHero(data);

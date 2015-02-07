@@ -58,10 +58,13 @@ function BMClass() {
 	*/
 	BMClass.prototype.moveHero = function(data)
 	{
+		console.log("\n BM moveHero");
+		console.log(data);
 		if(
 			data && data.id &&
 			this.battles[data.id] && this.battles[data.id].check()
 		){
+			console.log(data);
 			this.battles[data.id].moveHero(data);
 		}
 	}
