@@ -19,6 +19,11 @@ function HexagonClass(data) {
 		this.x = data.x;
 		this.y = data.y;
 		
+		if(data.isObstruction){
+			this.isObstructions = true;
+			this.isFree = false;
+			this.obstructionId = Math.floor(Math.random() * (lib.objectSize(GLOBAL.DATA.battleInfo.obstructions) - 1 + 1)) + 1;
+		}
 	}
 	
 	

@@ -77,7 +77,11 @@ function PreloadDataClass() {
 		
 		this.DATA.items = this.getItems();
 		
-		console.log(this.DATA.items);
+		
+		
+		this.DATA.battleInfo = this.getBattleInfo();;
+		
+		console.log(this.DATA.battleInfo);
 	}
 	
 	
@@ -127,6 +131,48 @@ function PreloadDataClass() {
 	
 	
 	
+	
+	/**************** BATTLE INFO ************/	
+	
+	/*
+		* Description:
+		*	Инфа по бивте
+		*		Объеты на поле боя (препятствия)
+		*	
+		*	
+		*
+		* @since  08.02.15
+		* @author pcemma
+	*/
+	this.getBattleInfo = function()
+	{
+		var battleInfo = {};
+			battleInfo.obstructions = this.getBattleObstructions();
+		
+		return battleInfo;
+	}
+	
+	
+	/*
+		* Description:
+		*	Собирает инфу о препятсвиях на поле боя
+		*	
+		*	
+		*
+		* @since  08.02.15
+		* @author pcemma
+	*/
+	this.getBattleObstructions = function()
+	{
+		var obstructions = {};
+		var req = SQL.querySync("SELECT * FROM  `game_BattleObstructions`");
+		var row = req.fetchAllSync();
+		for(key in row)
+		{
+			obstructions[String(row[key].id)] = row[key];
+		}
+		return obstructions;
+	}
 	
 	
 	

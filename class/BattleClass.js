@@ -24,8 +24,26 @@ function BattleClass() {
 		this.id = battleId;
 		this.startTime = currentTime;
 		this.endFlag = 0;
+		this.hexesInRow = 10;
+		this.hexesInCol = 5;
+		this.obstructionsHexes = {};
+		for (var i= 1; i <= Math.floor(Math.random() * (3 - 1 + 1)) + 1; i++ ){
+			var x = Math.floor(Math.random() * (this.hexesInRow + 1)),
+				y = Math.floor(Math.random() * (this.hexesInCol + 1));
+			this.obstructionsHexes[x+"."+y] = String(Math.floor(Math.random() * (lib.objectSize(GLOBAL.DATA.battleInfo.obstructions) - 1 + 1)) + 1);
+		}
+		
+		console.log("this.obstructionsHexes",this.obstructionsHexes);
+		
 		this.hexes = this.createGrid();
+		
+		console.log(this.hexes);
+		
 		this.heroes = {};
+		
+		
+	
+		
 		
 		
 		// массив команда. одна команда это массив ид пользователей, нпц которые в этой команде
@@ -189,14 +207,22 @@ function BattleClass() {
 	BattleClass.prototype.createGrid = function()
 	{
 		var tmpArray = {};
-		for (var i = 1; i <= 10; i++){
-			for (var j = 1; j <= 5; j++){
+		for (var i = 1; i <= this.hexesInRow; i++){
+			for (var j = 1; j <= this.hexesInCol; j++){
 				var x = i - 1,
 					y = j - 1;
 					dy = Math.fmod(y, 2);
 				
-				if(!(dy == 1 && i == 10)){ // не рисуем в четных рядах последний гекс для красивого отображения сетки
-					tmpArray[x+"."+y] = new HexagonClass({x: x, y: y});
+				if(!(dy == 1 && i == this.hexesInRow)){ // не рисуем в четных рядах последний гекс для красивого отображения сетки
+					// Флаг определяет будет ли на эом гексе препятствие
+					var isObstruction = false;
+					if(this.obstructionsHexes[x+"."+y]){
+						console.log("isObstruction", isObstruction);
+						isObstruction = true;
+					}
+				
+					
+					tmpArray[x+"."+y] = new HexagonClass({x: x, y: y, isObstruction: isObstruction});
 				}
 			}
 		}
@@ -219,7 +245,8 @@ function BattleClass() {
 	{
 		var battleInfo = {
 			id: this.id,
-			heroes: {}
+			heroes: {},
+			obstructionsHexes: this.obstructionsHexes
 		};
 		
 		
@@ -229,7 +256,6 @@ function BattleClass() {
 									teamId: this.heroes[i].teamId,
 									position: this.heroes[i].position,
 									login: battleInfo.heroes[String(this.heroes[i].userId)]
-									
 								};
 		}
 		

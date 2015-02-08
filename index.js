@@ -61,12 +61,13 @@ HexagonClass		= require("./class/HexagonClass.js");
 // start sql pool connection
 SQL = new DbClass();
 
-battlesManager = new BattleManagerClass();
 
 // fill global data array
 GLOBAL = new PreloadDataClass();
 GLOBAL.initialize();
 
+
+battlesManager = new BattleManagerClass();
 
 
 // start server
