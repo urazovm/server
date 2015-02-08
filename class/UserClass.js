@@ -252,7 +252,7 @@ function User() {
 		
 		//TODO: перенести это в кеш!!! Тут должна сработаь функция взятия из кеша всех данных.
 		this.userId = data.userId;
-		
+		this.login = "guest"+this.userId;
 		
 		
 	}

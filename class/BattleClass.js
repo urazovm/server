@@ -35,8 +35,6 @@ function BattleClass() {
 		
 		
 		console.log("battleId", this.id);
-		console.log(this.hexes);
-		
 	}
 	
 	
@@ -106,6 +104,8 @@ function BattleClass() {
 			}
 			
 			
+			// Обновление гекса
+			this.hexes[position].addHero({userId: hero.userId});
 			
 			// Тут апдейта массива юзера с данными о битве
 			this.heroes[String(hero.userId)].battleId = this.id;
@@ -140,13 +140,21 @@ function BattleClass() {
 	BattleClass.prototype.moveHero = function(data)
 	{
 		// TODO: Проверка на возможность делать ход
-		// TODO: Проверка на то что гекс в который хотят передвинуть свободен и находится в радиусе шага
+		// TODO:  и находится в радиусе шага
 		
 		console.log("\n B moveHero");
 		console.log(data);
 		
 		//Проверяем на то что такой гекс вообщеесть!
-		if(this.hexes[data.hexId]){
+		if(
+			this.hexes[data.hexId] && // Проверяем на то что такой гекс вообщеесть!
+			this.hexes[data.hexId].isFree // Проверка на то что гекс в который хотят передвинуть свободен
+		){
+			
+			// Обновление гекса
+			this.hexes[data.hexId].addHero({userId: data.userId});
+			this.hexes[this.heroes[data.userId].position].removeHero();
+			
 			this.heroes[data.userId].position = data.hexId;
 			
 			console.log("this.hero ", this.heroes[data.userId].position);
@@ -187,8 +195,8 @@ function BattleClass() {
 					y = j - 1;
 					dy = Math.fmod(y, 2);
 				
-				if(!(dy == 1 && i == 10)){ // не рисуем в четных рядахпоследний гекс для красивого отображения сетки
-					tmpArray[x+"."+y] = {};
+				if(!(dy == 1 && i == 10)){ // не рисуем в четных рядах последний гекс для красивого отображения сетки
+					tmpArray[x+"."+y] = new HexagonClass({x: x, y: y});
 				}
 			}
 		}
@@ -219,7 +227,9 @@ function BattleClass() {
 			battleInfo.heroes[String(this.heroes[i].userId)] = {
 									id: String(this.heroes[i].userId),
 									teamId: this.heroes[i].teamId,
-									position: this.heroes[i].position
+									position: this.heroes[i].position,
+									login: battleInfo.heroes[String(this.heroes[i].userId)]
+									
 								};
 		}
 		

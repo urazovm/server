@@ -51,6 +51,7 @@ UserClass 			= require("./class/UserClass.js");
 
 BattleManagerClass 	= require("./class/BattleManagerClass.js");
 BattleClass			= require("./class/BattleClass.js");
+HexagonClass		= require("./class/HexagonClass.js");
 
 
 
