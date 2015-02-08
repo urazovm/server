@@ -1,15 +1,15 @@
 console.log("DB CLASS is connected");	
 var mysql = require("mysql-libmysqlclient");
 
-function DBClass(params) {
+function DBClass(data) {
 	this.connectionsCount = 5;
 	this.bdList = {};
 	
-	params = params || {};	
+	data = data || {};	
 	
-	this.bd_name = params.bd_name || config.bd_config.bd_name;
-	this.user_name = params.user_name || config.bd_config.user_name;
-	this.user_password = params.user_password || config.bd_config.user_password;
+	this.bd_name = data.bd_name || config.bd_config.bd_name;
+	this.user_name = data.user_name || config.bd_config.user_name;
+	this.user_password = data.user_password || config.bd_config.user_password;
 	
 	/*
 		* Description:
