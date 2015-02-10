@@ -59,6 +59,38 @@ function HexagonClass(data) {
 		this.userId = false;
 	}
 	
+	
+	/*
+		* Description:
+		*	function проверяет является ли гекс с координатами, которые передали, соседом
+		*	
+		*	@data: array, {x, y}
+		*
+		*	return: bool, true/false
+		*
+		* @since  11.02.15
+		* @author pcemma
+	*/
+	HexagonClass.prototype.isNeighbor = function(data)
+	{
+		var directions = [
+					[ [1, 0], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1]],
+					[ [1, 0], [1, -1], [0, -1], [-1, 0], [0, 1], [1, 1]]
+				],
+			parity = this.y % 2;
+			
+		for(var i in directions[parity]){
+			if(
+				data.x == this.x + directions[parity][i][0] && 
+				data.y == this.y + directions[parity][i][1]
+			){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
 	this.__constructor(data);
 }
 

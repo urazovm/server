@@ -158,7 +158,7 @@ function BattleClass() {
 	BattleClass.prototype.moveHero = function(data)
 	{
 		// TODO: Проверка на возможность делать ход
-		// TODO:  и находится в радиусе шага
+		// TODO: 
 		
 		console.log("\n B moveHero");
 		console.log(data);
@@ -166,7 +166,8 @@ function BattleClass() {
 		//Проверяем на то что такой гекс вообщеесть!
 		if(
 			this.hexes[data.hexId] && // Проверяем на то что такой гекс вообщеесть!
-			this.hexes[data.hexId].isFree // Проверка на то что гекс в который хотят передвинуть свободен
+			this.hexes[data.hexId].isFree && // Проверка на то что гекс в который хотят передвинуть свободен
+			this.hexes[this.heroes[data.userId].position].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) // и находится в радиусе шага
 		){
 			
 			// Обновление гекса
