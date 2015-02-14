@@ -101,7 +101,7 @@ function BattleClass() {
 		if(!this.heroes[String(hero.userId)] || lib.objectSize(this.heroes[String(hero.userId)]) <= 0){
 		
 			var teamId = 1,
-				position = "0.0";
+				hexId = "0.0";
 				
 				
 			this.heroes[String(hero.userId)] = hero;
@@ -111,24 +111,24 @@ function BattleClass() {
 				this.teams[1].push(hero.userId);
 				var x = 0,
 					y = Math.floor(Math.random() * (4 + 1));
-				position = x+"."+y;
+				hexId = x+"."+y;
 			}
 			else{
 				this.teams[2].push(hero.userId);
 				teamId = 2;
 				var x = 8,
 					y = Math.floor(Math.random() * (4 + 1));
-				position = x+"."+y;
+				hexId = x+"."+y;
 			}
 			
 			
 			// Обновление гекса
-			this.hexes[position].addHero({userId: hero.userId});
+			this.hexes[hexId].addHero({userId: hero.userId});
 			
 			// Тут апдейта массива юзера с данными о битве
 			this.heroes[String(hero.userId)].battleId = this.id;
 			this.heroes[String(hero.userId)].teamId = teamId;
-			this.heroes[String(hero.userId)].position = position;
+			this.heroes[String(hero.userId)].hexId = hexId;
 			
 			
 			
@@ -138,7 +138,7 @@ function BattleClass() {
 								p: {
 									id: String(hero.userId),
 									teamId: teamId,
-									position: position
+									hexId: hexId
 									}
 							});
 		}
@@ -158,26 +158,25 @@ function BattleClass() {
 	BattleClass.prototype.moveHero = function(data)
 	{
 		// TODO: Проверка на возможность делать ход
-		// TODO: 
 		
 		console.log("\n B moveHero");
 		console.log(data);
 		
 		//Проверяем на то что такой гекс вообщеесть!
 		if(
-			this.hexes[data.hexId] && // Проверяем на то что такой гекс вообщеесть!
+			this.hexes[data.hexId] && // Проверяем на то что такой гекс вообще есть!
 			this.hexes[data.hexId].isFree && // Проверка на то что гекс в который хотят передвинуть свободен
-			this.hexes[this.heroes[data.userId].position].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) // и находится в радиусе шага
+			this.hexes[this.heroes[data.userId].hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) // и находится в радиусе шага
 		){
 			
 			// Обновление гекса
 			this.hexes[data.hexId].addHero({userId: data.userId});
-			this.hexes[this.heroes[data.userId].position].removeHero();
+			this.hexes[this.heroes[data.userId].hexId].removeHero();
 			
-			this.heroes[data.userId].position = data.hexId;
+			this.heroes[data.userId].hexId = data.hexId;
 			
-			console.log("this.hero ", this.heroes[data.userId].position);
-			console.log("USER ", GLOBAL.USERS[data.userId].position);
+			console.log("this.hero ", this.heroes[data.userId].hexId);
+			console.log("USER ", GLOBAL.USERS[data.userId].hexId);
 			
 			this.socketWrite({
 								f: "battleMoveHero", 
@@ -255,7 +254,7 @@ function BattleClass() {
 			battleInfo.heroes[String(this.heroes[i].userId)] = {
 									id: String(this.heroes[i].userId),
 									teamId: this.heroes[i].teamId,
-									position: this.heroes[i].position,
+									hexId: this.heroes[i].hexId,
 									login: battleInfo.heroes[String(this.heroes[i].userId)]
 								};
 		}
