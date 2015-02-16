@@ -19,40 +19,17 @@ function BattleClass() {
 			battleId = 1;
 		
 
-
-		
 		this.id = battleId;
 		this.startTime = currentTime;
 		this.endFlag = 0;
 		this.hexesInRow = 10;
 		this.hexesInCol = 5;
-		this.obstructionsHexes = {};
-		for (var i= 1; i <= Math.floor(Math.random() * (3 - 1 + 1)) + 1; i++ ){
-			var x = Math.floor(Math.random() * (this.hexesInRow + 1)),
-				y = Math.floor(Math.random() * (this.hexesInCol + 1));
-			this.obstructionsHexes[x+"."+y] = String(Math.floor(Math.random() * (lib.objectSize(GLOBAL.DATA.battleInfo.obstructions) - 1 + 1)) + 1);
-		}
-		
-		console.log("this.obstructionsHexes",this.obstructionsHexes);
-		
+		this.obstructionsHexes = this.createobstructionsHexes();
 		this.hexes = this.createGrid();
-		
-		console.log(this.hexes);
-		
 		this.heroes = {};
-		
-		
-	
-		
-		
-		
 		// массив команда. одна команда это массив ид пользователей, нпц которые в этой команде
 		this.teams = {'1': [], '2': []};
-		
-		
-		
-		
-		console.log("battleId", this.id);
+
 	}
 	
 	
@@ -107,14 +84,14 @@ function BattleClass() {
 			this.heroes[String(hero.userId)] = hero;
 			
 			// это времено, раскидываем по одному в команду.
-			if(this.teams[1].length <= this.teams[2].length){
-				this.teams[1].push(hero.userId);
+			if(this.teams['1'].length <= this.teams['2'].length){
+				this.teams['1'].push(String(hero.userId));
 				var x = 0,
 					y = Math.floor(Math.random() * (4 + 1));
 				hexId = x+"."+y;
 			}
 			else{
-				this.teams[2].push(hero.userId);
+				this.teams['2'].push(String(hero.userId));
 				teamId = 2;
 				var x = 8,
 					y = Math.floor(Math.random() * (4 + 1));
@@ -191,8 +168,25 @@ function BattleClass() {
 	}
 	
 	
-	
-	
+	/*
+		* Description:
+		*	function создает массив непроходимых гексов с препятствиями
+		*	
+		*
+		*
+		* @since  14.02.15
+		* @author pcemma
+	*/
+	BattleClass.prototype.createobstructionsHexes = function()
+	{
+		var tmpArray = {};
+		for (var i= 1; i <= Math.floor(Math.random() * (3 - 1 + 1)) + 1; i++ ){
+			var x = Math.floor(Math.random() * (this.hexesInRow + 1)),
+				y = Math.floor(Math.random() * (this.hexesInCol + 1));
+			tmpArray[x+"."+y] = String(Math.floor(Math.random() * (lib.objectSize(GLOBAL.DATA.battleInfo.obstructions) - 1 + 1)) + 1);
+		}
+		return tmpArray;
+	}
 	
 	
 	/*
@@ -244,9 +238,10 @@ function BattleClass() {
 	BattleClass.prototype.getBattleStatus = function()
 	{
 		var battleInfo = {
-			id: this.id,
-			heroes: {},
-			obstructionsHexes: this.obstructionsHexes
+			id: 				this.id,
+			heroes: 			{},
+			obstructionsHexes: 	this.obstructionsHexes,
+			teams:				this.teams	
 		};
 		
 		
