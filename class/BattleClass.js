@@ -115,7 +115,8 @@ function BattleClass() {
 								p: {
 									id: String(hero.userId),
 									teamId: teamId,
-									hexId: hexId
+									hexId: hexId,
+									lastActionTime: hero.lastActionTime
 									}
 							});
 		}
@@ -250,7 +251,8 @@ function BattleClass() {
 									id: String(this.heroes[i].userId),
 									teamId: this.heroes[i].teamId,
 									hexId: this.heroes[i].hexId,
-									login: battleInfo.heroes[String(this.heroes[i].userId)]
+									// login: battleInfo.heroes[String(this.heroes[i].userId)],
+									lastActionTime: this.heroes[i].lastActionTime
 								};
 		}
 		
