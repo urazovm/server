@@ -135,23 +135,26 @@ function BattleClass() {
 	*/
 	BattleClass.prototype.moveHero = function(data)
 	{
-		// TODO: Проверка на возможность делать ход
+		var currentTime = + new Date();
 		
 		console.log("\n B moveHero");
 		console.log(data);
+		// TODO: живой ли герой, мертвые не ходят!
 		
-		//Проверяем на то что такой гекс вообщеесть!
 		if(
 			this.hexes[data.hexId] && // Проверяем на то что такой гекс вообще есть!
 			this.hexes[data.hexId].isFree && // Проверка на то что гекс в который хотят передвинуть свободен
-			this.hexes[this.heroes[data.userId].hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) // и находится в радиусе шага
+			this.hexes[this.heroes[data.userId].hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) && // и находится в радиусе шага
+			this.heroes[data.userId].lastActionTime <= currentTime // Проверка на возможность делать ход, не включен ли таймаут
 		){
 			
 			// Обновление гекса
 			this.hexes[data.hexId].addHero({userId: data.userId});
 			this.hexes[this.heroes[data.userId].hexId].removeHero();
 			
+			// Обновление героя
 			this.heroes[data.userId].hexId = data.hexId;
+			this.heroes[data.userId].lastActionTime = currentTime + 5000;
 			
 			console.log("this.hero ", this.heroes[data.userId].hexId);
 			console.log("USER ", GLOBAL.USERS[data.userId].hexId);
