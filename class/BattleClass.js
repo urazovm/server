@@ -94,7 +94,7 @@ function BattleClass() {
 			else{
 				this.teams['2'].push(String(hero.userId));
 				teamId = 2;
-				var x = 8,
+				var x = 6,
 					y = Math.floor(Math.random() * (4 + 1));
 				hexId = x+"."+y;
 			}

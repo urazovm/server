@@ -163,8 +163,6 @@ function User() {
 	User.prototype.addNewUser = function(data)
 	{
 		// new user. need to create begin data to array and db!
-		console.log(data);
-		console.log()
 		var userId 		= SQL.lastInsertIdSync("INSERT INTO `game_Users` (`id`) VALUES (NULL)"), 
 			login		= "guest"+userId, 
 			email 		= login+"@"+(+new Date())+"bew.net", 
@@ -204,13 +202,49 @@ function User() {
 								"WHERE `id` = "+userId);
 		
 		// Добавляем статы игроку
-		this.addStats();
+		this.addStats(userId);
 		
 		return {userId: userId, login: login, email: email, password: password};
 	}
 	
 	
-
+	/*
+		* Description:
+		*	Добавляем статы новому игроку
+		*	
+		*	
+		*	return: 
+		*
+		* @since  21.02.15
+		* @author pcemma
+	*/
+	User.prototype.addStats = function(userId)
+	{
+		var tempArray = {
+			strength:			1,
+			agility:			1,
+			intuition:			1,
+			wisdom:				1,
+			intellect:			1,
+			stamina:			1,
+			luck:				1,
+			actionTime:			1,
+			moveActionTime:		5000,
+			hitActionTime:		5000
+		},
+		queryArray = [];
+		
+		for (var key in tempArray){
+			console.log("key",key);
+			console.log(GLOBAL.DATA.stats[key]);
+			queryArray.push("("+userId+", "+GLOBAL.DATA.stats[key].id+", "+tempArray[key]+")");
+		}
+		console.log("INSERT INTO `game_UsersStats` (`userId`, `statId`, `value`) VALUES "+queryArray.join(",")+" ");
+		SQL.querySync("INSERT INTO `game_UsersStats` (`userId`, `statId`, `value`) VALUES "+queryArray.join(",")+" ");
+		
+	}
+	
+	
 
 
 	
@@ -267,51 +301,7 @@ function User() {
 		this.userData.lastActionTime = 0;
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	/*
-		* Description:
-		*	Добавляем статы новому игроку
-		*	
-		*	
-		*	return: 
-		*
-		* @since  21.02.15
-		* @author pcemma
-	*/
-	User.prototype.addStats = function()
-	{
-		var tempArray = {
-			strength:			1,
-			agility:			1,
-			intuition:			1,
-			wisdom:				1,
-			intellect:			1,
-			stamina:			1,
-			luck:				1,
-			actionTime:			1,
-			moveActionTime:		5000,
-			hitActionTime:		5000
-		},
-		queryArray = [];
-		
-		for (var key in tempArray){
-			console.log("key",key);
-			console.log(GLOBAL.DATA.stats[key]);
-			queryArray.push("("+this.userId+", "+GLOBAL.DATA.stats[key].id+", "+tempArray[key]+")");
-		}
-		console.log("INSERT INTO `game_UsersStats` (`userId`, `statId`, `value`) VALUES "+queryArray.join(",")+" ");
-		SQL.querySync("INSERT INTO `game_UsersStats` (`userId`, `statId`, `value`) VALUES "+queryArray.join(",")+" ");
-		
-	}
-	
-	
+
 	
 }
 
