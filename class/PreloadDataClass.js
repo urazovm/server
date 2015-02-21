@@ -5,8 +5,6 @@ function PreloadDataClass() {
 
 	this.initialize = function()
 	{
-		// create STATES array
-		// this.createGlobalStates();
 		
 		// create USERS array
 		this.createGlobalUsers();
@@ -23,34 +21,6 @@ function PreloadDataClass() {
 
 
 
-	/**************** STATES ************/
-
-	/*
-		* Description:
-		*	Create the Global states array
-		*	
-		*	
-		*	
-		*
-		* @since  25.11.14
-		* @author t
-	*/
-	this.createGlobalStates = function()
-	{
-		// GLOBAL STATES ARRAY
-		this.STATES = {};
-		
-		// get STATES
-		var req = SQL.querySync(" SELECT * FROM  `game_States` ");
-		var row = req.fetchAllSync();
-		for(key in row){			
-			this.STATES[row[key].id] = row[key];
-			
-			// ARRAY FOR ONLINE USERS IN  THIS STATE
-			this.STATES[row[key].id].users = {};
-		}		
-	}
-	
 
 
 
@@ -74,12 +44,18 @@ function PreloadDataClass() {
 		this.HELP = {};
 		
 		
+		this.DATA.stats = this.getStats();
+		console.log(this.DATA.stats);
+		
 		
 		this.DATA.items = this.getItems();
 		
 		
 		
+		
 		this.DATA.battleInfo = this.getBattleInfo();;
+		
+		
 		
 		console.log(this.DATA.battleInfo);
 	}
@@ -122,6 +98,36 @@ function PreloadDataClass() {
 	}
 	
 	
+	
+	
+	
+	/*
+		* Description:
+		*	Собирает список всех статов в игре, которые могут быть у предметов, игроков и прочее
+		*	
+		*	
+		*	
+		*
+		* @since  21.02.15
+		* @author pcemma
+	*/
+	this.getStats = function()
+	{
+		var stats = {};
+		var req = SQL.querySync("SELECT `game_Stats`.* FROM `game_Stats`");
+		
+		
+		var rows = req.fetchAllSync();
+		for (var i=0, length = rows.length - 1; i <= length; i += 1){
+			stats[rows[i].name] = {
+											id: String(rows[i].id),
+											order: 0,
+											group: 0
+									};
+		}
+		
+		return stats;
+	}
 	
 	
 	
@@ -198,6 +204,17 @@ function PreloadDataClass() {
 	{
 		// GLOBAL USERS ARRAY
 		this.USERS = {};
+		var usersCountRow = SQL.querySync("SELECT `id` FROM `game_Users`");
+		var users = usersCountRow.fetchAllSync();
+		
+		for (var key in users){
+			console.log(users[key].id);
+			this.USERS[users[key].id] = new UserClass();
+			this.USERS[users[key].id].getUserData(users[key].id);
+			
+		}
+		
+		
 	}
 	
 	

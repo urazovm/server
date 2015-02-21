@@ -49,6 +49,7 @@ DbClass 			= require("./class/DBClass.js");
 PreloadDataClass 	= require("./class/PreloadDataClass.js");
 UserClass 			= require("./class/UserClass.js");
 
+
 BattleManagerClass 	= require("./class/BattleManagerClass.js");
 BattleClass			= require("./class/BattleClass.js");
 HexagonClass		= require("./class/HexagonClass.js");
@@ -65,6 +66,9 @@ SQL = new DbClass();
 // fill global data array
 GLOBAL = new PreloadDataClass();
 GLOBAL.initialize();
+
+
+
 
 
 battlesManager = new BattleManagerClass();

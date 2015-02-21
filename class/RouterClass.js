@@ -193,22 +193,20 @@ function Router() {
 		if(userId)
 		{
 			data.userId = userId;
-			// TODO придумать как будет себя вести вся система когда ползьваотеля дыбил не играет(свернул приложение)! 
-			
 			if(!GLOBAL.USERS[userId] || lib.objectSize(GLOBAL.USERS[userId]) <= 0){
 				console.log("NO USER ARRAY!");
 				GLOBAL.USERS[userId] = newUser;
+				GLOBAL.USERS[userId].getUserData(userId);
 			}
 			//TODO: auth должна возвращать поидее массив с данными для клиента. в кеше все данные есть, если их нет то при auth они создатуся в кеше
 			GLOBAL.USERS[userId].auth(data);
-			GLOBAL.USERS[userId].socket = data.socket;
 			
 			// SEND DATA TO CLIENT
 			sendData =  {
 							// проверяем версию Данных
 							// globalData: (Number(data.globalDataVersion) != Number(GLOBAL.globalConstants.globalDataVersion) || config._DEBUG) ? GLOBAL.DATA : {}, 
 							// globalDataVersion: GLOBAL.globalConstants.globalDataVersion,
-							// data: GLOBAL.USERS[userId].data, 
+							userData: GLOBAL.USERS[userId].userData, // data это все данные из кеша!! реализовать систему кешу!!
 							userId: userId, 
 							verifyHash: GLOBAL.USERS[userId].verifyHash, 
 							autoConfigData: autoConfigData
@@ -291,128 +289,6 @@ function Router() {
 			battlesManager.moveHero(data);
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	/*
-		* Description:
-		*	function Изменяет данные у пользователя
-		*	
-		*	@response:	response object
-		*	@data: 	object, Data from client
-		*	
-		*
-		* @since  23.01.15
-		* @author pcemma
-	*/
-	/*
-	this['/changeProfile'] = function (response, data) {
-		console.log(data);
-		var sendData = {incorrectFlag: true};
-		// проверяем на то что такой пользователь с таким мылом еще не регестрировался
-		if( 
-			data &&
-			data.autoConfigData &&
-			(data.autoConfigData.email && data.autoConfigData.email != "") &&
-			(data.autoConfigData.password && data.autoConfigData.password != "") &&
-			GLOBAL.USERS[data.userId].chekEmail(data.autoConfigData, true)
-		){
-			GLOBAL.USERS[data.userId].changeEmailAndPassword(data.autoConfigData);
-			sendData = {email: data.autoConfigData.email, password: data.autoConfigData.password}
-		}
-		sendDataToUser(response, {f: 'changeProfile', p: sendData});
-	}
-	*/
-	
-	/*
-		* Description:
-		*	function Позволяет пользователю зайти под другим аккаунтом
-		*	
-		*	@response:	response object
-		*	@data: 	object, Data from client
-		*	
-		*
-		* @since  23.01.15
-		* @author pcemma
-	*/
-	/*
-	this['/changeAccount'] = function (response, data) {
-		var newUser = new UserClass(),
-			userId,
-			sendData = {incorrectFlag: true};
-		
-		// проверяем на то что такой пользователь есть и верно введены данные для авторизации
-		if(
-			data && 
-			data.autoConfigData &&
-			((data.autoConfigData.email && data.autoConfigData.email != "") ||
-			(data.autoConfigData.password && data.autoConfigData.password != ""))
-		){
-			userId = newUser.check(data.autoConfigData);
-		}
-		
-		// мы удачно все прошли, нашли нужного пользователя с теми данными что прислыли, либо создали гостя
-		if(userId)
-		{
-			sendData = {email: data.autoConfigData.email, password: data.autoConfigData.password};
-		}
-		
-		// SEND DATA TO CLIENT"sap@kingsonline.com"}
-		sendDataToUser(response, {f: 'changeAccount', p: sendData});
-	}
-	*/
-	
-	/*
-		* Description:
-		*	function Создать нового пользователя
-		*	
-		*	@response:	response object
-		*	@data: 	object, Data from client
-		*	
-		*
-		* @since  23.01.15
-		* @author pcemma
-	*/
-	/*
-	this['/newAccount'] = function (response, data) {
-		console.log(data);
-		var newUser = new UserClass(),
-			userId,
-			sendData = {incorrectFlag: true},
-			tempAutoConfigData = {};
-		
-		// проверяем на то что такой пользователь есть и верно введены данные для авторизации
-		if(
-			data &&
-			data.autoConfigData &&
-			(data.autoConfigData.email && data.autoConfigData.email != "") &&
-			(data.autoConfigData.password && data.autoConfigData.password != "") &&
-			GLOBAL.USERS[data.userId].chekEmail(data.autoConfigData)
-		){
-			tempAutoConfigData = newUser.addNewUser(data);
-			userId = tempAutoConfigData.userId;
-		}
-		
-		// мы удачно создали нового юзера. Надо отправить старому новые данные для входа!
-		if(userId)
-		{
-			sendData = {email: tempAutoConfigData.email, password: tempAutoConfigData.password};
-		}
-		
-		// SEND DATA TO CLIENT"sap@kingsonline.com"}
-		sendDataToUser(response, {f: 'newAccount', p: sendData});
-	}
-	*/
-	
-	
-	
-	
-	
-
 	
 	
 

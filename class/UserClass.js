@@ -5,15 +5,12 @@ function User() {
 	this.userId = 0;
 	
 	// USER DATA
-	this.data = {
+	this.userData = {
 
 					
 				};
 				
 
-	
-	
-	this.usersAreas = {};
 
 
 
@@ -176,9 +173,6 @@ function User() {
 			currentTime = Math.floor(+new Date() / 1000),
 			query 		= "";
 		
-		this.userId = userId;
-		console.log("userId", this.userId);
-		
 		if(
 			data.autoConfigData &&
 			data.autoConfigData.email && data.autoConfigData.email != "" &&
@@ -209,14 +203,8 @@ function User() {
 								
 								"WHERE `id` = "+userId);
 		
-		
-		
-		
-		// UserData
-		// SQL.querySync("INSERT INTO `game_UsersData`(`id`, `user_id`, `last_resource_time_update`, `dailyAllianceEndTime`) VALUES (NULL, "+userId+", "+currentTime+", "+(currentTime + GLOBAL.globalConstants.dailyAllianceEndTime)+")");
-		
-		
-		
+		// Добавляем статы игроку
+		this.addStats();
 		
 		return {userId: userId, login: login, email: email, password: password};
 	}
@@ -242,23 +230,86 @@ function User() {
 	*/
 	User.prototype.auth = function(data)
 	{
-		
-		
-		
 		// Get verifyHash
+		this.socket = data.socket;
 		this.verifyHash = crypto.createHash('md5').update(String(+new Date()) + config.secretHashString + String(this.userId)).digest('hex');
 		this.ping = Math.floor(+new Date() / 1000);
-		
-		
-		//TODO: перенести это в кеш!!! Тут должна сработаь функция взятия из кеша всех данных.
-		this.userId = data.userId;
-		this.login = "guest"+this.userId;
-		this.actionTimeout = 5000;
-		this.lastActionTime = 0;
-		
 	}
 	
 	
+	/*
+		* Description:
+		*	Собирает массив данных о пользователе. 
+		*	@userId:	int, ид пользователя
+		*	
+		*	return: 
+		*
+		* @since  21.02.15
+		* @author pcemma
+	*/
+	User.prototype.getUserData = function(userId)
+	{
+		//TODO: перенести это в кеш!!! Тут должна сработаь функция взятия из кеша всех данных.
+		this.userId = userId;
+		this.login = "guest"+this.userId;
+		
+		
+		// get stats
+		var req = SQL.querySync("SELECT `us`.*, `gs`.`name` "+
+								"FROM `game_UsersStats` `us`, `game_Stats` `gs` "+
+								"WHERE `us`.`userId` = "+this.userId+" AND `gs`.`id` = `us`.`statId`");
+		var rows = req.fetchAllSync();
+		
+		for (var key in rows){
+			this.userData[rows[key].name] = rows[key].value;
+		}
+		
+		this.userData.lastActionTime = 0;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/*
+		* Description:
+		*	Добавляем статы новому игроку
+		*	
+		*	
+		*	return: 
+		*
+		* @since  21.02.15
+		* @author pcemma
+	*/
+	User.prototype.addStats = function()
+	{
+		var tempArray = {
+			strength:			1,
+			agility:			1,
+			intuition:			1,
+			wisdom:				1,
+			intellect:			1,
+			stamina:			1,
+			luck:				1,
+			actionTime:			1,
+			moveActionTime:		5000,
+			hitActionTime:		5000
+		},
+		queryArray = [];
+		
+		for (var key in tempArray){
+			console.log("key",key);
+			console.log(GLOBAL.DATA.stats[key]);
+			queryArray.push("("+this.userId+", "+GLOBAL.DATA.stats[key].id+", "+tempArray[key]+")");
+		}
+		console.log("INSERT INTO `game_UsersStats` (`userId`, `statId`, `value`) VALUES "+queryArray.join(",")+" ");
+		SQL.querySync("INSERT INTO `game_UsersStats` (`userId`, `statId`, `value`) VALUES "+queryArray.join(",")+" ");
+		
+	}
 	
 	
 	
