@@ -235,11 +235,8 @@ function User() {
 		queryArray = [];
 		
 		for (var key in tempArray){
-			console.log("key",key);
-			console.log(GLOBAL.DATA.stats[key]);
 			queryArray.push("("+userId+", "+GLOBAL.DATA.stats[key].id+", "+tempArray[key]+")");
 		}
-		console.log("INSERT INTO `game_UsersStats` (`userId`, `statId`, `value`) VALUES "+queryArray.join(",")+" ");
 		SQL.querySync("INSERT INTO `game_UsersStats` (`userId`, `statId`, `value`) VALUES "+queryArray.join(",")+" ");
 		
 	}
@@ -285,10 +282,28 @@ function User() {
 	{
 		//TODO: перенести это в кеш!!! Тут должна сработаь функция взятия из кеша всех данных.
 		this.userId = userId;
-		this.login = "guest"+this.userId;
+		//TODO взятие данных типа логин и прочие
+		this.userData.login = "guest"+this.userId;
+		this.userData.lastActionTime = 0;
 		
+		// Собираем статы игрока те что в базе
+		this.getStats();
 		
-		// get stats
+		// пересчитываем статы игрока. с учетом всех данных
+		this.recountStats();
+	}
+	
+	/*
+		* Description:
+		*	Собирает статы игрока которые есть в базе
+		*	
+		*	return: 
+		*
+		* @since  21.02.15
+		* @author pcemma
+	*/
+	User.prototype.getStats = function()
+	{
 		var req = SQL.querySync("SELECT `us`.*, `gs`.`name` "+
 								"FROM `game_UsersStats` `us`, `game_Stats` `gs` "+
 								"WHERE `us`.`userId` = "+this.userId+" AND `gs`.`id` = `us`.`statId`");
@@ -297,9 +312,32 @@ function User() {
 		for (var key in rows){
 			this.userData[rows[key].name] = rows[key].value;
 		}
-		
-		this.userData.lastActionTime = 0;
 	}
+	
+	
+	/*
+		* Description:
+		*	Собирает статы игрока которые есть в базе
+		*	
+		*	return: 
+		*
+		* @since  21.02.15
+		* @author pcemma
+	*/
+	User.prototype.recountStats = function()
+	{
+		
+		// minDamage
+		this.userData['minDamage'] = this.userData['strength'];
+		// maxDamage
+		this.userData['maxDamage'] = this.userData['strength'] * 3;
+		// hp
+		this.userData['hp'] = this.userData['stamina'] * 8;
+		// currentHp
+		this.userData['currentHp'] = this.userData['stamina'] * 8;
+	}
+	
+	
 	
 
 	

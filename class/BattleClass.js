@@ -67,8 +67,6 @@ function BattleClass() {
 	*/
 	BattleClass.prototype.addHero = function(hero)
 	{
-		var currentTime = + new Date();
-		
 		// отправляем пользователю, те данные что уже есть. положение всех воинов наполе боя
 		hero.socketWrite({
 							f: "battleCreate", 
@@ -113,12 +111,7 @@ function BattleClass() {
 			// тут должна отправляться вся инфа о пользователе. ид, логин, вещи, хп, манна,на какой позиции, команда, 
 			this.socketWrite({
 								f: "battleAddHero", 
-								p: {
-									id: String(hero.userId),
-									teamId: teamId,
-									hexId: hexId,
-									lastActionTime: (currentTime < hero.userData.lastActionTime) ? (hero.userData.lastActionTime - currentTime) : 0
-									}
+								p: this.getHeroData(hero.userId)
 							});
 		}
 	}
@@ -242,8 +235,7 @@ function BattleClass() {
 	*/
 	BattleClass.prototype.getBattleStatus = function()
 	{
-		var currentTime = + new Date(),
-			battleInfo = {
+		var battleInfo = {
 			id: 				this.id,
 			heroes: 			{},
 			obstructionsHexes: 	this.obstructionsHexes,
@@ -252,17 +244,39 @@ function BattleClass() {
 		
 		
 		for (var i in this.heroes){
-			battleInfo.heroes[String(this.heroes[i].userId)] = {
-									id: String(this.heroes[i].userId),
-									teamId: this.heroes[i].teamId,
-									hexId: this.heroes[i].hexId,
-									// login: battleInfo.heroes[String(this.heroes[i].userId)],
-									lastActionTime: (currentTime < this.heroes[i].userData.lastActionTime) ? (this.heroes[i].userData.lastActionTime - currentTime) : 0
-								};
+			console.log("i", i);
+			battleInfo.heroes[i] = this.getHeroData(i);
 		}
 		
 		return battleInfo;
 	}
+	
+	
+	/*
+		* Description:
+		*	function получаем все данные про героя, которые отправляются в бой
+		*	
+		*	@userId:	int, id героя(пользователя)	
+		*
+		*
+		* @since  21.02.15
+		* @author pcemma
+	*/
+	BattleClass.prototype.getHeroData = function(userId)
+	{
+		var currentTime = + new Date();
+			info = {
+						id: 		String(this.heroes[userId].userId),
+						teamId: 	this.heroes[userId].teamId,
+						hexId: 		this.heroes[userId].hexId,
+						login: 		this.heroes[userId].userData.login,
+						hp:			this.heroes[userId].userData.hp,
+						currentHp:	this.heroes[userId].userData.currentHp,
+						lastActionTime: (currentTime < this.heroes[userId].userData.lastActionTime) ? (this.heroes[userId].userData.lastActionTime - currentTime) : 0
+					};
+		return info;
+	}
+	
 	
 	
 	
