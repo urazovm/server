@@ -45,19 +45,10 @@ function PreloadDataClass() {
 		
 		
 		this.DATA.stats = this.getStats();
-		console.log(this.DATA.stats);
-		
-		
+	
 		this.DATA.items = this.getItems();
 		
-		
-		
-		
-		this.DATA.battleInfo = this.getBattleInfo();;
-		
-		
-		
-		console.log(this.DATA.battleInfo);
+		this.DATA.battleInfo = this.getBattleInfo();
 	}
 	
 	
@@ -96,9 +87,6 @@ function PreloadDataClass() {
 		
 		return items;
 	}
-	
-	
-	
 	
 	
 	/*
@@ -152,9 +140,9 @@ function PreloadDataClass() {
 	*/
 	this.getBattleInfo = function()
 	{
-		var battleInfo = {};
-			battleInfo.obstructions = this.getBattleObstructions();
-		
+		var battleInfo = {
+			obstructions: this.getBattleObstructions() // массив данных про препятсвия на карте боя
+		}
 		return battleInfo;
 	}
 	
@@ -208,13 +196,9 @@ function PreloadDataClass() {
 		var users = usersCountRow.fetchAllSync();
 		
 		for (var key in users){
-			console.log(users[key].id);
 			this.USERS[users[key].id] = new UserClass();
 			this.USERS[users[key].id].getUserData(users[key].id);
-			
 		}
-		
-		
 	}
 	
 	

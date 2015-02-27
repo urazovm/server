@@ -70,7 +70,28 @@ function BMClass() {
 	}
 	
 	
-	
+	/*
+		* Description: герой совершает удар
+		*	@data: arr
+		*		@id: 		int, ид боя
+		*		@hexId: 	str, вида x.y
+		*
+		*
+		* @since  25.02.15
+		* @author pcemma
+	*/
+	BMClass.prototype.heroMakeHit = function(data)
+	{
+		console.log("\n BM heroMakeHit");
+		console.log(data);
+		if(
+			data && data.id &&
+			this.battles[data.id] && this.battles[data.id].check()
+		){
+			console.log(data);
+			this.battles[data.id].heroMakeHit(data);
+		}
+	}
 	//TODO: удалить создание боя с ид 1 для теста!
 	this.createBattle();
 }

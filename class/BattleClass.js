@@ -150,9 +150,6 @@ function BattleClass() {
 			this.heroes[data.userId].hexId = data.hexId;
 			this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.moveActionTime;
 			
-			console.log("this.hero ", this.heroes[data.userId].hexId);
-			console.log("USER ", GLOBAL.USERS[data.userId].hexId);
-			
 			this.socketWrite({
 								f: "battleMoveHero", 
 								p: {
@@ -160,10 +157,60 @@ function BattleClass() {
 									hexId: data.hexId
 								}
 							});
-		
 		}
-		
 	}
+	
+	
+	/*
+		* Description: Производит удар
+		*	@data: arr
+		*		@id: 		int, ид боя
+		*		@hexId: 	str, вида x.y
+		*
+		*
+		* @since  25.02.15
+		* @author pcemma
+	*/
+	BattleClass.prototype.heroMakeHit = function(data)
+	{
+		var currentTime = + new Date();
+		
+		console.log("\n B heroMakeHit");
+		console.log(data);
+		// TODO: живой ли герой, мертвые не ходят!
+		// TODO: есть в ли этой клетке герой
+		// TODO: противник ли в этой клетке
+		// TODO: переделать проверку соседей на проверку в радиусе
+		
+		if(
+			this.hexes[data.hexId] && // Проверяем на то что такой гекс вообще есть!
+			// this.hexes[data.hexId].isFree && // Проверка на то что гекс в который хотят передвинуть свободен
+			this.hexes[this.heroes[data.userId].hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) && // и находится в радиусе удара
+			this.heroes[data.userId].userData.lastActionTime <= currentTime // Проверка на возможность делать удар, не включен ли таймаут
+		){
+			
+			// обновляем герою который совершал удар время таймаута
+			this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.moveActionTime;
+			
+			
+			//Берем ид героя(противника) в гексе
+			var oponentUserId = this.hexes[data.hexId].userId;
+			
+			
+			//TODO: считать увернулся ли противник
+			//TODO: считать урон противнику если противник не увернулся.
+			
+			this.socketWrite({
+								f: "battleHeroMakeHit", 
+								p: {
+									userId: String(data.userId),
+									oponentUserId: String(oponentUserId)
+								}
+							});
+		}
+	}
+	
+	
 	
 	
 	/*
@@ -203,17 +250,10 @@ function BattleClass() {
 			for (var j = 1; j <= this.hexesInCol; j++){
 				var x = i - 1,
 					y = j - 1;
-					dy = Math.fmod(y, 2);
+					dy = Math.fmod(y, 2),
+					isObstruction = (this.obstructionsHexes[x+"."+y]) ? true : false; // Флаг определяет будет ли на эом гексе препятствие
 				
 				if(!(dy == 1 && i == this.hexesInRow)){ // не рисуем в четных рядах последний гекс для красивого отображения сетки
-					// Флаг определяет будет ли на эом гексе препятствие
-					var isObstruction = false;
-					if(this.obstructionsHexes[x+"."+y]){
-						console.log("isObstruction", isObstruction);
-						isObstruction = true;
-					}
-				
-					
 					tmpArray[x+"."+y] = new HexagonClass({x: x, y: y, isObstruction: isObstruction});
 				}
 			}

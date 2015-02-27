@@ -291,6 +291,26 @@ function Router() {
 	}
 	
 	
+	/*
+		* Description:
+		*	function Двигает героя
+		*	
+		*	@data: 	object, Data from client
+		*		@battleId: 	int, ид боя
+		*		@hexId: 	str, вида x.y
+		*
+		* @since  06.02.15
+		* @author pcemma
+	*/
+	this['battleHeroMakeHit'] = function (data) {
+		console.log("\n battleHeroMakeHit");
+		console.log(data);
+		if(data){
+			battlesManager.heroMakeHit(data);
+		}
+	}
+	
+	
 
 }
 
