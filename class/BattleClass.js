@@ -189,22 +189,28 @@ function BattleClass() {
 			this.heroes[data.userId].userData.lastActionTime <= currentTime // Проверка на возможность делать удар, не включен ли таймаут
 		){
 			
+			//TODO: считать увернулся ли противник
+			
 			// обновляем герою который совершал удар время таймаута
 			this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.moveActionTime;
-			
 			
 			//Берем ид героя(противника) в гексе
 			var oponentUserId = this.hexes[data.hexId].userId;
 			
 			
-			//TODO: считать увернулся ли противник
-			//TODO: считать урон противнику если противник не увернулся.
+			// Считаем урон противнику.
+			var damage = Math.floor(Math.random() * (this.heroes[data.userId].userData.maxDamage - this.heroes[data.userId].userData.minDamage + 1)) + this.heroes[data.userId].userData.minDamage;
+			// Обновляем противнику его текущее значение хп
+			this.heroes[oponentUserId].userData.currentHp =- damage;
+			
+			
 			
 			this.socketWrite({
 								f: "battleHeroMakeHit", 
 								p: {
 									userId: String(data.userId),
-									oponentUserId: String(oponentUserId)
+									oponentUserId: String(oponentUserId),
+									damage: damage
 								}
 							});
 		}
