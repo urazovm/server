@@ -286,6 +286,11 @@ function User() {
 		this.userData.login = "guest"+this.userId;
 		this.userData.lastActionTime = 0;
 		
+		
+		//Флаги
+		this.userData.inBattleFlag = false;
+		this.userData.isAliveFlag = true;;
+		
 		// Собираем статы игрока те что в базе
 		this.getStats();
 		
@@ -341,6 +346,28 @@ function User() {
 	
 	
 
+	
+	
+	/*
+		* Description: Проверка мерт ли герой. 
+		*
+		*
+		* @since  01.03.15
+		* @author pcemma
+	*/
+	User.prototype.isAlive = function()
+	{
+		console.log("\n\n ------------");
+		console.log("this.userData.currentHp", this.userData.currentHp);
+		if(this.userData.currentHp <= 0 ){
+			this.userData.currentHp = 0;
+			this.userData.isAliveFlag = false;
+		}
+		
+		console.log("this.userData.isAliveFlag", this.userData.isAliveFlag);
+		console.log("------------ \n\n");
+		return this.userData.isAliveFlag;
+	}
 	
 }
 
