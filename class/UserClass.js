@@ -349,6 +349,20 @@ function User() {
 	
 	
 	/*
+		* Description: Функция считает удар, который герой может нанести
+		*
+		*
+		* @since  02.03.15
+		* @author pcemma
+	*/
+	User.prototype.countDamage = function()
+	{
+		var damage = Math.floor(Math.random() * (this.userData.maxDamage - this.userData.minDamage + 1)) + this.userData.minDamage;
+		return damage;
+	}
+	
+	
+	/*
 		* Description: Проверка мерт ли герой. 
 		*
 		*

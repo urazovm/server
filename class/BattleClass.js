@@ -102,6 +102,8 @@ function BattleClass() {
 			this.hexes[hexId].addHero({userId: hero.userId});
 			
 			// Тут апдейта массива юзера с данными о битве
+			// TODO после окончания боя флаг в бою и ид битвы убрать. так же убрать гекс ид и теам ид
+			this.heroes[String(hero.userId)].userData.inBattleFlag = true;
 			this.heroes[String(hero.userId)].userData.battleId = this.id;
 			this.heroes[String(hero.userId)].userData.teamId = teamId;
 			this.heroes[String(hero.userId)].userData.hexId = hexId;
@@ -133,13 +135,16 @@ function BattleClass() {
 		
 		console.log("\n B moveHero");
 		console.log(data);
-		// TODO: живой ли герой, мертвые не ходят!
-		
+			
 		if(
-			this.hexes[data.hexId] && // Проверяем на то что такой гекс вообще есть!
-			this.hexes[data.hexId].isFree && // Проверка на то что гекс в который хотят передвинуть свободен
-			this.hexes[this.heroes[data.userId].userData.hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) && // и находится в радиусе шага
-			this.heroes[data.userId].userData.lastActionTime <= currentTime // Проверка на возможность делать ход, не включен ли таймаут
+			this.heroes[data.userId] && 										// Проверяем на то есть ли вообще такой герой у нас
+			this.heroes[data.userId].userData.inBattleFlag && 					// Проверяем на то что герой этот в бою
+			this.heroes[data.userId].userData.battleId == this.id &&			// Проверка что герой в этом самом бою
+			this.heroes[data.userId].isAlive() &&								// живой ли герой, мертвые не ходят!
+			this.heroes[data.userId].userData.lastActionTime <= currentTime && 	// Проверка на возможность делать ход, не включен ли таймаут
+			this.hexes[data.hexId] && 											// Проверяем на то что такой гекс вообще есть!
+			this.hexes[data.hexId].isFree && 									// Проверка на то что гекс в который хотят передвинуть свободен
+			this.hexes[this.heroes[data.userId].userData.hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) // и находится в радиусе шага
 		){
 			
 			// Обновление гекса
@@ -177,55 +182,67 @@ function BattleClass() {
 		
 		console.log("\n B heroMakeHit");
 		console.log(data);
-		// TODO: живой ли герой, мертвые не ходят!
-		// TODO: есть в ли этой клетке герой
-		// TODO: противник ли в этой клетке
+	
 		// TODO: переделать проверку соседей на проверку в радиусе
 		
 		if(
-			this.hexes[data.hexId] && // Проверяем на то что такой гекс вообще есть!
-			// this.hexes[data.hexId].isFree && // Проверка на то что гекс в который хотят передвинуть свободен
+			this.heroes[data.userId] && 										// Проверяем на то есть ли вообще такой герой у нас
+			this.heroes[data.userId].userData.inBattleFlag && 					// Проверяем на то что герой этот в бою
+			this.heroes[data.userId].userData.battleId == this.id &&			// Проверка что герой в этом самом бою
+			this.heroes[data.userId].isAlive() &&								// живой ли герой, мертвые не сражаются!
+			this.heroes[data.userId].userData.lastActionTime <= currentTime && 	// Проверка на возможность делать удар, не включен ли таймаут
+			this.hexes[data.hexId] && 											// Проверяем на то что такой гекс вообще есть!
 			this.hexes[this.heroes[data.userId].userData.hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) && // и находится в радиусе удара
-			this.heroes[data.userId].userData.lastActionTime <= currentTime // Проверка на возможность делать удар, не включен ли таймаут
-		){
-			
-			//TODO: считать увернулся ли противник
-			
-			// обновляем герою который совершал удар время таймаута
-			this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.moveActionTime;
-			
+			this.hexes[data.hexId].userId										// Проверяем на то что в этом гексе есть герой
+		){		 
 			//Берем ид героя(противника) в гексе
 			var oponentUserId = this.hexes[data.hexId].userId;
 			
+			if(
+				this.heroes[oponentUserId] && 								// Проверяем на то есть ли вообще такой герой у нас
+				this.heroes[oponentUserId].userData.inBattleFlag && 		// Проверяем на то что герой этот в бою
+				this.heroes[oponentUserId].userData.battleId == this.id &&	// Проверка что герой в этом самом бою
+				this.heroes[oponentUserId].isAlive() &&						// живой ли герой, мертвых не бьют!
+				this.heroes[oponentUserId].userData.teamId != this.heroes[data.userId].userData.teamId	// противник ли в этой клетке?
+			){
+				// обновляем герою который совершал удар время таймаута
+				this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.moveActionTime;
+				
+				
+				//TODO: считать увернулся ли противник
 			
-			// Считаем урон противнику.
-			var damage = Math.floor(Math.random() * (this.heroes[data.userId].userData.maxDamage - this.heroes[data.userId].userData.minDamage + 1)) + this.heroes[data.userId].userData.minDamage;
-			console.log("damage", damage, "oponentUserId", oponentUserId, "this.heroes[oponentUserId].userData.currentHp", this.heroes[oponentUserId].userData.currentHp);
-			// Обновляем противнику его текущее значение хп
-			this.heroes[oponentUserId].userData.currentHp -= damage;
-			// Проверяет умер ли герой. Если да, тоставит герою соответствующие флаги
-			var isHeroAlive = this.heroes[oponentUserId].isAlive();
-			// Проверяем если герой умер то надо удалить его из гекса.
-			if(!isHeroAlive){
-				this.hexes[this.heroes[oponentUserId].userData.hexId].removeHero();
+				// Считаем урон противнику.
+				var damage = this.heroes[data.userId].countDamage();
+				//TODO: посчитать броню противника
+				
+				console.log("damage", damage, "oponentUserId", oponentUserId, "this.heroes[oponentUserId].userData.currentHp", this.heroes[oponentUserId].userData.currentHp);
+				
+				// Обновляем противнику его текущее значение хп
+				this.heroes[oponentUserId].userData.currentHp -= damage;
+				// Проверяет умер ли герой. Если да, тоставит герою соответствующие флаги
+				var isHeroAlive = this.heroes[oponentUserId].isAlive();
+				// Проверяем если герой умер то надо удалить его из гекса.
+				if(!isHeroAlive){
+					this.hexes[this.heroes[oponentUserId].userData.hexId].removeHero();
+				}
+				
+				this.socketWrite({
+									f: "battleHeroMakeHit", 
+									p: {
+										userId: String(data.userId),
+										oponentUserId: String(oponentUserId),
+										damage: damage
+									}
+								});
+				
+				// Проверяет остались ли в команде героя по которому нанесли урон живые. 
+				// Если живых нет, то надо закончить бой
+				if(!isHeroAlive && !this.isAliveHeroesInTeam(this.heroes[oponentUserId].userData.teamId)){
+					console.log("DONT OPEN!! DEAD INSIDE!!!");
+					
+					
+				}
 			}
-			
-			this.socketWrite({
-								f: "battleHeroMakeHit", 
-								p: {
-									userId: String(data.userId),
-									oponentUserId: String(oponentUserId),
-									damage: damage
-								}
-							});
-			
-			// Проверяет остались ли в команде героя по которому нанесли урон живые. 
-			// Если живых нет, то надо закончить бой
-			if(!isHeroAlive && !this.isAliveHeroesInTeam(this.heroes[oponentUserId].userData.teamId)){
-				console.log("DONT OPEN!! DEAD INSIDE!!!");
-			}
-			
-			
 		}
 	}
 	
