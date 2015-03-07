@@ -14,8 +14,7 @@ function BattleClass() {
 	*/
 	BattleClass.prototype.create = function()
 	{
-		console.log("DATE!! ", (+ new Date()));
-		var currentTime = + new Date(),
+		var currentTime = Math.floor(+new Date() / 1000),
 			battleId = SQL.lastInsertIdSync("INSERT INTO `game_Battles` (`id`, `startTime`) VALUES (NULL, "+currentTime+")");
 			
 		
@@ -71,8 +70,6 @@ function BattleClass() {
 	{
 		console.log("\n B completion");
 		console.log(data);
-		
-		var currentTime = + new Date();
 		
 		// 1. Пройтись по всем юзерам и поставить что они не в бою. 
 		for (var heroId in this.heroes){
@@ -173,7 +170,7 @@ function BattleClass() {
 	*/
 	BattleClass.prototype.moveHero = function(data)
 	{
-		var currentTime = + new Date();
+		var currentTime = Math.floor(+new Date() / 1000);
 		
 		console.log("\n B moveHero");
 		console.log(data);
@@ -220,7 +217,7 @@ function BattleClass() {
 	*/
 	BattleClass.prototype.heroMakeHit = function(data)
 	{
-		var currentTime = + new Date();
+		var currentTime = Math.floor(+new Date() / 1000);
 		
 		console.log("\n B heroMakeHit");
 		console.log(data);
@@ -385,7 +382,7 @@ function BattleClass() {
 	*/
 	BattleClass.prototype.getHeroData = function(userId)
 	{
-		var currentTime = + new Date();
+		var currentTime = Math.floor(+new Date() / 1000);
 			info = {
 						id: 			String(this.heroes[userId].userId),
 						teamId: 		this.heroes[userId].userData.teamId,

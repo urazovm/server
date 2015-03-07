@@ -69,8 +69,6 @@ GLOBAL.initialize();
 
 
 
-
-
 battlesManager = new BattleManagerClass();
 
 

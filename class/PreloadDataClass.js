@@ -5,7 +5,6 @@ function PreloadDataClass() {
 
 	this.initialize = function()
 	{
-		
 		// create USERS array
 		this.createGlobalUsers();
 		

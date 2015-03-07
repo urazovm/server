@@ -132,7 +132,24 @@ function BMClass() {
 		}
 	}
 	
-
+	
+	
+	/*
+		* Description: Очищает незакоченые бои в базе при старте сервера.
+		*
+		*
+		* @since  08.03.15
+		* @author pcemma
+	*/
+	BMClass.prototype.deleteAllNotEndedBattles = function()
+	{
+		console.log("TYT!!");
+		SQL.querySync("UPDATE `game_Battles` SET `game_Battles`.`endFlag` = 1");
+	}
+	
+	
+	
+	this.deleteAllNotEndedBattles();
 }
 
 
