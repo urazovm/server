@@ -229,8 +229,8 @@ function User() {
 			stamina:			1,
 			luck:				1,
 			actionTime:			1,
-			moveActionTime:		2000,
-			hitActionTime:		2000
+			moveActionTime:		2,
+			hitActionTime:		2
 		},
 		queryArray = [];
 		
