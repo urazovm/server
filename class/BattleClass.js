@@ -14,9 +14,10 @@ function BattleClass() {
 	*/
 	BattleClass.prototype.create = function()
 	{
+		console.log("DATE!! ", (+ new Date()));
 		var currentTime = + new Date(),
-			// battleId = SQL.lastInsertIdSync("INSERT INTO `game_Battles` (`id`, `startTime`) VALUES (NULL, "+currentTime+")");
-			battleId = 1;
+			battleId = SQL.lastInsertIdSync("INSERT INTO `game_Battles` (`id`, `startTime`) VALUES (NULL, "+currentTime+")");
+			
 		
 
 		this.id = battleId;
@@ -45,7 +46,10 @@ function BattleClass() {
 	BattleClass.prototype.check = function()
 	{
 		// TODO: нормальная проверка, на свободные места, и прочее
-		if(this.endFlag == 0){
+		if(	
+			
+			this.endFlag == 0
+		){
 			return true;
 		}
 		return false;
@@ -82,7 +86,14 @@ function BattleClass() {
 								winTeamId: data.winTeamId
 							}
 						});
-		delete this;
+		
+		// TODO: Статистика
+		
+		// Обновление таблиц				
+		SQL.querySync("UPDATE `game_Battles` SET `game_Battles`.`endFlag` = 1 WHERE `game_Battles`.`id` = "+this.id);				
+		
+		//TODO: Пересмотреть механизм удаления боя
+		battlesManager.removeBattle({id: this.id});
 	}
 	
 	

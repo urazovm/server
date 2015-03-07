@@ -21,16 +21,37 @@ function BMClass() {
 		if(battle){
 			this.battles[battleId] = battle;
 		}
-		
 		console.log("battleId", battleId);
+		
+		return battle.id
+	}
+	
+	
+	/*
+		* Description:
+		*	function Удаляет бой.
+		*	
+		*	@data: 		arrray,	
+		*		@id: 	int, ид боя, который надо удалить
+		*
+		*
+		* @since  07.03.15
+		* @author pcemma
+	*/
+	BMClass.prototype.removeBattle = function(data)
+	{
+		if(data && data.id){
+			delete this.battles[data.id];
+		}
 	}
 	
 	
 	/*
 		* Description:
 		*	function вход в битву 
-		*	
-		*
+		*		@data: array
+		*			@id: 	int, ид боя
+		*			@user:	obj, объект пользователя
 		*
 		* @since  31.01.15
 		* @author pcemma
@@ -41,7 +62,25 @@ function BMClass() {
 			data && data.id &&
 			this.battles[data.id] && this.battles[data.id].check()
 		){
+			console.log("enterBattle 1");
 			this.battles[data.id].addHero(data.user);
+		}
+		
+		else if(lib.objectSize(this.battles) == 0){
+			console.log("enterBattle 2");
+			var battleId = this.createBattle();
+			this.battles[battleId].addHero(data.user);
+		}
+		
+		else{
+			// TODO: Временно для кнопки вступить в бой. Находим первый бой в который можно вступить
+			console.log("enterBattle 3");
+			for(var battleId in this.battles){
+				if(this.battles[battleId] && this.battles[battleId].check()){
+					this.battles[battleId].addHero(data.user);
+					break;
+				}
+			}
 		}
 	}
 	
@@ -93,8 +132,7 @@ function BMClass() {
 		}
 	}
 	
-	//TODO: удалить создание боя с ид 1 для теста!
-	this.createBattle();
+
 }
 
 
