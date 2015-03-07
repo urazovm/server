@@ -346,6 +346,46 @@ function User() {
 	
 	
 
+	/*
+		* Description: Функция добавляет героя в бой.
+		*
+		*	@data:	arr,
+		*		battleId: 	int, ид боя
+		*		teamId: 	int, ид команды
+		*		hexId: 		int, ид гекса 
+		*
+		*
+		* @since  06.03.15
+		* @author pcemma
+	*/
+	User.prototype.addToBattle = function(data)
+	{
+		this.userData.inBattleFlag = true;
+		this.userData.battleId = data.battleId;
+		this.userData.teamId = data.teamId;
+		this.userData.hexId = data.hexId;
+	}
+	
+	
+	/*
+		* Description: Функция удаляет героя из боя.
+		*
+		*	@data:	arr,
+		*		battleId: 	int, ид боя
+		*		teamId: 	int, ид команды
+		*		hexId: 		int, ид гекса 
+		*
+		*
+		* @since  06.03.15
+		* @author pcemma
+	*/
+	User.prototype.removeFromBattle = function(data)
+	{
+		this.userData.inBattleFlag = false;
+		delete this.userData.battleId;
+		delete this.userData.teamId;
+		delete this.userData.hexId;
+	}
 	
 	
 	/*

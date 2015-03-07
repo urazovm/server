@@ -92,6 +92,7 @@ function BMClass() {
 			this.battles[data.id].heroMakeHit(data);
 		}
 	}
+	
 	//TODO: удалить создание боя с ид 1 для теста!
 	this.createBattle();
 }

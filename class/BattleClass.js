@@ -52,6 +52,38 @@ function BattleClass() {
 	}
 	
 	
+	/*
+		* Description:
+		*	function Заканчивает бой
+		*	
+		*	@data: array
+		*		@winTeamId: int, ид команды,которая выиграла бой
+		*
+		*
+		* @since  06.03.15
+		* @author pcemma
+	*/
+	BattleClass.prototype.completion = function(data)
+	{
+		console.log("\n B completion");
+		console.log(data);
+		
+		var currentTime = + new Date();
+		
+		// 1. Пройтись по всем юзерам и поставить что они не в бою. 
+		for (var heroId in this.heroes){
+			this.heroes[heroId].removeFromBattle();
+		}
+		
+		
+		this.socketWrite({
+							f: "battleCompletion", 
+							p: {
+								winTeamId: data.winTeamId
+							}
+						});
+		delete this;
+	}
 	
 	
 	
@@ -102,12 +134,11 @@ function BattleClass() {
 			this.hexes[hexId].addHero({userId: hero.userId});
 			
 			// Тут апдейта массива юзера с данными о битве
-			// TODO после окончания боя флаг в бою и ид битвы убрать. так же убрать гекс ид и теам ид
-			this.heroes[String(hero.userId)].userData.inBattleFlag = true;
-			this.heroes[String(hero.userId)].userData.battleId = this.id;
-			this.heroes[String(hero.userId)].userData.teamId = teamId;
-			this.heroes[String(hero.userId)].userData.hexId = hexId;
-			
+			this.heroes[String(hero.userId)].addToBattle({
+															battleId: 	this.id,
+															teamId: 	teamId,
+															hexId: 		hexId
+														});
 			
 			
 			// тут должна отправляться вся инфа о пользователе. ид, логин, вещи, хп, манна,на какой позиции, команда, 
@@ -208,11 +239,11 @@ function BattleClass() {
 				// обновляем герою который совершал удар время таймаута
 				this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.moveActionTime;
 				
-				
 				//TODO: считать увернулся ли противник
 			
 				// Считаем урон противнику.
 				var damage = this.heroes[data.userId].countDamage();
+				
 				//TODO: посчитать броню противника
 				
 				console.log("damage", damage, "oponentUserId", oponentUserId, "this.heroes[oponentUserId].userData.currentHp", this.heroes[oponentUserId].userData.currentHp);
@@ -239,8 +270,9 @@ function BattleClass() {
 				// Если живых нет, то надо закончить бой
 				if(!isHeroAlive && !this.isAliveHeroesInTeam(this.heroes[oponentUserId].userData.teamId)){
 					console.log("DONT OPEN!! DEAD INSIDE!!!");
-					
-					
+					this.completion({
+										winTeamId: (this.heroes[oponentUserId].userData.teamId == 1) ? 2 : 1 
+									});
 				}
 			}
 		}
