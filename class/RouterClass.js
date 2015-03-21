@@ -22,7 +22,7 @@ function Router() {
 			// postData = JSON.parse(postData);
 			// console.log(postData);
 			// GLOBAL CHECKING IF USER EXIST AND VERIFYING
-			if( pathname == 'getGlobalData' || pathname == 'authorization' || ( GLOBAL.USERS[postData.userId] && GLOBAL.USERS[postData.userId].verifyHash == postData.verifyHash)){
+			if( pathname == 'getGlobalData' || pathname == 'authorization' || pathname == 'makeClientsErrorLogs' || ( GLOBAL.USERS[postData.userId] && GLOBAL.USERS[postData.userId].verifyHash == postData.verifyHash)){
 				this[pathname](postData);
 			}
 		} else {
@@ -64,37 +64,40 @@ function Router() {
 	*/
 	this['makeClientsErrorLogs'] = function (data) {
 		console.log("data.error_message",data);
-		var find_error 		= false;
-		
-		for(var key in GLOBAL.errorsLists.clientsErrorsList)
-		{
-			if(GLOBAL.errorsLists.clientsErrorsList[key].functionName == data.functionName && GLOBAL.errorsLists.clientsErrorsList[key].error == data.error)
+		var find_error 	= false,
+			errorId		= 0;
+		data.userId = Number(data.userId);
+		if(data.userId || data.userId == 0){
+			for(var key in GLOBAL.errorsLists.clientsErrorsList)
 			{
-				console.log("find error!!!!!!!!!!!");
-				if(GLOBAL.checkVersion(data.clientVersion, GLOBAL.errorsLists.clientsErrorsList[key].clientVersion) )
+				if(GLOBAL.errorsLists.clientsErrorsList[key].functionName == data.functionName && GLOBAL.errorsLists.clientsErrorsList[key].error == data.error)
 				{
-					console.log("Version is >>>>>= !!!!!!!!!!!");
-					if(GLOBAL.errorsLists.clientsErrorsList[key].state == 1)
+					console.log("find error!!!!!!!!!!!");
+					if(GLOBAL.checkVersion(data.clientVersion, GLOBAL.errorsLists.clientsErrorsList[key].clientVersion) )
 					{
-						GLOBAL.errorsLists.clientsErrorsList[key].state = 2;
-						GLOBAL.errorsLists.clientsErrorsList[key].clientVersion = data.clientVersion;
+						console.log("Version is >>>>>= !!!!!!!!!!!");
+						if(GLOBAL.errorsLists.clientsErrorsList[key].state == 1)
+						{
+							GLOBAL.errorsLists.clientsErrorsList[key].state = 2;
+							GLOBAL.errorsLists.clientsErrorsList[key].clientVersion = data.clientVersion;
+						}
+						SQL.querySync("UPDATE `game_ErrorsClientList` SET `state` = "+GLOBAL.errorsLists.clientsErrorsList[key].state+", `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"' WHERE `id` = "+key);
 					}
-					SQL.querySync("UPDATE `game_ErrorsClientList` SET `state` = "+GLOBAL.errorsLists.clientsErrorsList[key].state+", `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"' WHERE `id` = "+key);
+					find_error = true;
+					errorId = key;
+					break;
 				}
-				find_error = true;
-				break;
 			}
+			if(!find_error)
+			{
+				errorId = SQL.lastInsertIdSync("INSERT INTO `game_ErrorsClientList` SET `functionName` = '"+SQL.mysqlRealEscapeString(data.functionName)+"', `error` = '"+SQL.mysqlRealEscapeString(data.error)+"', `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"', state = 0 ");
+				GLOBAL.errorsLists.clientsErrorsList[errorId] = {functionName: data.functionName, error: data.error, clientVersion: data.clientVersion, state: 0};
+			}
+			// update errors log
+			SQL.querySync("INSERT INTO `game_ErrorsClient` SET `date` = UNIX_TIMESTAMP(), `errorId` = "+errorId+", `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"', userId ="+data.userId);
 		}
-		if(!find_error)
-		{
-			var error_id = SQL.lastInsertIdSync("INSERT INTO `game_ErrorsClientList` SET `functionName` = '"+SQL.mysqlRealEscapeString(data.functionName)+"', `error` = '"+SQL.mysqlRealEscapeString(data.error)+"', `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"', state = 0 ");
-			GLOBAL.errorsLists.clientsErrorsList[error_id] = {functionName: data.functionName, error: data.error, clientVersion: data.clientVersion, state: 0};
-		}
-		// update errors log
-		SQL.querySync("INSERT INTO `game_ErrorsClient` SET `date` = UNIX_TIMESTAMP(), `functionName` = '"+SQL.mysqlRealEscapeString(data.functionName)+"', `error` = '"+SQL.mysqlRealEscapeString(data.error)+"', `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"', userId ="+data.userId);
 	}
-		
-		
+	
 	
 	/*
 		* Description:

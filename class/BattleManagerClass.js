@@ -143,7 +143,7 @@ function BMClass() {
 	*/
 	BMClass.prototype.deleteAllNotEndedBattles = function()
 	{
-		console.log("TYT!!");
+		console.log("DELETE ALL OLD BATTLES!!");
 		SQL.querySync("UPDATE `game_Battles` SET `game_Battles`.`endFlag` = 1");
 	}
 	

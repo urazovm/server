@@ -7,8 +7,10 @@ d = domain.create();
 d.on('error', function(er) 
 {
 	console.log('### ERROR', er.stack);
+	er.stack = er.stack;
 	
-	var find_error = false;
+	var find_error = false,
+		errorId = 0;
 	
 	for(var key in GLOBAL.errorsLists.serverErrorsList)
 	{
@@ -19,21 +21,20 @@ d.on('error', function(er)
 				GLOBAL.errorsLists.serverErrorsList[key].state = 2;
 				SQL.querySync("UPDATE `game_ErrorsServerList` SET `state` = 2 WHERE `id` = "+key);
 			}
-			
 			find_error = true;
+			errorId = key;
 			break;
 		}
 	}
 	if(!find_error)
 	{
-		var error_id = SQL.lastInsertIdSync("INSERT INTO `game_ErrorsServerList` SET `functionName` = '', `error` = '"+SQL.mysqlRealEscapeString(er.stack)+"', state = 0");
-		var error_id = 1;
-		GLOBAL.errorsLists.serverErrorsList[error_id] = {functionName: '', error: er.stack, state: 0};
+		errorId = SQL.lastInsertIdSync("INSERT INTO `game_ErrorsServerList` SET `error` = '"+SQL.mysqlRealEscapeString(er.stack)+"', state = 0");
+		GLOBAL.errorsLists.serverErrorsList[errorId] = {error: er.stack, state: 0};
 	}
-
-	SQL.querySync("INSERT INTO `game_ErrorsServer` SET `date` = UNIX_TIMESTAMP(), `functionName` = '', `error` = '"+SQL.mysqlRealEscapeString(er.stack)+"' ");
-
+	SQL.querySync("INSERT INTO `game_ErrorsServer` SET `date` = UNIX_TIMESTAMP(), `errorId` = "+errorId );
 });
+
+
 
 
 // add personal config package
@@ -84,11 +85,5 @@ d.run(function() {
 });
 
 
-
-
-
-
-// var tempUser = new UserClass();
-// tempUser.authOffline({userId: 181});
 
 
