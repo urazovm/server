@@ -45,10 +45,16 @@ function PreloadDataClass() {
 		
 		this.DATA.stats = this.getStats();
 	
+	
 		this.DATA.items = this.getItems();
+		this.DATA.spineSlots = this.getSpineSlots();
+		
+		
 		
 		this.DATA.battleInfo = this.getBattleInfo();
 	}
+	
+	
 	
 	
 	/*
@@ -64,28 +70,83 @@ function PreloadDataClass() {
 	this.getItems = function()
 	{
 		var items = {};
-		var req = SQL.querySync("SELECT `game_Items`.* "+
-								"FROM `game_Items`");
+		var req = SQL.querySync("SELECT "+
+									"`game_Items` . *, "+
+									"`game_ItemsStats`.`statId`, "+
+									"`game_ItemsStats`.`value` AS `statValue`, "+
+									"`game_Stats`.`name` AS  `statName`, "+
+									"`game_ItemsAttachments`.`slotSpineId`, "+
+									"`game_ItemsAttachments`.`attachmentSpineId` "+
+								"FROM "+
+									"(`game_Items`) "+
+								"LEFT JOIN `game_ItemsStats` ON `game_Items`.`id` = `game_ItemsStats`.`itemId` "+
+								"LEFT JOIN `game_Stats`ON  `game_ItemsStats`.`statId`  = `game_Stats`.`id` "+
+								"LEFT JOIN `game_ItemsAttachments`ON `game_Items`.`id` = `game_ItemsAttachments`.`itemId` "+
+								"WHERE 1 ");
 		
 		
 		var rows = req.fetchAllSync();
 		for (var i=0, length = rows.length - 1; i <= length; i += 1){
-			items[String(rows[i].id)] = {
+			// Проверяем добавляли ли мы уже такой итем.если да, то смотрим какое из свойств еще не добавленно
+			var itemId = String(rows[i].id);
+			if(!items[itemId]){
+				items[itemId] = {
 											id: String(rows[i].id),
 											name: rows[i].name,
-											weight: rows[i].weight,
 											imageId: rows[i].imageId,
-											recipe: (rows[i].receipId) ? rows[i].receipId : null,
+											rarity: rows[i].rarity,
+											// recipe: (rows[i].receipId) ? rows[i].receipId : null,
 											categories: rows[i].category.split(","),
-											needStats: {},
-											giveStats:{},
+											// needStats: {},
+											stats:{},
 											attachments: {},
-											
 										};
+			}
+			
+			// Собираем статы вещи, которые она дает
+			if(rows[i].statName && items[itemId] && !items[itemId].stats[rows[i].statName]){
+				items[itemId].stats[rows[i].statName] = rows[i].statValue;
+			}
+			
+			// Собираем attachments вещи
+			if(rows[i].slotSpineId && items[itemId] && !items[itemId].attachments[String(rows[i].slotSpineId)]){
+				items[itemId].attachments[String(rows[i].slotSpineId)] = rows[i].attachmentSpineId;
+			}
 		}
-		
+		console.log(items);
 		return items;
 	}
+	
+	
+	/*
+		* Description:
+		*	Собирает список всех слотов для спайна
+		*	
+		*	
+		*	
+		*
+		* @since  26.03.15
+		* @author pcemma
+	*/
+	this.getSpineSlots = function()
+	{
+		var spineSlots = {},
+			req = SQL.querySync("SELECT `game_ItemsSpineSlots`.* FROM `game_ItemsSpineSlots`"),
+			rows = req.fetchAllSync();
+		for (var i=0, length = rows.length - 1; i <= length; i += 1){
+			spineSlots[String(rows[i].id)] = {
+											id: String(rows[i].id),
+											name: rows[i].name
+									};
+		}
+		return spineSlots;
+	}
+	
+	
+	
+	
+	
+	
 	
 	
 	/*

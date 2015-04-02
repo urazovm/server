@@ -294,6 +294,9 @@ function User() {
 		// Собираем статы игрока те что в базе
 		this.getStats();
 		
+		// this.userData.items = this.getItems();
+		
+		
 		// пересчитываем статы игрока. с учетом всех данных
 		this.recountStats();
 	}
@@ -344,6 +347,10 @@ function User() {
 	}
 	
 	
+	
+	
+	
+	/*****************	BATTLE	******************/
 	
 
 	/*
@@ -421,6 +428,34 @@ function User() {
 		console.log("this.userData.isAliveFlag", this.userData.isAliveFlag);
 		console.log("------------ \n\n");
 		return this.userData.isAliveFlag;
+	}
+	
+
+	
+	
+	
+	/*****************	ITEMS	******************/
+	
+	
+	/*
+		* Description:
+		*	Собирает список итемов (предметов) у пользователя
+		*	
+		*	return: массив, итемов (предметов)
+		*
+		* @since  24.03.15
+		* @author pcemma
+	*/
+	User.prototype.getItems = function()
+	{
+		var req = SQL.querySync("SELECT `us`.*, `gs`.`name` "+
+								"FROM `game_UsersItems` `us`, `game_Stats` `gs` "+
+								"WHERE `us`.`userId` = "+this.userId+" AND `gs`.`id` = `us`.`statId`");
+		var rows = req.fetchAllSync();
+		
+		for (var key in rows){
+			this.userData[rows[key].name] = rows[key].value;
+		}
 	}
 	
 }
