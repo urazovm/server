@@ -42,15 +42,18 @@ function ServerClass() {
 
 		var oData = "";
 		
-		// добавили сокет в домайн
-		d.add(socket);
+		var dSocket = domain.create();
+		// Вешаем обработчик ошибки,
+		dSocket.on('error', function(err) { lib.domainL(err); });
+		// Добавляем наши переменные, которые тоже могут сгенерировать ошибки самостоятельно
+		dSocket.add(socket);
 		
 		//connect
 		socket.on('connect', function () 
 		{
 			// проверка на подключение пустого сокета. пустые сокеты которые открыли соединение но не прсилали команды авторизациинадо выкидывать
 			socket.empty_connection = true;
-			socket.timer_for_off_empty_socket = setTimeout(function(){lib.close_socket(socket);}, 10000)
+			socket.timer_for_off_empty_socket = setTimeout(function(){lib.closeSocket(socket);}, 10000)
 
 			console.log(" -------------------------------------------------------------\n",
 						"Connection client, EMPTY SOCKET \n",

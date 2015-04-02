@@ -4,37 +4,6 @@ crypto = require('crypto');
 geoip = require('./lib/geoip/geoip');
 
 d = domain.create();
-d.on('error', function(er) 
-{
-	console.log('### ERROR', er.stack);
-	er.stack = er.stack;
-	
-	var find_error = false,
-		errorId = 0;
-	
-	for(var key in GLOBAL.errorsLists.serverErrorsList)
-	{
-		if(GLOBAL.errorsLists.serverErrorsList[key].error === er.stack)
-		{
-			if(GLOBAL.errorsLists.serverErrorsList[key].state == 1)
-			{
-				GLOBAL.errorsLists.serverErrorsList[key].state = 2;
-				SQL.querySync("UPDATE `game_ErrorsServerList` SET `state` = 2 WHERE `id` = "+key);
-			}
-			find_error = true;
-			errorId = key;
-			break;
-		}
-	}
-	if(!find_error)
-	{
-		errorId = SQL.lastInsertIdSync("INSERT INTO `game_ErrorsServerList` SET `error` = '"+SQL.mysqlRealEscapeString(er.stack)+"', state = 0");
-		GLOBAL.errorsLists.serverErrorsList[errorId] = {error: er.stack, state: 0};
-	}
-	SQL.querySync("INSERT INTO `game_ErrorsServer` SET `date` = UNIX_TIMESTAMP(), `errorId` = "+errorId );
-});
-
-
 
 
 // add personal config package
@@ -74,6 +43,7 @@ battlesManager = new BattleManagerClass();
 
 
 // start server
+d.on('error', function(err) { lib.domainL(err); });
 d.run(function() {
 	var server = new ServerClass();
 	server.startSocket();	
