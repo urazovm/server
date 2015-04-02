@@ -48,6 +48,7 @@ function PreloadDataClass() {
 	
 		this.DATA.items = this.getItems();
 		this.DATA.spineSlots = this.getSpineSlots();
+		this.DATA.inventorySlots = this.getInventorySlots();
 		
 		
 		
@@ -143,6 +144,30 @@ function PreloadDataClass() {
 	}
 	
 	
+	/*
+		* Description:
+		*	Собирает список всех слотов инвентаря
+		*	
+		*	
+		*	
+		*
+		* @since  03.04.15
+		* @author pcemma
+	*/
+	this.getInventorySlots = function()
+	{
+		var invetorySlots = {},
+			req = SQL.querySync("SELECT `game_ItemsInventorySlots`.* FROM `game_ItemsInventorySlots`"),
+			rows = req.fetchAllSync();
+		for (var i=0, length = rows.length - 1; i <= length; i += 1){
+			invetorySlots[String(rows[i].id)] = {
+											id: String(rows[i].id),
+											imageId: String(rows[i].imageId),
+											order: String(rows[i].order)
+									};
+		}
+		return invetorySlots;
+	}
 	
 	
 	
