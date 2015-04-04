@@ -286,16 +286,27 @@ function User() {
 		this.userData.login = "guest"+this.userId;
 		this.userData.lastActionTime = 0;
 		
-		
 		//Флаги
 		this.userData.inBattleFlag = false;
-		this.userData.isAliveFlag = true;;
+		this.userData.isAliveFlag = true;
+		
+		// Массивы
+		
+		// Предметы
+		this.userData.items = {};
+		// Надетые вещи
+		this.userData.stuff = {};
+		
+		
+		
+		
 		
 		// Собираем статы игрока те что в базе
 		this.getStats();
 		
-		// this.userData.items = this.getItems();
+		this.getItems();
 		
+
 		
 		// пересчитываем статы игрока. с учетом всех данных
 		this.recountStats();
@@ -448,13 +459,19 @@ function User() {
 	*/
 	User.prototype.getItems = function()
 	{
-		var req = SQL.querySync("SELECT `us`.*, `gs`.`name` "+
-								"FROM `game_UsersItems` `us`, `game_Stats` `gs` "+
-								"WHERE `us`.`userId` = "+this.userId+" AND `gs`.`id` = `us`.`statId`");
+		var req = SQL.querySync("SELECT `game_UsersItems`.* "+
+								"FROM `game_UsersItems` "+
+								"WHERE `game_UsersItems`.`userId` = "+this.userId+" ");
 		var rows = req.fetchAllSync();
 		
 		for (var key in rows){
-			this.userData[rows[key].name] = rows[key].value;
+			this.userData.items[String(rows[key].id)] = rows[key];
+			if(rows[key].inventorySlotId > 0){
+				this.userData.stuff[String(rows[key].inventorySlotId)] = {
+																			itemId: rows[key].itemId,
+																			inventorySlotId: rows[key].inventorySlotId
+																		};
+			}
 		}
 	}
 	
