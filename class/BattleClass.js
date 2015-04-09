@@ -391,7 +391,8 @@ function BattleClass() {
 						login: 			this.heroes[userId].userData.login,
 						hp:				this.heroes[userId].userData.hp,
 						currentHp:		this.heroes[userId].userData.currentHp,
-						lastActionTime: (currentTime < this.heroes[userId].userData.lastActionTime) ? (this.heroes[userId].userData.lastActionTime - currentTime) : 0
+						lastActionTime: (currentTime < this.heroes[userId].userData.lastActionTime) ? (this.heroes[userId].userData.lastActionTime - currentTime) : 0,
+						stuff: 			this.heroes[userId].userData.stuff
 					};
 		return info;
 	}
