@@ -51,6 +51,9 @@ function PreloadDataClass() {
 		this.DATA.inventorySlots = this.getInventorySlots();
 		
 		
+		// NPC INFO
+		this.DATA.npcs = this.getNpcs();
+		
 		
 		this.DATA.battleInfo = this.getBattleInfo();
 	}
@@ -256,6 +259,29 @@ function PreloadDataClass() {
 	
 	
 	
+	
+	
+	
+	/**************** NPCS INFO ************/	
+	
+	/*
+		* Description:
+		*	Информация о нпц
+		*	
+		*	
+		*
+		* @since  24.04.15
+		* @author pcemma
+	*/
+	this.getNpcs = function()
+	{
+		var npcs = {};
+		
+		
+		
+		
+		return npcs;
+	}
 	
 	
 	
