@@ -18,6 +18,7 @@ RouterClass 		= require("./class/RouterClass.js");
 DbClass 			= require("./class/DBClass.js");
 PreloadDataClass 	= require("./class/PreloadDataClass.js");
 UserClass 			= require("./class/UserClass.js");
+NpcClass 			= require("./class/NpcClass.js");
 
 
 BattleManagerClass 	= require("./class/BattleManagerClass.js");

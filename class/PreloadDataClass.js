@@ -5,14 +5,22 @@ function PreloadDataClass() {
 
 	this.initialize = function()
 	{
-		// create USERS array
-		this.createGlobalUsers();
 		
 		// собираем все константы
 		this.globalConstants = this.createGlobalConstants();
-	
+		
 		// create DATA array
 		this.createGlobalData();
+		
+		
+		// create USERS array
+		this.createGlobalUsers();
+		
+		
+		// create NPC array
+		// this.createGlobalNpcs();
+		
+		
 		
 		//собираем массив ошибок
 		this.errorsLists = this.getErrorsLists();
@@ -56,6 +64,10 @@ function PreloadDataClass() {
 		
 		
 		this.DATA.battleInfo = this.getBattleInfo();
+		
+		
+		
+		this.DATA.NpcsInfo = this.getNpcsInfo();
 	}
 	
 	
@@ -211,8 +223,75 @@ function PreloadDataClass() {
 	
 	
 	
+	/**************** BATTLE INFO ************/	
+	
+	/*
+		* Description:
+		*	Информация о всех нпц
+		*	
+		*	
+		*
+		* @since  05.05.15
+		* @author pcemma
+	*/
+	this.getNpcsInfo = function()
+	{
+		var npcsInfo = {},
+			npcsInfoReq = SQL.querySync("SELECT `game_Npcs`.* FROM `game_Npcs`"),
+			rows = npcsInfoReq.fetchAllSync();
+		for (var npcId in rows){
+			npcsInfo[String(rows[npcId].id)] = {
+												id: String(rows[npcId].id),
+												name: rows[npcId].name,
+												enName: rows[npcId].enName,
+												ruName: rows[npcId].ruName,
+												stats: {}
+											};
+			
+			var reqStats = SQL.querySync("SELECT `ns`.*, `gs`.`name` "+
+							"FROM `game_NpcsStats` `ns`, `game_Stats` `gs` "+
+							"WHERE `ns`.`npcId` = "+rows[npcId].id+" AND `gs`.`id` = `ns`.`statId`"),
+				statsRows = reqStats.fetchAllSync();
+			
+			for (var statId in statsRows){
+				npcsInfo[String(rows[npcId].id)].stats[statsRows[statId].name] = statsRows[statId].value;
+			}
+			
+		}
+		
+		console.log(npcsInfo);
+		return npcsInfo;
+	}
 	
 	
+	
+	/*
+		* Description:
+		*	Создает глобальный массив всех нпц на карте!
+		*	
+		*	
+		*	
+		*
+		* @since  05.05.14
+		* @author pcemma
+	*/
+	this.createGlobalNpcs = function()
+	{
+		var npcId = 1;
+		
+		// GLOBAL USERS ARRAY
+		this.NPCS = {};
+		
+		
+		
+		for (var key in this.DATA.npcsInfo){
+			for (var i = 1; i <= 10000; i++){
+				this.NPCS[String(npcId)] = new NpcClass();
+				this.NPCS[String(npcId)].getUserData(users[key].id);
+				npcId++;
+			}
+		}
+	}
 	
 	/**************** BATTLE INFO ************/	
 	
@@ -230,7 +309,7 @@ function PreloadDataClass() {
 	{
 		var battleInfo = {
 			obstructions: this.getBattleObstructions() // массив данных про препятсвия на карте боя
-		}
+		};
 		return battleInfo;
 	}
 	
