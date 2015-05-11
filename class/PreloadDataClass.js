@@ -18,7 +18,7 @@ function PreloadDataClass() {
 		
 		
 		// create NPC array
-		// this.createGlobalNpcs();
+		this.createGlobalNpcs();
 		
 		
 		
@@ -59,15 +59,16 @@ function PreloadDataClass() {
 		this.DATA.inventorySlots = this.getInventorySlots();
 		
 		
-		// NPC INFO
-		this.DATA.npcs = this.getNpcs();
+	
+	
 		
 		
 		this.DATA.battleInfo = this.getBattleInfo();
 		
 		
-		
-		this.DATA.NpcsInfo = this.getNpcsInfo();
+		// NPC INFO
+		this.DATA.npcsInfo = this.getNpcsInfo();
+		console.log(this.DATA.npcsInfo);
 	}
 	
 	
@@ -223,7 +224,7 @@ function PreloadDataClass() {
 	
 	
 	
-	/**************** BATTLE INFO ************/	
+	/**************** NPCS ************/	
 	
 	/*
 		* Description:
@@ -259,12 +260,10 @@ function PreloadDataClass() {
 			
 		}
 		
-		console.log(npcsInfo);
 		return npcsInfo;
 	}
 	
-	
-	
+
 	/*
 		* Description:
 		*	Создает глобальный массив всех нпц на карте!
@@ -277,21 +276,29 @@ function PreloadDataClass() {
 	*/
 	this.createGlobalNpcs = function()
 	{
-		var npcId = 1;
+		var npcCount = 1;
 		
-		// GLOBAL USERS ARRAY
+		// GLOBAL NPC ARRAY
 		this.NPCS = {};
 		
 		
-		
-		for (var key in this.DATA.npcsInfo){
-			for (var i = 1; i <= 10000; i++){
+		for (var realNpcId in this.DATA.npcsInfo){
+			for (var i = 1; i <= 10; i++){
+				var npcId = "npc"+npcCount;
 				this.NPCS[String(npcId)] = new NpcClass();
-				this.NPCS[String(npcId)].getUserData(users[key].id);
-				npcId++;
+				this.NPCS[String(npcId)].getUserData({npcId: realNpcId, userId: npcId});
+				npcCount++;
 			}
 		}
 	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	/**************** BATTLE INFO ************/	
 	
@@ -336,31 +343,6 @@ function PreloadDataClass() {
 	}
 	
 	
-	
-	
-	
-	
-	
-	/**************** NPCS INFO ************/	
-	
-	/*
-		* Description:
-		*	Информация о нпц
-		*	
-		*	
-		*
-		* @since  24.04.15
-		* @author pcemma
-	*/
-	this.getNpcs = function()
-	{
-		var npcs = {};
-		
-		
-		
-		
-		return npcs;
-	}
 	
 	
 	

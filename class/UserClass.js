@@ -6,9 +6,9 @@ function User() {
 	
 	// USER DATA
 	this.userData = {
-
-					
-				};
+						items: {}, 	// Предметы
+						stuff: {} 	// Надетые вещи
+					};
 				
 
 }
@@ -289,15 +289,6 @@ User.prototype.getUserData = function(userId)
 	//Флаги
 	this.userData.inBattleFlag = false;
 	this.userData.isAliveFlag = true;
-	
-	// Массивы
-	
-	// Предметы
-	this.userData.items = {};
-	// Надетые вещи
-	this.userData.stuff = {};
-	
-	
 	
 	
 	
