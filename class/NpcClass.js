@@ -84,6 +84,22 @@ Npc.prototype.getStats = function()
 
 
 
+/*****************	BATTLE	******************/
+
+
+/*
+	* Description:
+	*	Листнер старта боя для нпц. ЗАпускает ИИ нашего нпц.
+	*	
+	*
+	* @since  12.05.15
+	* @author pcemma
+*/
+Npc.prototype.addToBattleListener = function()
+{
+	
+}
+
 
 
 

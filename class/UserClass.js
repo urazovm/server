@@ -369,6 +369,28 @@ User.prototype.recountStats = function()
 */
 User.prototype.addToBattle = function(data)
 {
+	// ставим данные о бое
+	this.setBattleData(data);
+	// запускаем листнер вступления в бой
+	// TODO: переделать эту проверку
+	(this.addToBattleListener) ? this.addToBattleListener() : 0;
+}
+
+
+/*
+	* Description: Функция обновляет данные о бое в инфе героя.
+	*
+	*	@data:	arr,
+	*		battleId: 	int, ид боя
+	*		teamId: 	int, ид команды
+	*		hexId: 		int, ид гекса 
+	*
+	*
+	* @since  12.05.15
+	* @author pcemma
+*/
+User.prototype.setBattleData = function(data)
+{
 	this.userData.inBattleFlag = true;
 	this.userData.battleId = data.battleId;
 	this.userData.teamId = data.teamId;
