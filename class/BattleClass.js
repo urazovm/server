@@ -242,9 +242,13 @@ BattleClass.prototype.heroMakeHit = function(data)
 		
 		if(
 			this.heroes[oponentUserId] && 								// Проверяем на то есть ли вообще такой герой у нас
+			
+			// TODO: вынести этот кусок в метод класса юзер
 			this.heroes[oponentUserId].userData.inBattleFlag && 		// Проверяем на то что герой этот в бою
 			this.heroes[oponentUserId].userData.battleId == this.id &&	// Проверка что герой в этом самом бою
 			this.heroes[oponentUserId].isAlive() &&						// живой ли герой, мертвых не бьют!
+			
+			
 			this.heroes[oponentUserId].userData.teamId != this.heroes[data.userId].userData.teamId	// противник ли в этой клетке?
 		){
 			// обновляем герою который совершал удар время таймаута
@@ -343,6 +347,49 @@ BattleClass.prototype.createGrid = function()
 }
 
 
+/*
+	* Description:
+	*	function Поиск врагов в области удара игрока.
+	*	
+	*	@data: array
+	*		@hexId: str, ид гекса центра области. Гекса в котором находится герой.
+	*		@userId: str, ид героя, который запрашивает информацию по области.
+	*
+	* @since  16.05.15
+	* @author pcemma
+*/
+BattleClass.prototype.searchEnemyInArea = function(data)
+{
+	var hexId = data.hexId,
+		hexesArray = [];
+	if(hexId in this.hexes){
+		var area = this.hexes[hexId].getArea();
+		// TODO: проверить, что быстрее форич или простой цикл
+		for(var hexesCount in area){
+			var hexIdInArea = area[hexesCount].x+"."+area[hexesCount].y;
+			if(
+				this.hexes[hexIdInArea] && 											// Проверяем на то что такой гекс вообще есть!
+				this.hexes[hexIdInArea].userId										// Проверяем на то что в этом гексе есть герой
+			){
+				//Берем ид героя(противника) в гексе
+				var oponentUserId = this.hexes[hexIdInArea].userId;
+				
+				if(
+					this.heroes[oponentUserId] && 								// Проверяем на то есть ли вообще такой герой у нас
+					this.heroes[oponentUserId].userData.inBattleFlag && 		// Проверяем на то что герой этот в бою
+					this.heroes[oponentUserId].userData.battleId == this.id &&	// Проверка что герой в этом самом бою
+					this.heroes[oponentUserId].isAlive() &&						// живой ли герой, мертвых не бьют!
+					this.heroes[oponentUserId].userData.teamId != this.heroes[data.userId].userData.teamId	// противник ли в этой клетке?
+				){
+					hexesArray.push(hexIdInArea);
+				}
+			}
+		}
+	}
+	return hexesArray;
+}
+
+
 
 
 /*
@@ -421,6 +468,18 @@ BattleClass.prototype.isAliveHeroesInTeam = function(teamId)
 	}
 	return false;
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

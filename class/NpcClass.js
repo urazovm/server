@@ -97,8 +97,59 @@ Npc.prototype.getStats = function()
 */
 Npc.prototype.addToBattleListener = function()
 {
-	
+	this.searchEnemyInArea();
 }
+
+
+/*
+	* Description:
+	*	Поиск врагов в области удара.
+	*	
+	*
+	* @since  15.05.15
+	* @author pcemma
+*/
+Npc.prototype.searchEnemyInArea = function()
+{
+	var currentTime = Math.floor(+new Date() / 1000);
+	// TODO: Сделать поверку на то что бой еще идет. 
+	if(
+		this.userData.inBattleFlag && 					// Проверяем на то что герой этот в бою
+		// this.userData.battleId == this.id &&			// Проверка что герой в этом самом бою
+		this.isAlive() &&								// живой ли герой, мертвые не сражаются!
+		this.userData.lastActionTime <= currentTime  	// Проверка на возможность делать удар, не включен ли таймаут
+	){
+		var hexesArray = battlesManager.searchEnemyInArea({id: this.userData.battleId, hexId: this.userData.hexId, userId: this.userId});
+		console.log("\n\n============================");
+		console.log(hexesArray);
+		console.log("============================\n\n");
+		// Проверяем вернулся ли нам массив. Если нет, то боя такого нет, нам более нет надобности заводить таймеры для нпц.
+		if(hexesArray){
+			console.log("TYT!");
+			// Проверка на количество гексов с врагами.
+			if(hexesArray.length >= 1){
+				// Нашли врагов. 
+				// TODO: Надо сделать проверку на поиск врага, самого близкого к герою.
+				
+			}
+			else{
+				// Врагов нет. Начинаем поиск свободных ячеек для перехода.
+			}
+			
+			
+			this.battleTimer = setTimeout(function(that){ that.searchEnemyInArea(); }, 2000, this);
+
+			
+			
+		}
+	}
+}
+
+
+
+
+
+
 
 
 

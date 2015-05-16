@@ -141,6 +141,36 @@ BMClass.prototype.heroMakeHit = function(data)
 
 
 
+
+
+
+/*
+	* Description: Поиск врагов в области.
+	*	@data: arr
+	*		@id: 		int, ид боя
+	*		@hexId: 	str, вида x.y
+	*		@userId: 	str, ид героя, который запрашивает инфу про область
+	*
+	*
+	* @since  16.05.15
+	* @author pcemma
+*/
+BMClass.prototype.searchEnemyInArea = function(data)
+{
+	console.log("\n BM searchEnemyInArea");
+	console.log(data);
+	if(
+		data && data.id &&
+		this.battles[data.id] && this.battles[data.id].check()
+	){
+		console.log(data);
+		return this.battles[data.id].searchEnemyInArea(data);
+	}
+	return false;
+}
+
+
+
 /*
 	* Description: Очищает незакоченые бои в базе при старте сервера.
 	*
