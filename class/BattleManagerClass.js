@@ -97,6 +97,7 @@ BMClass.prototype.enterBattle = function(data)
 	*	@data: arr
 	*		@id: 		int, ид боя
 	*		@hexId: 	str, вида x.y
+	*		@userId: 	str, id героя, который соверает передвижение
 	*
 	*
 	* @since  06.02.15
@@ -121,6 +122,7 @@ BMClass.prototype.moveHero = function(data)
 	*	@data: arr
 	*		@id: 		int, ид боя
 	*		@hexId: 	str, вида x.y
+	*		@userId: 	str, id героя, который соверает передвижение
 	*
 	*
 	* @since  25.02.15
@@ -170,6 +172,30 @@ BMClass.prototype.searchEnemyInArea = function(data)
 }
 
 
+/*
+	* Description: Поиск свободных гексов в области передвижения.
+	*	@data: arr
+	*		@id: 		int, ид боя
+	*		@hexId: 	str, вида x.y
+	*		@userId: 	str, ид героя, который запрашивает инфу про область
+	*
+	*
+	* @since  01.06.15
+	* @author pcemma
+*/
+BMClass.prototype.searchFreeHexesInArea = function(data)
+{
+	console.log("\n BM searchFreeHexesInArea");
+	console.log(data);
+	if(
+		data && data.id &&
+		this.battles[data.id] && this.battles[data.id].check()
+	){
+		console.log(data);
+		return this.battles[data.id].searchFreeHexesInArea(data);
+	}
+	return false;
+}
 
 /*
 	* Description: Очищает незакоченые бои в базе при старте сервера.

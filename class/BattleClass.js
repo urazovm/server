@@ -166,6 +166,7 @@ BattleClass.prototype.addHero = function(hero)
 	*	@data: arr
 	*		@id: 		int, ид боя
 	*		@hexId: 	str, вида x.y
+	*		@userId: 	str, id героя, который соверает передвижение
 	*
 	*
 	* @since  06.02.15
@@ -204,7 +205,9 @@ BattleClass.prototype.moveHero = function(data)
 								hexId: data.hexId
 							}
 						});
+		return true;
 	}
+	return false;
 }
 
 
@@ -213,6 +216,7 @@ BattleClass.prototype.moveHero = function(data)
 	*	@data: arr
 	*		@id: 		int, ид боя
 	*		@hexId: 	str, вида x.y
+	*		@userId: 	str, id героя, который соверает передвижение
 	*
 	*
 	* @since  25.02.15
@@ -289,8 +293,10 @@ BattleClass.prototype.heroMakeHit = function(data)
 									winTeamId: (this.heroes[oponentUserId].userData.teamId == 1) ? 2 : 1 
 								});
 			}
+			return true;
 		}
 	}
+	return false;
 }
 
 
@@ -363,7 +369,7 @@ BattleClass.prototype.searchEnemyInArea = function(data)
 	var hexId = data.hexId,
 		hexesArray = [];
 	if(hexId in this.hexes){
-		var area = this.hexes[hexId].getArea();
+		var area = this.hexes[hexId].getHitArea();
 		// TODO: проверить, что быстрее форич или простой цикл
 		for(var hexesCount in area){
 			var hexIdInArea = area[hexesCount].x+"."+area[hexesCount].y;
@@ -388,6 +394,40 @@ BattleClass.prototype.searchEnemyInArea = function(data)
 	}
 	return hexesArray;
 }
+
+
+/*
+	* Description:
+	*	function Поиск свободных ячеек в области.
+	*	
+	*	@data: array
+	*		@hexId: str, ид гекса центра области. Гекса в котором находится герой.
+	*		@userId: str, ид героя, который запрашивает информацию по области.
+	*
+	* @since  01.06.15
+	* @author pcemma
+*/
+BattleClass.prototype.searchFreeHexesInArea = function(data)
+{
+	var hexId = data.hexId,
+		hexesArray = [];
+	if(hexId in this.hexes){
+		var area = this.hexes[hexId].getMoveArea();
+		// TODO: проверить, что быстрее форич или простой цикл
+		for(var hexesCount in area){
+			var hexIdInArea = area[hexesCount].x+"."+area[hexesCount].y;
+			if(
+				this.hexes[hexIdInArea] && 											// Проверяем на то что такой гекс вообще есть!
+				this.hexes[hexIdInArea].isFree										// Проверяем на то что гекс пустой
+			){
+				hexesArray.push(hexIdInArea);
+			}
+		}
+	}
+	return hexesArray;
+}
+
+
 
 
 

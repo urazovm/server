@@ -104,7 +104,7 @@ HexagonClass.prototype.isNeighbor = function(data)
 	* @since  16.05.15
 	* @author pcemma
 */
-HexagonClass.prototype.getArea = function()
+HexagonClass.prototype.getHitArea = function()
 {
 	var directions = [
 				[ [1, 0], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1]],
@@ -119,6 +119,32 @@ HexagonClass.prototype.getArea = function()
 	return hexesArray;
 }
 
+
+
+/*
+	* Description:
+	*	»щет все гексы в обалсти хотьбы.
+	*	
+	*
+	*	return: array, массив гексов, которые наход€тс€ в области у текущего гекса
+	*
+	* @since  01.06.15
+	* @author pcemma
+*/
+HexagonClass.prototype.getMoveArea = function()
+{
+	var directions = [
+				[ [1, 0], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1]],
+				[ [1, 0], [1, -1], [0, -1], [-1, 0], [0, 1], [1, 1]]
+			],
+		parity = this.y % 2,
+		hexesArray = [];
+		
+	for(var i in directions[parity]){
+		hexesArray.push({x: this.x + directions[parity][i][0], y: this.y + directions[parity][i][1]});
+	}
+	return hexesArray;
+}
 
 
 module.exports = HexagonClass;
