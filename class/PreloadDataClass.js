@@ -68,7 +68,6 @@ function PreloadDataClass() {
 		
 		// NPC INFO
 		this.DATA.npcsInfo = this.getNpcsInfo();
-		console.log(this.DATA.npcsInfo);
 	}
 	
 	

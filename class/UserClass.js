@@ -420,6 +420,9 @@ User.prototype.removeFromBattle = function(data)
 	delete this.userData.battleId;
 	delete this.userData.teamId;
 	delete this.userData.hexId;
+	
+	// TODO: переделать эту проверку
+	(this.removeFromBattleListener) ? this.removeFromBattleListener() : 0;
 }
 
 
@@ -446,15 +449,10 @@ User.prototype.countDamage = function()
 */
 User.prototype.isAlive = function()
 {
-	console.log("\n\n ------------");
-	console.log("this.userData.currentHp", this.userData.currentHp);
 	if(this.userData.currentHp <= 0 ){
 		this.userData.currentHp = 0;
 		this.userData.isAliveFlag = false;
 	}
-	
-	console.log("this.userData.isAliveFlag", this.userData.isAliveFlag);
-	console.log("------------ \n\n");
 	return this.userData.isAliveFlag;
 }
 
@@ -491,7 +489,6 @@ User.prototype.getItems = function()
 		}
 	}
 }
-
 
 
 

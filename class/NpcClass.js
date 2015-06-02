@@ -34,7 +34,6 @@ Npc.prototype.getUserData = function(data)
 {
 	
 	// TODO: переписать этот метод в юзер классе. он должен быть один и для нпц и для юзера
-	
 	this.userId = data.userId; 	// Вид: "npc"+id, где ид - эт порядковый номер нпц в спике всех нпц
 	this.npcId = data.npcId;	// int, реальное ид нпц. из таблицы всех нпц
 	
@@ -103,6 +102,23 @@ Npc.prototype.addToBattleListener = function()
 
 /*
 	* Description:
+	*	Листнер окончания боя для нпц. 
+	*		1. Останавливает таймеры
+	*	
+	*
+	* @since  01.06.15
+	* @author pcemma
+*/
+Npc.prototype.removeFromBattleListener = function()
+{
+	if(this.battleTimer){
+		clearTimeout(this.battleTimer);
+	}
+}
+
+
+/*
+	* Description:
 	*	Поиск врагов в области удара.
 	*	
 	*
@@ -116,35 +132,31 @@ Npc.prototype.searchEnemyInArea = function()
 	if(
 		this.userData.inBattleFlag && 					// Проверяем на то что герой этот в бою
 		// this.userData.battleId == this.id &&			// Проверка что герой в этом самом бою
-		this.isAlive() &&								// живой ли герой, мертвые не сражаются!
-		this.userData.lastActionTime <= currentTime  	// Проверка на возможность делать удар, не включен ли таймаут
+		this.isAlive() 									// живой ли герой, мертвые не сражаются!
 	){
-		var hexesArray = battlesManager.searchEnemyInArea({id: this.userData.battleId, hexId: this.userData.hexId, userId: this.userId});
-		console.log("\n\n============================");
-		console.log(hexesArray);
-		console.log("============================\n\n");
-		// Проверяем вернулся ли нам массив. Если нет, то боя такого нет, нам более нет надобности заводить таймеры для нпц.
-		if(hexesArray){
-			// Проверка на количество гексов с врагами.
-			if(hexesArray.length >= 1){
-				// Нашли врагов. 
-				// TODO: Надо сделать проверку на поиск врага, самого близкого к герою.
-				//TODO: переделать механизм выбора ячейки для передвижения, в данный момент это просто любая свободная ячейка.
-				var enemyHexId = Math.floor((Math.random() * hexesArray.length));
-				
-				console.log("------------");
-				console.log(hexesArray[enemyHexId]);
-				console.log("------------");
-				
-				
-				// Запоминаем гекс с врагом, который подошел по услвояим поиска. 
-				this.userData.enemyHexId = hexesArray[enemyHexId];
-				this.heroMakeHit();
+		if(this.userData.lastActionTime <= currentTime ){ 	// Проверка на возможность делать удар, не включен ли таймаут
+			var hexesArray = battlesManager.searchEnemyInArea({id: this.userData.battleId, hexId: this.userData.hexId, userId: this.userId});
+			// Проверяем вернулся ли нам массив. Если нет, то боя такого нет, нам более нет надобности заводить таймеры для нпц.
+			if(hexesArray){
+				// Проверка на количество гексов с врагами.
+				if(hexesArray.length >= 1){
+					// Нашли врагов. 
+					// TODO: Надо сделать проверку на поиск врага, самого близкого к герою.
+					//TODO: переделать механизм выбора ячейки для передвижения, в данный момент это просто любая свободная ячейка.
+					var enemyHexId = Math.floor((Math.random() * hexesArray.length));
+					// Запоминаем гекс с врагом, который подошел по услвояим поиска. 
+					this.userData.enemyHexId = hexesArray[enemyHexId];
+					this.heroMakeHit();
+				}
+				else{
+					// Врагов нет. Начинаем поиск свободных ячеек для перехода.
+					this.findHexIdToMove();
+				}
 			}
-			else{
-				// Врагов нет. Начинаем поиск свободных ячеек для перехода.
-				this.findHexIdToMove();
-			}
+		}
+		else{
+			console.log("else for searchEnemyInArea");
+			this.battleTimer = setTimeout(this.searchEnemyInArea().bind(this), 500);
 		}
 	}
 }
@@ -166,26 +178,27 @@ Npc.prototype.findHexIdToMove = function()
 		this.userData.inBattleFlag && 					// Проверяем на то что герой этот в бою
 		// this.userData.battleId == this.id &&			// Проверка что герой в этом самом бою
 		this.isAlive() &&								// живой ли герой, мертвые не сражаются!
-		this.userData.lastActionTime <= currentTime  	// Проверка на возможность делать удар, не включен ли таймаут
 	){
-		var hexesArray = battlesManager.searchFreeHexesInArea({id: this.userData.battleId, hexId: this.userData.hexId, userId: this.userId});
-		console.log("\n\n============================");
-		console.log(hexesArray);
-		console.log("============================\n\n");
-		// Проверяем вернулся ли нам массив. Если нет, то пустых гексовдля передвижения в области нет. 
-		// Проверка на количество гексов для передвижения.
-		if(hexesArray.length >= 1){
-			//TODO: переделать механизм выбора гекса для передвижения, в данный момент это просто любая свободная ячейка.
-			var hexToMoveId = Math.floor((Math.random() * hexesArray.length));
-			console.log("hexToMoveId", hexToMoveId);
-			battlesManager.moveHero({id: this.userData.battleId, hexId: hexesArray[hexToMoveId], userId: this.userId});
-			this.battleTimer = setTimeout(function(that){ that.searchEnemyInArea(); }, this.userData.moveActionTime * 1000, this);
+		if(this.userData.lastActionTime <= currentTime){  	// Проверка на возможность делать удар, не включен ли таймаут
+			var hexesArray = battlesManager.searchFreeHexesInArea({id: this.userData.battleId, hexId: this.userData.hexId, userId: this.userId});
+			// Проверяем вернулся ли нам массив. Если нет, то пустых гексовдля передвижения в области нет. 
+			// Проверка на количество гексов для передвижения.
+			if(hexesArray.length >= 1){
+				//TODO: переделать механизм выбора гекса для передвижения, в данный момент это просто любая свободная ячейка.
+				var hexToMoveId = Math.floor((Math.random() * hexesArray.length));
+				battlesManager.moveHero({id: this.userData.battleId, hexId: hexesArray[hexToMoveId], userId: this.userId});			
+				this.battleTimer = setTimeout(this.searchEnemyInArea.bind(this), this.userData.moveActionTime * 1000);								
+			}
+			else{
+				// Свободных гексов нет. Надо заново проверить область на поиск врага. 
+				// Используем moveActionTime, потому что дейсвтие должно быть сделано по таймеру движения. 
+				this.battleTimer = setTimeout(this.searchEnemyInArea().bind(this), this.userData.hitActionTime * 1000);
+			}	
 		}
 		else{
-			// Свободных гексов нет. Надо заново проверить область на поиск врага. 
-			// Используем moveActionTime, потому что дейсвтие должно быть сделано по таймеру движения. 
-			this.battleTimer = setTimeout(function(that){ that.searchEnemyInArea(); }, this.userData.moveActionTime * 1000, this);
-		}	
+			console.log("else for findHexIdToMove");
+			this.battleTimer = setTimeout(this.findHexIdToMove().bind(this), 500);
+		}
 	}
 }
 
@@ -203,18 +216,12 @@ Npc.prototype.heroMakeHit = function()
 	var currentTime = Math.floor(+new Date() / 1000),
 		isNpcHit = battlesManager.heroMakeHit({id: this.userData.battleId, hexId: this.userData.enemyHexId, userId: this.userId});
 	if(isNpcHit){
-		this.battleTimer = setTimeout(function(that){ that.heroMakeHit(); }, this.userData.hitActionTime * 1000, this);
+		this.battleTimer = setTimeout(this.heroMakeHit.bind(this), this.userData.hitActionTime * 1000);
 	}
 	else{
-		this.battleTimer = setTimeout(function(that){ that.searchEnemyInArea(); }, this.userData.hitActionTime * 1000, this);
-	}
-	
-	
-	
+		this.battleTimer = setTimeout(this.searchEnemyInArea().bind(this), this.userData.hitActionTime * 1000);
+	}	
 }
-
-
-
 
 
 

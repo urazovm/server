@@ -247,10 +247,8 @@ function Router() {
 		* @author pcemma
 	*/
 	this['battleCreate'] = function (data) {
-		console.log(data);
 		if(data){
 			battlesManager.createBattle();
-		
 		}
 	}
 	
@@ -267,7 +265,6 @@ function Router() {
 		* @author pcemma
 	*/
 	this['enterBattle'] = function (data) {
-		console.log(data);
 		if(data){
 			battlesManager.enterBattle({id: data.id, user: GLOBAL.USERS[data.userId]});
 		}
@@ -286,8 +283,6 @@ function Router() {
 		* @author pcemma
 	*/
 	this['battleMoveHero'] = function (data) {
-		console.log("\n battleMoveHero");
-		console.log(data);
 		if(data){
 			battlesManager.moveHero(data);
 		}
@@ -306,8 +301,6 @@ function Router() {
 		* @author pcemma
 	*/
 	this['battleHeroMakeHit'] = function (data) {
-		console.log("\n battleHeroMakeHit");
-		console.log(data);
 		if(data){
 			battlesManager.heroMakeHit(data);
 		}

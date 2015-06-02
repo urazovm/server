@@ -70,10 +70,7 @@ BattleClass.prototype.check = function()
 	* @author pcemma
 */
 BattleClass.prototype.completion = function(data)
-{
-	console.log("\n B completion");
-	console.log(data);
-	
+{	
 	// 1. Пройтись по всем юзерам и поставить что они не в бою. 
 	for (var heroId in this.heroes){
 		this.heroes[heroId].removeFromBattle();
@@ -103,12 +100,13 @@ BattleClass.prototype.completion = function(data)
 	* Description:
 	*	function Добавляет героя в битву
 	*	
-	*	@hero:	obj, Объект пользователя, либо объект нпц который предварительно создан
+	*	@hero:		obj, Объект пользователя, либо объект нпц который предварительно создан
+	*	@teamId:	int, номер команды в которую, надо занести героя
 	*
 	* @since  31.01.15
 	* @author pcemma
 */
-BattleClass.prototype.addHero = function(hero)
+BattleClass.prototype.addHero = function(hero, teamId)
 {
 	// отправляем пользователю, те данные что уже есть. положение всех воинов на поле боя
 	hero.socketWrite({
@@ -119,14 +117,14 @@ BattleClass.prototype.addHero = function(hero)
 	// TODO: если такой герой есть, то скорее всего это повторное подключение. Перепоределить сокет ??
 	if(!this.heroes[String(hero.userId)] || lib.objectSize(this.heroes[String(hero.userId)]) <= 0){
 	
-		var teamId = 1,
+		var tempTeamId = 1,
 			hexId = "0.0";
 			
 			
 		this.heroes[String(hero.userId)] = hero;
 		
 		// это времено, раскидываем по одному в команду.
-		if(this.teams['1'].length <= this.teams['2'].length){
+		if((this.teams['1'].length <= this.teams['2'].length && !teamId) || teamId == 1){
 			this.teams['1'].push(String(hero.userId));
 			var x = 0,
 				y = Math.floor(Math.random() * (4 + 1));
@@ -134,12 +132,11 @@ BattleClass.prototype.addHero = function(hero)
 		}
 		else{
 			this.teams['2'].push(String(hero.userId));
-			teamId = 2;
+			tempTeamId = 2;
 			var x = 6,
 				y = Math.floor(Math.random() * (4 + 1));
 			hexId = x+"."+y;
 		}
-		
 		
 		// Обновление гекса
 		this.hexes[hexId].addHero({userId: hero.userId});
@@ -147,7 +144,7 @@ BattleClass.prototype.addHero = function(hero)
 		// Тут апдейта массива юзера с данными о битве
 		this.heroes[String(hero.userId)].addToBattle({
 														battleId: 	this.id,
-														teamId: 	teamId,
+														teamId: 	tempTeamId,
 														hexId: 		hexId
 													});
 		
@@ -174,10 +171,8 @@ BattleClass.prototype.addHero = function(hero)
 */
 BattleClass.prototype.moveHero = function(data)
 {
+	console.log("moveHero", data.userId);
 	var currentTime = Math.floor(+new Date() / 1000);
-	
-	console.log("\n B moveHero");
-	console.log(data);
 		
 	if(
 		this.heroes[data.userId] && 										// Проверяем на то есть ли вообще такой герой у нас
@@ -189,7 +184,6 @@ BattleClass.prototype.moveHero = function(data)
 		this.hexes[data.hexId].isFree && 									// Проверка на то что гекс в который хотят передвинуть свободен
 		this.hexes[this.heroes[data.userId].userData.hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) // и находится в радиусе шага
 	){
-		
 		// Обновление гекса
 		this.hexes[data.hexId].addHero({userId: data.userId});
 		this.hexes[this.heroes[data.userId].userData.hexId].removeHero();
@@ -226,9 +220,6 @@ BattleClass.prototype.heroMakeHit = function(data)
 {
 	var currentTime = Math.floor(+new Date() / 1000);
 	
-	console.log("\n B heroMakeHit");
-	console.log(data);
-
 	// TODO: переделать проверку соседей на проверку в радиусе
 	
 	if(
@@ -269,10 +260,11 @@ BattleClass.prototype.heroMakeHit = function(data)
 			
 			// Обновляем противнику его текущее значение хп
 			this.heroes[oponentUserId].userData.currentHp -= damage;
-			// Проверяет умер ли герой. Если да, тоставит герою соответствующие флаги
+			// Проверяет умер ли герой. Если да, то ставит герою соответствующие флаги
 			var isHeroAlive = this.heroes[oponentUserId].isAlive();
 			// Проверяем если герой умер то надо удалить его из гекса.
 			if(!isHeroAlive){
+				console.log("TYT PROWLI!!!");
 				this.hexes[this.heroes[oponentUserId].userData.hexId].removeHero();
 			}
 			
@@ -452,7 +444,6 @@ BattleClass.prototype.getBattleStatus = function()
 	
 	
 	for (var i in this.heroes){
-		console.log("i", i);
 		battleInfo.heroes[i] = this.getHeroData(i);
 	}
 	
@@ -535,12 +526,12 @@ BattleClass.prototype.isAliveHeroesInTeam = function(teamId)
 */
 BattleClass.prototype.socketWrite = function(data)
 {
-	console.log("\n\n BattleClass.prototype.socketWrite");
+	// console.log("\n\n BattleClass.prototype.socketWrite");
 	for(var i in this.heroes){
-		console.log("heroId", i);
+		// console.log("heroId", i);
 		this.heroes[i].socketWrite(data);
 	}
-	console.log("--------------- \n\n");
+	// console.log("--------------- \n\n");
 }
 
 

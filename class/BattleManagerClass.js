@@ -75,8 +75,9 @@ BMClass.prototype.enterBattle = function(data)
 		
 		//TODO: временно добавляем нпц в бой сразу за героем. Для тестов и показа издателю.
 		// добавляем первого нпц тупо.
-		this.battles[battleId].addHero(GLOBAL.NPCS.npc1);
-		
+		for(var i = 1; i <= 5; i++){
+			this.battles[battleId].addHero(GLOBAL.NPCS["npc"+i], 2);
+		}
 	}
 	
 	else{
@@ -105,14 +106,14 @@ BMClass.prototype.enterBattle = function(data)
 */
 BMClass.prototype.moveHero = function(data)
 {
-	console.log("\n BM moveHero");
-	console.log(data);
+	// console.log("\n BM moveHero");
+	// console.log("data.userId", data.userId);
+	// console.log("-------------------- \n\n");
 	if(
 		data && data.id &&
 		this.battles[data.id] && this.battles[data.id].check()
 	){
-		console.log(data);
-		this.battles[data.id].moveHero(data);
+		return this.battles[data.id].moveHero(data);
 	}
 }
 
@@ -131,14 +132,15 @@ BMClass.prototype.moveHero = function(data)
 BMClass.prototype.heroMakeHit = function(data)
 {
 	console.log("\n BM heroMakeHit");
-	console.log(data);
+	console.log("data.userId", data.userId);
+	console.log("-------------------- \n\n");
 	if(
 		data && data.id &&
 		this.battles[data.id] && this.battles[data.id].check()
 	){
-		console.log(data);
-		this.battles[data.id].heroMakeHit(data);
+		return this.battles[data.id].heroMakeHit(data);
 	}
+	return false;
 }
 
 
@@ -160,12 +162,12 @@ BMClass.prototype.heroMakeHit = function(data)
 BMClass.prototype.searchEnemyInArea = function(data)
 {
 	console.log("\n BM searchEnemyInArea");
-	console.log(data);
+	console.log("data.userId", data.userId);
+	console.log("-------------------- \n\n");
 	if(
 		data && data.id &&
 		this.battles[data.id] && this.battles[data.id].check()
 	){
-		console.log(data);
 		return this.battles[data.id].searchEnemyInArea(data);
 	}
 	return false;
@@ -186,12 +188,12 @@ BMClass.prototype.searchEnemyInArea = function(data)
 BMClass.prototype.searchFreeHexesInArea = function(data)
 {
 	console.log("\n BM searchFreeHexesInArea");
-	console.log(data);
+	console.log("data.userId", data.userId);
+	console.log("-------------------- \n\n");
 	if(
 		data && data.id &&
 		this.battles[data.id] && this.battles[data.id].check()
 	){
-		console.log(data);
 		return this.battles[data.id].searchFreeHexesInArea(data);
 	}
 	return false;
