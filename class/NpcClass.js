@@ -177,7 +177,7 @@ Npc.prototype.findHexIdToMove = function()
 	if(
 		this.userData.inBattleFlag && 					// Проверяем на то что герой этот в бою
 		// this.userData.battleId == this.id &&			// Проверка что герой в этом самом бою
-		this.isAlive() &&								// живой ли герой, мертвые не сражаются!
+		this.isAlive()									// живой ли герой, мертвые не сражаются!
 	){
 		if(this.userData.lastActionTime <= currentTime){  	// Проверка на возможность делать удар, не включен ли таймаут
 			var hexesArray = battlesManager.searchFreeHexesInArea({id: this.userData.battleId, hexId: this.userData.hexId, userId: this.userId});

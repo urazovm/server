@@ -2,6 +2,10 @@ domain = require('domain');
 net = require('net');
 crypto = require('crypto');
 geoip = require('./lib/geoip/geoip');
+syncMysql = require("mysql-libmysqlclient");
+asyncMysql = require('mysql');
+
+
 
 d = domain.create();
 
