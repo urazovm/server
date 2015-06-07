@@ -81,7 +81,7 @@ function Router() {
 							GLOBAL.errorsLists.clientsErrorsList[key].state = 2;
 							GLOBAL.errorsLists.clientsErrorsList[key].clientVersion = data.clientVersion;
 						}
-						SQL.querySync("UPDATE `game_ErrorsClientList` SET `state` = "+GLOBAL.errorsLists.clientsErrorsList[key].state+", `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"' WHERE `id` = "+key);
+						SQL.queryAsync("UPDATE `game_ErrorsClientList` SET `state` = "+GLOBAL.errorsLists.clientsErrorsList[key].state+", `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"' WHERE `id` = "+key);
 					}
 					find_error = true;
 					errorId = key;
@@ -94,7 +94,7 @@ function Router() {
 				GLOBAL.errorsLists.clientsErrorsList[errorId] = {functionName: data.functionName, error: data.error, clientVersion: data.clientVersion, state: 0};
 			}
 			// update errors log
-			SQL.querySync("INSERT INTO `game_ErrorsClient` SET `date` = UNIX_TIMESTAMP(), `errorId` = "+errorId+", `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"', userId ="+data.userId);
+			SQL.queryAsync("INSERT INTO `game_ErrorsClient` SET `date` = UNIX_TIMESTAMP(), `errorId` = "+errorId+", `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"', userId ="+data.userId);
 		}
 	}
 	
