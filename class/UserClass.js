@@ -481,6 +481,7 @@ User.prototype.getItems = function()
 	
 	for (var key in rows){
 		this.userData.items[String(rows[key].id)] = rows[key];
+		this.userData.items[String(rows[key].id)].itemId = String(this.userData.items[String(rows[key].id)].itemId);
 		if(rows[key].inventorySlotId != ''){
 			var arrayOfSlots = rows[key].inventorySlotId.split(',');
 			for(var i in arrayOfSlots){
@@ -510,19 +511,47 @@ User.prototype.getItems = function()
 */
 User.prototype.wearOnItem = function(data)
 {
-	// Проверка на то что такая вещь вообще есть у пользователя
-	// TODO: может стоит проверять еще и на ид в мире!
-	if(data.itemId in this.userData.items){
+	if(
+		data.itemId in this.userData.items  // Проверка на то что такая вещь вообще есть у пользователя
+											// TODO: Проверка на то что ее можно надеть, что она подходит по статам, и что она не надета уже!
+											// TODO: может стоит проверять еще и на ид в мире!
+	){
 		var itemId = this.userData.items[data.itemId].itemId;
 		// Проверка на то, что такая вещь вообще есть в базе!
 		if(itemId in GLOBAL.DATA.items){
+			
 			// Проверка на то, то слот, в который хотим надеть вещь, свободен. Если нет, то надо снять предыдущую вещь.
 			for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots){
 				if(inventorySlotId in this.userData.stuff){
-					
 					this.wearOffItem({itemId: this.userData.stuff[inventorySlotId].userItemId });
 				}
 			}
+			
+			// Надеваем вещь!
+			// Проход по всем слотам, в которые надо надеть вещь, и добавление данных о вещи.
+			var inventorySlotsArray = [];
+			for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots){
+				
+				inventorySlotsArray.push(inventorySlotId);
+				
+				//TODO: добавлять статы вещи в статы юзера, все бонусы и прочее
+				this.userData.stuff[inventorySlotId] = {
+														userItemId: 	 String(data.itemId),
+														itemId: 		 String(itemId),
+														inventorySlotId: String(inventorySlotId)
+													};
+			}
+			// Обновляем слот ид в массиве свойств вещи пользователя.
+			var slotsId = inventorySlotsArray.join(',');
+			this.userData.items[data.itemId].inventorySlotId = slotsId;
+			SQL.queryAsync("UPDATE `game_UsersItems` SET `game_UsersItems`.`inventorySlotId` = '"+slotsId+"' WHERE `game_UsersItems`.`id` = "+data.itemId+" ");
+			
+			this.socketWrite({
+				f: "userWearOnItem", 
+				p: {
+					itemId: String(data.itemId)
+				}
+			});
 		}
 	}
 }
@@ -542,13 +571,15 @@ User.prototype.wearOnItem = function(data)
 */
 User.prototype.wearOffItem = function(data)
 {
-	// Проверка на то что такая вещь вообще есть у пользователя
-	// TODO: может стоит проверять еще и на ид в мире!
-	if(data.itemId in this.userData.items){
+	if(
+		data.itemId in this.userData.items  // Проверка на то что такая вещь вообще есть у пользователя
+											// TODO: Проверка на то что ее можно надеть, что она подходит по статам, и что она не надета уже!
+											// TODO: может стоит проверять еще и на ид в мире!
+	){
 		var itemId = this.userData.items[data.itemId].itemId;
 		// Проверка на то, что такая вещь вообще есть в базе!
 		if(itemId in GLOBAL.DATA.items){
-			// Проверка на то, то слот, в который хотим надеть вещь, свободен. Если нет, то надо снять предыдущие вещи.
+			// Проход по всем слотам, в которых надета вещь, и удаление данных о вещи.
 			var itemsArray = [];
 			for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots){
 				if(
@@ -561,7 +592,8 @@ User.prototype.wearOffItem = function(data)
 					delete this.userData.stuff[inventorySlotId];
 				}
 			}
-			
+			// Обновляем слот ид в массиве свойств вещи пользователя.
+			this.userData.items[data.itemId].inventorySlotId = '';
 			SQL.queryAsync("UPDATE `game_UsersItems` SET `game_UsersItems`.`inventorySlotId` = '' WHERE `game_UsersItems`.`id` IN ("+itemsArray.join(',')+") ");
 			
 			this.socketWrite({

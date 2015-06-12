@@ -332,6 +332,23 @@ Router.prototype.userWearOnItem = function (data) {
 }
 
 
+/*
+	* Description:
+	*	function Снимает предмет с героя
+	*	
+	*	@data: 	object, Data from client
+	*		@itemId: 	int, ид вещи из таблицы вещей пользователя
+	*	
+	*
+	* @since  08.06.15
+	* @author pcemma
+*/
+Router.prototype.userWearOffItem = function (data) {
+	if(data){
+		GLOBAL.USERS[data.userId].wearOffItem(data);
+	}
+}
+
 
 
 
