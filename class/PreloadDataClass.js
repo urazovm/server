@@ -56,7 +56,7 @@ function PreloadDataClass() {
 	
 		this.DATA.items = this.getItems();
 		this.DATA.spineSlots = this.getSpineSlots();
-		this.DATA.inventorySlots = this.getInventorySlots();
+		this.DATA.inventorySlotsList = this.getInventorySlotsList();
 		
 		
 	
@@ -92,12 +92,14 @@ function PreloadDataClass() {
 									"`game_ItemsStats`.`value` AS `statValue`, "+
 									"`game_Stats`.`name` AS  `statName`, "+
 									"`game_ItemsAttachments`.`slotSpineId`, "+
-									"`game_ItemsAttachments`.`attachmentSpineId` "+
+									"`game_ItemsAttachments`.`attachmentSpineId`, "+
+									"`game_ItemsInventorySlots`.`slotId` "+
 								"FROM "+
 									"(`game_Items`) "+
 								"LEFT JOIN `game_ItemsStats` ON `game_Items`.`id` = `game_ItemsStats`.`itemId` "+
-								"LEFT JOIN `game_Stats`ON  `game_ItemsStats`.`statId`  = `game_Stats`.`id` "+
-								"LEFT JOIN `game_ItemsAttachments`ON `game_Items`.`id` = `game_ItemsAttachments`.`itemId` "+
+								"LEFT JOIN `game_Stats` ON  `game_ItemsStats`.`statId`  = `game_Stats`.`id` "+
+								"LEFT JOIN `game_ItemsAttachments` ON `game_Items`.`id` = `game_ItemsAttachments`.`itemId` "+
+								"LEFT JOIN `game_ItemsInventorySlots` ON `game_Items`.`id` = `game_ItemsInventorySlots`.`itemId` "+
 								"WHERE 1 ");
 		
 		
@@ -116,6 +118,7 @@ function PreloadDataClass() {
 											// needStats: {},
 											stats:{},
 											attachments: {},
+											inventorySlots: {},
 										};
 			}
 			
@@ -127,6 +130,11 @@ function PreloadDataClass() {
 			// Собираем attachments вещи
 			if(rows[i].slotSpineId && items[itemId] && !items[itemId].attachments[String(rows[i].slotSpineId)]){
 				items[itemId].attachments[String(rows[i].slotSpineId)] = rows[i].attachmentSpineId;
+			}
+			
+			// Собираем слоты вещи, в которые она надевается
+			if(rows[i].slotId && items[itemId] && !items[itemId].inventorySlots[String(rows[i].slotId)]){
+				items[itemId].inventorySlots[String(rows[i].slotId)] = String(rows[i].slotId);
 			}
 		}
 		console.log(items);
@@ -169,10 +177,10 @@ function PreloadDataClass() {
 		* @since  03.04.15
 		* @author pcemma
 	*/
-	this.getInventorySlots = function()
+	this.getInventorySlotsList = function()
 	{
 		var invetorySlots = {},
-			req = SQL.querySync("SELECT `game_ItemsInventorySlots`.* FROM `game_ItemsInventorySlots`"),
+			req = SQL.querySync("SELECT `game_ItemsInventorySlotsList`.* FROM `game_ItemsInventorySlotsList`"),
 			rows = req.fetchAllSync();
 		for (var i=0, length = rows.length - 1; i <= length; i += 1){
 			invetorySlots[String(rows[i].id)] = {

@@ -72,7 +72,7 @@ DBClass.prototype.createBdList = function()
 */
 DBClass.prototype.pingMysqlSession = function()
 {
-	this.queryAsync("SELECT version()")
+	this.queryAsync("SELECT version()");
 	for(var key in this.bdList){
 		this.bdList[key].querySync("SELECT version()");
 	}
@@ -224,13 +224,26 @@ DBClass.prototype.createPoolConntections = function() {
 	*	return: 
 	*
 	* @since  05.06.15
-	* @author pcemma
+	* @author pcemma, tooreckiy
 */
 DBClass.prototype.queryAsync = function(query, callBack) {
-	this.poolConntections.query(query, (callBack) ? callBack : function(err, result) { if (err) throw err; });
+	this.poolConntections.query( query, d.bind(
+											function(err, result, fields){																			
+												if (err){ 
+													err.stack = query+"\n".concat(err.stack);
+													throw err; 									
+												} 
+												else{
+													if(callBack){
+														callBack(err, result, fields);
+													}
+												} 
+											}
+										) 
+	);
 }
 	
-	
+
 	
 
 module.exports = DBClass;

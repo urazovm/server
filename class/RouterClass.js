@@ -18,18 +18,18 @@ function Router() {
 	* @since  16.02.14
 	* @author pcemma
 */
-Router.prototype.route = function(pathname, postData) {
+Router.prototype.route = function(pathname, data) {
 	console.log("pathname", pathname);
 	if (typeof (this[pathname]) === 'function') {
-		// postData = JSON.parse(postData);
-		// console.log(postData);
+		// data = JSON.parse(data);
+		// console.log(data);
 		// GLOBAL CHECKING IF USER EXIST AND VERIFYING
-		if( pathname == 'getGlobalData' || pathname == 'authorization' || pathname == 'makeClientsErrorLogs' || ( GLOBAL.USERS[postData.userId] && GLOBAL.USERS[postData.userId].verifyHash == postData.verifyHash)){
-			this[pathname](postData);
+		if( pathname == 'getGlobalData' || pathname == 'authorization' || pathname == 'makeClientsErrorLogs' || ( GLOBAL.USERS[data.userId] && GLOBAL.USERS[data.userId].verifyHash == data.verifyHash)){
+			this[pathname](data);
 		}
 	} else {
 		console.log("No request handler found for " + pathname);
-		this['/'](postData);
+		this['/'](data);
 	}
 }
 
@@ -326,7 +326,9 @@ Router.prototype.battleHeroMakeHit = function (data) {
 	* @author pcemma
 */
 Router.prototype.userWearOnItem = function (data) {
-	
+	if(data){
+		GLOBAL.USERS[data.userId].wearOnItem(data);
+	}
 }
 
 

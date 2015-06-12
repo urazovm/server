@@ -481,11 +481,95 @@ User.prototype.getItems = function()
 	
 	for (var key in rows){
 		this.userData.items[String(rows[key].id)] = rows[key];
-		if(rows[key].inventorySlotId > 0){
-			this.userData.stuff[String(rows[key].inventorySlotId)] = {
-																		itemId: rows[key].itemId,
-																		inventorySlotId: rows[key].inventorySlotId
-																	};
+		if(rows[key].inventorySlotId != ''){
+			var arrayOfSlots = rows[key].inventorySlotId.split(',');
+			for(var i in arrayOfSlots){
+				var slotId = arrayOfSlots[i];
+				this.userData.stuff[String(slotId)] = {
+														userItemId: 	 String(rows[key].id),
+														itemId: 		 String(rows[key].itemId),
+														inventorySlotId: String(slotId)
+													};
+			}
+		}
+	}
+}
+
+
+/*
+	* Description:
+	*	Надевает вещь на героя
+	*	
+	*	@data:	array
+	*		@itemId:	int, id вещи из таблицы game_UsersItems
+	*	
+	*	
+	*
+	* @since  09.06.15
+	* @author pcemma
+*/
+User.prototype.wearOnItem = function(data)
+{
+	// Проверка на то что такая вещь вообще есть у пользователя
+	// TODO: может стоит проверять еще и на ид в мире!
+	if(data.itemId in this.userData.items){
+		var itemId = this.userData.items[data.itemId].itemId;
+		// Проверка на то, что такая вещь вообще есть в базе!
+		if(itemId in GLOBAL.DATA.items){
+			// Проверка на то, то слот, в который хотим надеть вещь, свободен. Если нет, то надо снять предыдущую вещь.
+			for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots){
+				if(inventorySlotId in this.userData.stuff){
+					
+					this.wearOffItem({itemId: this.userData.stuff[inventorySlotId].userItemId });
+				}
+			}
+		}
+	}
+}
+
+
+/*
+	* Description:
+	*	Снимает вещь с героя
+	*	
+	*	@data:	array
+	*		@itemId:	int, id вещи из таблицы game_UsersItems
+	*	
+	*	
+	*
+	* @since  09.06.15
+	* @author pcemma
+*/
+User.prototype.wearOffItem = function(data)
+{
+	// Проверка на то что такая вещь вообще есть у пользователя
+	// TODO: может стоит проверять еще и на ид в мире!
+	if(data.itemId in this.userData.items){
+		var itemId = this.userData.items[data.itemId].itemId;
+		// Проверка на то, что такая вещь вообще есть в базе!
+		if(itemId in GLOBAL.DATA.items){
+			// Проверка на то, то слот, в который хотим надеть вещь, свободен. Если нет, то надо снять предыдущие вещи.
+			var itemsArray = [];
+			for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots){
+				if(
+					inventorySlotId in this.userData.stuff && // проверка на что слот такой занят
+					this.userData.stuff[inventorySlotId].userItemId == data.itemId // Проверка что это именна та вещь вслоте, которую пытаются снять
+				){
+					itemsArray.push(this.userData.stuff[inventorySlotId].userItemId);
+					
+					//TODO: вычитать статы вещи из статов юзера, все бонусы и прочее
+					delete this.userData.stuff[inventorySlotId];
+				}
+			}
+			
+			SQL.queryAsync("UPDATE `game_UsersItems` SET `game_UsersItems`.`inventorySlotId` = '' WHERE `game_UsersItems`.`id` IN ("+itemsArray.join(',')+") ");
+			
+			this.socketWrite({
+				f: "userWearOffItem", 
+				p: {
+					itemId: String(data.itemId)
+				}
+			});
 		}
 	}
 }
