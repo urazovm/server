@@ -264,7 +264,6 @@ BattleClass.prototype.heroMakeHit = function(data)
 			var isHeroAlive = this.heroes[oponentUserId].isAlive();
 			// Проверяем если герой умер то надо удалить его из гекса.
 			if(!isHeroAlive){
-				console.log("TYT PROWLI!!!");
 				this.hexes[this.heroes[oponentUserId].userData.hexId].removeHero();
 			}
 			
