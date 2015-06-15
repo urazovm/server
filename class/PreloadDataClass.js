@@ -68,10 +68,71 @@ function PreloadDataClass() {
 		
 		// NPC INFO
 		this.DATA.npcsInfo = this.getNpcsInfo();
+		
+		
+		
+		
+		// TOWNS 
+		this.DATA.towns = this.getTownsList();
+		this.DATA.buildings = this.getTownBuildingsList();
 	}
 	
 	
 	
+	
+	/*****************	TOWNS	**************/
+	
+	/*
+		* Description:
+		*	Собирает список городов
+		*	
+		*	
+		*	
+		*
+		* @since  14.06.15
+		* @author pcemma
+	*/
+	this.getTownsList = function()
+	{
+		var towns = {},
+			req = SQL.querySync("SELECT `game_Towns`.* FROM (`game_Towns`) "),
+			rows = req.fetchAllSync();
+		for (var i=0, length = rows.length - 1; i <= length; i += 1){
+			rows[i].id = String(rows[i].id);
+			towns[rows[i].id] = rows[i];
+		}
+		console.log(towns);
+		return towns;
+	}
+	
+	
+	/*
+		* Description:
+		*	Собирает список зданийв городах
+		*	
+		*	
+		*	
+		*
+		* @since  14.06.15
+		* @author pcemma
+	*/
+	this.getTownBuildingsList = function()
+	{
+		var buildings = {},
+			req = SQL.querySync("SELECT `game_TownsBuildings`.* FROM (`game_TownsBuildings`) "),
+			rows = req.fetchAllSync();
+		for (var i=0, length = rows.length - 1; i <= length; i += 1){
+			rows[i].id = String(rows[i].id);
+			rows[i].townId = String(rows[i].townId);
+			buildings[rows[i].id] = rows[i];
+		}
+		console.log(buildings);
+		return buildings;
+	}
+	
+	
+	
+	/*****************	ITEMS	**************/
 	
 	/*
 		* Description:
@@ -137,7 +198,6 @@ function PreloadDataClass() {
 				items[itemId].inventorySlots[String(rows[i].slotId)] = String(rows[i].slotId);
 			}
 		}
-		console.log(items);
 		return items;
 	}
 	
@@ -194,36 +254,6 @@ function PreloadDataClass() {
 	
 	
 	
-	
-	
-	
-	/*
-		* Description:
-		*	Собирает список всех статов в игре, которые могут быть у предметов, игроков и прочее
-		*	
-		*	
-		*	
-		*
-		* @since  21.02.15
-		* @author pcemma
-	*/
-	this.getStats = function()
-	{
-		var stats = {};
-		var req = SQL.querySync("SELECT `game_Stats`.* FROM `game_Stats`");
-		
-		
-		var rows = req.fetchAllSync();
-		for (var i=0, length = rows.length - 1; i <= length; i += 1){
-			stats[rows[i].name] = {
-											id: String(rows[i].id),
-											order: 0,
-											group: 0
-									};
-		}
-		
-		return stats;
-	}
 	
 	
 	
@@ -348,6 +378,47 @@ function PreloadDataClass() {
 		}
 		return obstructions;
 	}
+	
+	
+	
+	
+	/**************** OTHERS ************/	
+	
+	
+	/*
+		* Description:
+		*	Собирает список всех статов в игре, которые могут быть у предметов, игроков и прочее
+		*	
+		*	
+		*	
+		*
+		* @since  21.02.15
+		* @author pcemma
+	*/
+	this.getStats = function()
+	{
+		var stats = {};
+		var req = SQL.querySync("SELECT `game_Stats`.* FROM `game_Stats`");
+		
+		
+		var rows = req.fetchAllSync();
+		for (var i=0, length = rows.length - 1; i <= length; i += 1){
+			stats[rows[i].name] = {
+											id: String(rows[i].id),
+											order: 0,
+											group: 0
+									};
+		}
+		
+		return stats;
+	}
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
