@@ -75,8 +75,10 @@ BMClass.prototype.enterBattle = function(data)
 		
 		//TODO: временно добавляем нпц в бой сразу за героем. Для тестов и показа издателю.
 		// добавляем первого нпц тупо.
-		for(var i = 1; i <= 5; i++){
-			this.battles[battleId].addHero(GLOBAL.NPCS["npc"+i], 2);
+		if(data.battleType == "npc"){
+			for(var i = 1; i <= 3; i++){
+				this.battles[battleId].addHero(GLOBAL.NPCS["npc"+i], 2);
+			}
 		}
 	}
 	

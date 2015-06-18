@@ -199,6 +199,19 @@ User.prototype.addNewUser = function(data)
 							
 							"WHERE `id` = "+userId);
 	
+	//TODO:удалить или заменить это, это тестово
+	// Добавляем вещи юзеру сразу.
+	var sqlQueriesArr = [];
+	for(var i = 1; i <= 8; i++){
+		sqlQueriesArr.push("("+userId+", "+i+", 1)");
+	}
+	SQL.querySync("INSERT INTO `game_UsersItems`(`userId`, `itemId`, `count`) VALUES "+sqlQueriesArr.join(','));
+	
+	
+	
+	
+	
+	
 	// Добавляем статы игроку
 	this.addStats(userId);
 	

@@ -74,6 +74,7 @@ function PreloadDataClass() {
 		
 		// TOWNS 
 		this.DATA.towns = this.getTownsList();
+		this.DATA.buildingsTypes = this.getTownBuildingsTypes();
 		this.DATA.buildings = this.getTownBuildingsList();
 	}
 	
@@ -103,6 +104,30 @@ function PreloadDataClass() {
 		}
 		console.log(towns);
 		return towns;
+	}
+	
+	
+	/*
+		* Description:
+		*	Собирает список типов зданий вгороде
+		*	
+		*	
+		*	
+		*
+		* @since  17.06.15
+		* @author pcemma
+	*/
+	this.getTownBuildingsTypes = function()
+	{
+		var townsBuildingsTypes = {},
+			req = SQL.querySync("SELECT `game_TownsBuildingsTypes`.* FROM (`game_TownsBuildingsTypes`) "),
+			rows = req.fetchAllSync();
+		for (var i=0, length = rows.length - 1; i <= length; i += 1){
+			rows[i].id = String(rows[i].id);
+			townsBuildingsTypes[rows[i].id] = rows[i];
+		}
+		console.log(townsBuildingsTypes);
+		return townsBuildingsTypes;
 	}
 	
 	

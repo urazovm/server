@@ -267,7 +267,7 @@ Router.prototype.battleCreate = function (data) {
 */
 Router.prototype.enterBattle = function (data) {
 	if(data){
-		battlesManager.enterBattle({id: data.id, user: GLOBAL.USERS[data.userId]});
+		battlesManager.enterBattle({id: data.id, user: GLOBAL.USERS[data.userId], battleType: data.battleType});
 	}
 }
 
