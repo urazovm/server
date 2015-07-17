@@ -21,7 +21,7 @@ BattleClass.prototype.create = function()
 		battleId = SQL.lastInsertIdSync("INSERT INTO `game_Battles` (`id`, `startTime`) VALUES (NULL, "+currentTime+")");
 		
 	
-
+	
 	this.id = battleId;
 	this.startTime = currentTime;
 	this.endFlag = 0;

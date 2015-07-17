@@ -8,7 +8,7 @@ function HexagonClass(data) {
 
 /*
 	* Description:
-	*	function создает гекс
+	*	function СЃРѕР·РґР°РµС‚ РіРµРєСЃ
 	*	
 	*
 	*
@@ -32,7 +32,7 @@ HexagonClass.prototype.__constructor = function(data)
 
 /*
 	* Description:
-	*	function добавляет героя в гекс
+	*	function РґРѕР±Р°РІР»СЏРµС‚ РіРµСЂРѕСЏ РІ РіРµРєСЃ
 	*	
 	*	@data:			arr
 	*		@userId:	str, id of the user
@@ -49,7 +49,7 @@ HexagonClass.prototype.addHero = function(data)
 
 /*
 	* Description:
-	*	function удаляет героя из гекса
+	*	function СѓРґР°Р»СЏРµС‚ РіРµСЂРѕСЏ РёР· РіРµРєСЃР°
 	*	
 	*
 	*
@@ -65,7 +65,7 @@ HexagonClass.prototype.removeHero = function(data)
 
 /*
 	* Description:
-	*	function проверяет является ли гекс с координатами, которые передали, соседом
+	*	function РїСЂРѕРІРµСЂСЏРµС‚ СЏРІР»СЏРµС‚СЃСЏ Р»Рё РіРµРєСЃ СЃ РєРѕРѕСЂРґРёРЅР°С‚Р°РјРё, РєРѕС‚РѕСЂС‹Рµ РїРµСЂРµРґР°Р»Рё, СЃРѕСЃРµРґРѕРј
 	*	
 	*	@data: array, {x, y}
 	*
@@ -96,10 +96,10 @@ HexagonClass.prototype.isNeighbor = function(data)
 
 /*
 	* Description:
-	*	Ищет все гексы в обалсти удара.
+	*	РС‰РµС‚ РІСЃРµ РіРµРєСЃС‹ РІ РѕР±Р°Р»СЃС‚Рё СѓРґР°СЂР°.
 	*	
 	*
-	*	return: array, массив гексов, которые находятся в области у текущего гекса
+	*	return: array, РјР°СЃСЃРёРІ РіРµРєСЃРѕРІ, РєРѕС‚РѕСЂС‹Рµ РЅР°С…РѕРґСЏС‚СЃСЏ РІ РѕР±Р»Р°СЃС‚Рё Сѓ С‚РµРєСѓС‰РµРіРѕ РіРµРєСЃР°
 	*
 	* @since  16.05.15
 	* @author pcemma
@@ -123,10 +123,10 @@ HexagonClass.prototype.getHitArea = function()
 
 /*
 	* Description:
-	*	Ищет все гексы в обалсти хотьбы.
+	*	РС‰РµС‚ РІСЃРµ РіРµРєСЃС‹ РІ РѕР±Р°Р»СЃС‚Рё С…РѕС‚СЊР±С‹.
 	*	
 	*
-	*	return: array, массив гексов, которые находятся в области у текущего гекса
+	*	return: array, РјР°СЃСЃРёРІ РіРµРєСЃРѕРІ, РєРѕС‚РѕСЂС‹Рµ РЅР°С…РѕРґСЏС‚СЃСЏ РІ РѕР±Р»Р°СЃС‚Рё Сѓ С‚РµРєСѓС‰РµРіРѕ РіРµРєСЃР°
 	*
 	* @since  01.06.15
 	* @author pcemma
