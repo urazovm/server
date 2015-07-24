@@ -1,5 +1,8 @@
 console.log("PreloadData CLASS is connected");	
-	
+var mongoose = require('mongoose');
+
+
+
 function PreloadDataClass() {
 
 
@@ -45,10 +48,29 @@ function PreloadDataClass() {
 	*/
 	this.createGlobalData = function()
 	{
-		this.DATA = {};
 		
+		var queues = [
+			this.getTownsList.bind(this)
+		];
+		
+		this.DATA = {};
 		// help array only for server
 		this.HELP = {};
+		
+		
+		async.parallel(
+			queues,
+			function(err){
+				// All tasks are done now
+				console.log("ALL DONE!!!");
+			}
+		);
+		
+		
+		
+		
+		
+		
 		
 		
 		this.DATA.stats = this.getStats();
@@ -73,7 +95,7 @@ function PreloadDataClass() {
 		
 		
 		// TOWNS 
-		this.DATA.towns = this.getTownsList();
+		// this.DATA.towns = this.getTownsList();
 		this.DATA.buildingsTypes = this.getTownBuildingsTypes();
 		this.DATA.buildings = this.getTownBuildingsList();
 	}
@@ -90,26 +112,41 @@ function PreloadDataClass() {
 		*	
 		*	
 		*
-		* @since  14.06.15
+		* @since  21.07.15
 		* @author pcemma
 	*/
-	this.getTownsList = function()
+	this.getTownsList = function(callback)
 	{
-		var towns = {},
-			req = SQL.querySync("SELECT `game_Towns`.* FROM (`game_Towns`) "),
-			rows = req.fetchAllSync();
-		for (var i=0, length = rows.length - 1; i <= length; i += 1){
-			rows[i].id = String(rows[i].id);
-			towns[rows[i].id] = rows[i];
+		this.DATA.towns = {};
+		Mongo.find('game_Towns', {}, function (rows) {
+			for(var i in rows){
+				rows[i].id = String(rows[i].id);
+				this.DATA.towns[rows[i].id] = {
+					id: rows[i].id,
+					ruName: rows[i].ruName,
+					enName: rows[i].enName
+				};
+			}
+			callback();
+		}.bind(this));
+		
+		
+		
+		
+		for (var i = 2; i <= 10; i++){
+			Mongo.insertLastId('game_Towns', {enName: "test"+i, ruName: "тест"+i}, function (rows) {
+				for(var i in rows){
+					console.log(rows);
+				}
+			});
 		}
-		console.log(towns);
-		return towns;
 	}
 	
 	
 	/*
 		* Description:
 		*	Собирает список типов зданий вгороде
+		*	
 		*	
 		*	
 		*	
@@ -126,7 +163,7 @@ function PreloadDataClass() {
 			rows[i].id = String(rows[i].id);
 			townsBuildingsTypes[rows[i].id] = rows[i];
 		}
-		console.log(townsBuildingsTypes);
+		// console.log(townsBuildingsTypes);
 		return townsBuildingsTypes;
 	}
 	
@@ -151,7 +188,7 @@ function PreloadDataClass() {
 			rows[i].townId = String(rows[i].townId);
 			buildings[rows[i].id] = rows[i];
 		}
-		console.log(buildings);
+		// console.log(buildings);
 		return buildings;
 	}
 	
