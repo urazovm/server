@@ -525,8 +525,11 @@ PreloadDataClass.prototype.createGlobalConstants = function(id)
 	for(key in row)
 	{
 		// get client version
-		if(row[key].name == "clientVersion")
-			constants.clientVersion = lib.explode( ".", row[0].value );
+		if(row[key].name == "clientVersion"){
+			// constants.clientVersion = lib.explode( ".", row[0].value );
+			constants.clientVersion = row[0].value.split(".");
+			console.log(constants.clientVersion);
+		}
 		else
 			constants[row[key].name] = Number(row[key].value);
 	}
@@ -553,14 +556,16 @@ PreloadDataClass.prototype.createGlobalConstants = function(id)
 
 PreloadDataClass.prototype.checkVersion = function(version, need_version)
 {
-	if(!need_version) 
+	if(!need_version){ 
 		need_version = this.globalConstants.clientVersion;
-	else
-		need_version = lib.explode( ".", need_version );
-		
+	}else{
+		// need_version = lib.explode( ".", need_version );
+		need_version = need_version.split(".");;
+	}	
 	if(version && version != '')
 	{
-		var client_version = lib.explode( ".", version );
+		// var client_version = lib.explode( ".", version );
+		var client_version = version.split(".");;
 		for(var key in need_version)
 		{
 			if(Number(client_version[key]) > Number(need_version[key]))
