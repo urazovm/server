@@ -63,28 +63,3 @@ Mongo = new MongoDBClass(function(){
 					"-------------------------------------------------------------\n\n");
 	});
 });
-
-// fill global data array
-// GLOBAL = new PreloadDataClass();
-// GLOBAL.initialize();
-
-
-
-// battlesManager = new BattleManagerClass();
-
-
-// start server
-// d.on('error', function(err) { lib.domainL(err); });
-// d.run(function() {
-	// var server = new ServerClass();
-	// server.startSocket();	
-	// console.log("\n\n -------------------------------------------------------------\n",
-				// "SERVER START TIME:"+Date()+" \n",
-				// "client version: ", GLOBAL.globalConstants.clientVersion+" \n", 
-				// "Data version: ", GLOBAL.globalConstants.globalDataVersion+" \n",
-				// "-------------------------------------------------------------\n\n");
-// });
-
-
-
-
