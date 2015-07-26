@@ -61,42 +61,47 @@ Router.prototype['/'] = function (response, data) {
 	*	@data: 	json, Data from client
 	*	
 	*
-	* @since  31.03.14
+	* @since  26.07.15
 	* @author pcemma
 */
 Router.prototype.makeClientsErrorLogs = function (data) {
 	console.log("data.error_message",data);
-	var find_error 	= false,
-		errorId		= 0;
 	data.userId = Number(data.userId);
-	if(data.userId || data.userId == 0){
-		for(var key in GLOBAL.errorsLists.clientsErrorsList)
-		{
-			if(GLOBAL.errorsLists.clientsErrorsList[key].functionName == data.functionName && GLOBAL.errorsLists.clientsErrorsList[key].error == data.error)
+	if(data.userId || data.userId === 0){
+		// Добавить новую ошибку либо обновить статус у старой
+		Mongo.findAndModify(	
+			'game_ErrorsClientList', 
+			{functionName: data.functionName}, 
+			[],  
 			{
-				console.log("find error!!!!!!!!!!!");
-				if(GLOBAL.checkVersion(data.clientVersion, GLOBAL.errorsLists.clientsErrorsList[key].clientVersion) )
-				{
-					console.log("Version is >>>>>= !!!!!!!!!!!");
-					if(GLOBAL.errorsLists.clientsErrorsList[key].state == 1)
-					{
-						GLOBAL.errorsLists.clientsErrorsList[key].state = 2;
-						GLOBAL.errorsLists.clientsErrorsList[key].clientVersion = data.clientVersion;
-					}
-					SQL.queryAsync("UPDATE `game_ErrorsClientList` SET `state` = "+GLOBAL.errorsLists.clientsErrorsList[key].state+", `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"' WHERE `id` = "+key);
+				$set: { 
+					functionName: data.functionName, 
+					error: data.error
+				},
+				$inc: {count: 1}
+			},
+			{
+				upsert: true,
+				new: true
+			},
+			function(doc){
+				var insertData = {$set:{}};
+				// Проверяем не увеличилась ли клиент версия, на которой случилась ошибка, либо что это новая ошибка
+				// В этом случае надо обновить в БД поля clientVersion и state.
+				if(
+					(doc.value.clientVersion &&
+					GLOBAL.checkVersion(data.clientVersion, doc.value.clientVersion)) ||
+					!(doc.value.clientVersion)
+				){
+					insertData["$set"].clientVersion = data.clientVersion;
+					insertData["$set"].state = (doc.value.state > 0) ? 2 : 0; 
 				}
-				find_error = true;
-				errorId = key;
-				break;
+				Mongo.update('game_ErrorsClientList', {_id: doc.value._id}, insertData, function(){});
+				
+				// Занести в список ошибок (лист)
+				Mongo.insert('game_ErrorsClient', {date: + new Date(), errorId: doc.value._id.toHexString(), clientVersion: data.clientVersion, userId: data.userId}, function(doc){});
 			}
-		}
-		if(!find_error)
-		{
-			errorId = SQL.lastInsertIdSync("INSERT INTO `game_ErrorsClientList` SET `functionName` = '"+SQL.mysqlRealEscapeString(data.functionName)+"', `error` = '"+SQL.mysqlRealEscapeString(data.error)+"', `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"', state = 0 ");
-			GLOBAL.errorsLists.clientsErrorsList[errorId] = {functionName: data.functionName, error: data.error, clientVersion: data.clientVersion, state: 0};
-		}
-		// update errors log
-		SQL.queryAsync("INSERT INTO `game_ErrorsClient` SET `date` = UNIX_TIMESTAMP(), `errorId` = "+errorId+", `clientVersion` = '"+SQL.mysqlRealEscapeString(data.clientVersion)+"', userId ="+data.userId);
+		);
 	}
 }
 

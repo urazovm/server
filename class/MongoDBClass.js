@@ -1,11 +1,8 @@
 console.log("MongoDBClass CLASS is connected");	
-var MongoClient = require('mongodb').MongoClient,
-	ObjectID = require('mongodb').ObjectID,
-	autoIncrement = require("mongodb-autoincrement");
-
+var MongoClient = require('mongodb').MongoClient;
 
 function MongoDBClass(callback) {
-	this.connect(callback);	
+	this.connect(callback);
 }
 
 
@@ -26,11 +23,10 @@ MongoDBClass.prototype.find = function(collection, searchData, callback) {
 	var collection = this.db.collection(collection);
 	// Find some documents
 	collection.find({}).toArray(function(err, docs) {
-		console.dir(docs);
+		// console.dir(docs);
 		callback(docs);
 	});
 }
-
 
 
 MongoDBClass.prototype.insert = function(collection, insertData, callback) {
@@ -38,33 +34,34 @@ MongoDBClass.prototype.insert = function(collection, insertData, callback) {
 	var collection = this.db.collection(collection);
 	// Insert some documents
 	collection.insert(insertData, function(err, result) {
-		console.log(result);
+		// console.log(result);
 		callback(result);
 	});
 }
 
-
-MongoDBClass.prototype.insertLastId = function(collection, insertData, callback) {
-	this.db.collection('counters').findAndModify({_id:collection}, {$inc : {seq:1}}, {new:true}, function(err, doc) {
-		console.log('------------');
-		console.log(doc);
-		console.log('------------');
-		// insertData.id = doc.seq;
-		// this.insert(collection, insertData, callback);	
-	}.bind(this));	
+/*
+insertData: obj, {$set : {a: 2}}
+*/
+MongoDBClass.prototype.update = function(collection, searchData, insertData, callback) {
+	var collection = this.db.collection(collection);
+	collection.update(searchData, insertData, function(err, result) {
+		callback(result);
+	});  
 }
 
 
-
-
-
-MongoDBClass.prototype.update = function(collection, searchData, insertData, callback) {
-	// Get the documents collection
-	var collection = this.db.collection(collection);
-	// Update document where a is 2, set b equal to 1
-	collection.update(searchData, { $set: insertData }, function(err, result) {
-		callback(result);
-	});  
+/*
+	criteria is the query object to find the record
+	sort indicates the order of the matches if there’s more than one matching record. The first record on the result set will be used. See Queries->find->options->sort for the format.
+	update is the replacement object
+	options define the behavior of the function
+	callback is the function to run after the update is done. Has two parameters - error object (if error occured) and the record that was updated.
+*/
+MongoDBClass.prototype.findAndModify = function(collection, criteria, sort, update, options, callback) {
+	this.db.collection(collection).findAndModify(criteria, sort, update, options, function(err, doc) {
+		console.log(doc);
+		callback(doc);
+	}.bind(this));	
 }
 
 
@@ -76,6 +73,20 @@ MongoDBClass.prototype.remove = function(collection, searchData, callback) {
 		callback(result);
 	});
 }
+
+
+
+
+
+/*
+MongoDBClass.prototype.insertLastId = function(collection, insertData, callback) {
+	this.db.collection('counters').findAndModify({id: collection}, [], {$inc : {seq : 1}}, {new: true}, function(err, doc) {
+		insertData.id = doc.value.seq;
+		this.insert(collection, insertData, callback);	
+	}.bind(this));	
+}
+*/
+
 
 
 module.exports = MongoDBClass;

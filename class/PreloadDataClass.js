@@ -1,6 +1,4 @@
 console.log("PreloadData CLASS is connected");	
-var mongoose = require('mongoose');
-
 
 
 function PreloadDataClass() {
@@ -22,11 +20,6 @@ function PreloadDataClass() {
 		
 		// create NPC array
 		this.createGlobalNpcs();
-		
-		
-		
-		//собираем массив ошибок
-		this.errorsLists = this.getErrorsLists();
 	}
 
 
@@ -129,17 +122,6 @@ function PreloadDataClass() {
 			}
 			callback();
 		}.bind(this));
-		
-		
-		
-		
-		for (var i = 2; i <= 10; i++){
-			Mongo.insertLastId('game_Towns', {enName: "test"+i, ruName: "тест"+i}, function (rows) {
-				for(var i in rows){
-					console.log(rows);
-				}
-			});
-		}
 	}
 	
 	
@@ -597,40 +579,6 @@ function PreloadDataClass() {
 		return true;
 	}
 	
-		
-	/*
-		function that get errors lists from db
-		
-		author: pcemma
-		
-		return array
-		[
-			clients_errors_list: array (clients_errors_list[id] = array(functionName, error, state))
-			server_errors_list: 	array (server_errors_list[id] = array(functionName, error, state))
-		]
-	*/
-	this.getErrorsLists = function()
-	{
-		var exports = {}
-		exports.clientsErrorsList = {};
-		exports.serverErrorsList = {};
-		
-		// clients errors
-		var req = SQL.querySync("SELECT * FROM  `game_ErrorsClientList` ");
-		var row = req.fetchAllSync();
-		for(key in row)
-			exports.clientsErrorsList[row[key].id] = {functionName: row[key].functionName, error: row[key].error, state: row[key].state, clientVersion: row[key].clientVersion};
-		
-		var req = SQL.querySync("SELECT * FROM  `game_ErrorsServerList` ");
-		var row = req.fetchAllSync();
-		for(key in row)
-			exports.serverErrorsList[row[key].id] = {functionName: row[key].functionName, error: row[key].error, state: row[key].state, clientVersion: row[key].clientVersion};
-		
-		return exports;
-	}
-	
-	
 
-	
 }
 module.exports = PreloadDataClass;

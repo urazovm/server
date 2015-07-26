@@ -6,9 +6,6 @@ async = require("async");
 
 
 
-var mongoose = require('mongoose');
-
-
 
 
 syncMysql = require("mysql-libmysqlclient");
@@ -21,10 +18,6 @@ d = domain.create();
 
 // add personal config package
 config = require("./config/personal_config.js");
-// mongoose.connect('mongodb://localhost/'+config.bd_config.bd_name);
-mongoose.connect('mongodb://localhost/pcemmaDb');
-
-
 
 
 // add lib package
