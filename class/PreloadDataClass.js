@@ -47,7 +47,10 @@ PreloadDataClass.prototype.createGlobalData = function()
 {
 	
 	var queues = [
-		this.getTownsList.bind(this)
+		// TOWNS 
+		this.getTownsList.bind(this),
+		this.getTownBuildingsTypes.bind(this),
+		this.getTownBuildingsList.bind(this)
 	];
 	
 	this.DATA = {};
@@ -70,20 +73,13 @@ PreloadDataClass.prototype.createGlobalData = function()
 	
 	
 	
-	
-	// TOWNS 
-	// this.DATA.towns = this.getTownsList();
-	this.DATA.buildingsTypes = this.getTownBuildingsTypes();
-	this.DATA.buildings = this.getTownBuildingsList();
-	
-	
-	
 	async.parallel(
 		queues,
 		function(err){
 			// All tasks are done now
 			console.log("ALL DONE!!!");
-		}
+			console.log(this.DATA);
+		}.bind(this)
 	);
 }
 
@@ -130,17 +126,19 @@ PreloadDataClass.prototype.getTownsList = function(callback)
 	* @since  17.06.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getTownBuildingsTypes = function()
+PreloadDataClass.prototype.getTownBuildingsTypes = function(callback)
 {
-	var townsBuildingsTypes = {},
-		req = SQL.querySync("SELECT `game_TownsBuildingsTypes`.* FROM (`game_TownsBuildingsTypes`) "),
-		rows = req.fetchAllSync();
-	for (var i=0, length = rows.length - 1; i <= length; i += 1){
-		rows[i].id = String(rows[i].id);
-		townsBuildingsTypes[rows[i].id] = rows[i];
-	}
-	// console.log(townsBuildingsTypes);
-	return townsBuildingsTypes;
+	this.DATA.buildingsTypes = {};
+	Mongo.find('game_TownsBuildingsTypes', {}, function(rows){
+		for(var i in rows){
+			rows[i].id = String(rows[i].id);
+			this.DATA.buildingsTypes[rows[i].id] = {
+				id: rows[i].id,
+				name: rows[i].name
+			};
+		}
+		callback();
+	}.bind(this));
 }
 
 
@@ -154,18 +152,18 @@ PreloadDataClass.prototype.getTownBuildingsTypes = function()
 	* @since  14.06.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getTownBuildingsList = function()
+PreloadDataClass.prototype.getTownBuildingsList = function(callback)
 {
-	var buildings = {},
-		req = SQL.querySync("SELECT `game_TownsBuildings`.* FROM (`game_TownsBuildings`) "),
-		rows = req.fetchAllSync();
-	for (var i=0, length = rows.length - 1; i <= length; i += 1){
-		rows[i].id = String(rows[i].id);
-		rows[i].townId = String(rows[i].townId);
-		buildings[rows[i].id] = rows[i];
-	}
-	// console.log(buildings);
-	return buildings;
+		
+	this.DATA.buildings = {};
+	Mongo.find('game_TownsBuildings', {}, function(rows){
+		for(var i in rows){
+			rows[i].id = String(rows[i].id);
+			rows[i].townId = String(rows[i].townId);
+			this.DATA.buildings[rows[i].id] = rows[i];
+		}
+		callback();
+	}.bind(this));	
 }
 
 
