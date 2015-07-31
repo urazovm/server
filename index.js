@@ -5,9 +5,6 @@ geoip = require('./lib/geoip/geoip');
 async = require("async");
 
 
-
-
-
 syncMysql = require("mysql-libmysqlclient");
 asyncMysql = require('mysql');
 

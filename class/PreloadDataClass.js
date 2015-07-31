@@ -3,6 +3,9 @@ console.log("PreloadData CLASS is connected");
 
 function PreloadDataClass() {
 	// this.initialize();
+	this.DATA = {};
+	// help array only for server
+	this.HELP = {};
 	
 	return this;
 }
@@ -10,20 +13,42 @@ function PreloadDataClass() {
 
 PreloadDataClass.prototype.initialize = function()
 {
+	var queues = [
+		this.createGlobalConstants.bind(this), // собираем все константы
+		
+		// create DATA array
+		// TOWNS 
+		this.getTownsList.bind(this),
+		this.getTownBuildingsTypes.bind(this),
+		this.getTownBuildingsList.bind(this),
+		
+		this.getStats.bind(this),
+		
+		// ITEMS
+		this.getInventorySlotsList.bind(this),
+		this.getSpineSlots.bind(this),
+		this.getItems.bind(this),
+		
+		// NPC INFO
+		this.getNpcsInfo.bind(this),
+		
+		
+		this.createGlobalUsers.bind(this), // create USERS array
+		this.createGlobalNpcs.bind(this) // create NPC array
+	];
+
+
+	this.DATA.battleInfo = this.getBattleInfo();
 	
-	// собираем все константы
-	this.globalConstants = this.createGlobalConstants();
-	
-	// create DATA array
-	this.createGlobalData();
-	
-	
-	// create USERS array
-	this.createGlobalUsers();
-	
-	
-	// create NPC array
-	this.createGlobalNpcs();
+	async.parallel(
+		queues,
+		function(err){
+			// All tasks are done now
+			// console.log(this.DATA.items[1]);
+			console.log(this);
+			console.log("PreloadDataClass is initialized!!!");
+		}.bind(this)
+	)
 }
 
 
@@ -32,58 +57,6 @@ PreloadDataClass.prototype.initialize = function()
 
 
 /**************** DATA ARRAY FUNCTIONS ************/	
-
-/*
-	* Description:
-	*	Create the Global data array and fill it.
-	*	
-	*	
-	*	
-	*
-	* @since  10.02.14
-	* @author pcemma
-*/
-PreloadDataClass.prototype.createGlobalData = function()
-{
-	
-	var queues = [
-		// TOWNS 
-		this.getTownsList.bind(this),
-		this.getTownBuildingsTypes.bind(this),
-		this.getTownBuildingsList.bind(this)
-	];
-	
-	this.DATA = {};
-	// help array only for server
-	this.HELP = {};
-	
-	this.DATA.stats = this.getStats();
-
-
-	this.DATA.items = this.getItems();
-	this.DATA.spineSlots = this.getSpineSlots();
-	this.DATA.inventorySlotsList = this.getInventorySlotsList();
-
-	
-	this.DATA.battleInfo = this.getBattleInfo();
-	
-	
-	// NPC INFO
-	this.DATA.npcsInfo = this.getNpcsInfo();
-	
-	
-	
-	async.parallel(
-		queues,
-		function(err){
-			// All tasks are done now
-			console.log("ALL DONE!!!");
-			console.log(this.DATA);
-		}.bind(this)
-	);
-}
-
-
 
 
 /*****************	TOWNS	**************/
@@ -180,61 +153,16 @@ PreloadDataClass.prototype.getTownBuildingsList = function(callback)
 	* @since  22.12.14
 	* @author pcemma
 */
-PreloadDataClass.prototype.getItems = function()
+PreloadDataClass.prototype.getItems = function(callback)
 {
-	var items = {};
-	var req = SQL.querySync("SELECT "+
-								"`game_Items` . *, "+
-								"`game_ItemsStats`.`statId`, "+
-								"`game_ItemsStats`.`value` AS `statValue`, "+
-								"`game_Stats`.`name` AS  `statName`, "+
-								"`game_ItemsAttachments`.`slotSpineId`, "+
-								"`game_ItemsAttachments`.`attachmentSpineId`, "+
-								"`game_ItemsInventorySlots`.`slotId` "+
-							"FROM "+
-								"(`game_Items`) "+
-							"LEFT JOIN `game_ItemsStats` ON `game_Items`.`id` = `game_ItemsStats`.`itemId` "+
-							"LEFT JOIN `game_Stats` ON  `game_ItemsStats`.`statId`  = `game_Stats`.`id` "+
-							"LEFT JOIN `game_ItemsAttachments` ON `game_Items`.`id` = `game_ItemsAttachments`.`itemId` "+
-							"LEFT JOIN `game_ItemsInventorySlots` ON `game_Items`.`id` = `game_ItemsInventorySlots`.`itemId` "+
-							"WHERE 1 ");
-	
-	
-	var rows = req.fetchAllSync();
-	for (var i=0, length = rows.length - 1; i <= length; i += 1){
-		// Проверяем добавляли ли мы уже такой итем.если да, то смотрим какое из свойств еще не добавленно
-		var itemId = String(rows[i].id);
-		if(!items[itemId]){
-			items[itemId] = {
-										id: String(rows[i].id),
-										name: rows[i].name,
-										imageId: rows[i].imageId,
-										rarity: rows[i].rarity,
-										// recipe: (rows[i].receipId) ? rows[i].receipId : null,
-										categories: rows[i].category.split(","),
-										// needStats: {},
-										stats:{},
-										attachments: {},
-										inventorySlots: {},
-									};
+	this.DATA.items = {};
+	Mongo.find('game_Items', {}, function (rows) {
+		for(var i in rows){
+			rows[i]._id = rows[i]._id.toHexString();
+			this.DATA.items[rows[i]._id] = rows[i];
 		}
-		
-		// Собираем статы вещи, которые она дает
-		if(rows[i].statName && items[itemId] && !items[itemId].stats[rows[i].statName]){
-			items[itemId].stats[rows[i].statName] = rows[i].statValue;
-		}
-		
-		// Собираем attachments вещи
-		if(rows[i].slotSpineId && items[itemId] && !items[itemId].attachments[String(rows[i].slotSpineId)]){
-			items[itemId].attachments[String(rows[i].slotSpineId)] = rows[i].attachmentSpineId;
-		}
-		
-		// Собираем слоты вещи, в которые она надевается
-		if(rows[i].slotId && items[itemId] && !items[itemId].inventorySlots[String(rows[i].slotId)]){
-			items[itemId].inventorySlots[String(rows[i].slotId)] = String(rows[i].slotId);
-		}
-	}
-	return items;
+		callback();
+	}.bind(this));
 }
 
 
@@ -248,18 +176,18 @@ PreloadDataClass.prototype.getItems = function()
 	* @since  26.03.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getSpineSlots = function()
+PreloadDataClass.prototype.getSpineSlots = function(callback)
 {
-	var spineSlots = {},
-		req = SQL.querySync("SELECT `game_ItemsSpineSlots`.* FROM `game_ItemsSpineSlots`"),
-		rows = req.fetchAllSync();
-	for (var i=0, length = rows.length - 1; i <= length; i += 1){
-		spineSlots[String(rows[i].id)] = {
-										id: String(rows[i].id),
-										name: rows[i].name
-								};
-	}
-	return spineSlots;
+	this.DATA.spineSlots = {};
+	Mongo.find('game_ItemsSpineSlots', {}, function (rows) {
+		for(var i in rows){
+			this.DATA.spineSlots[String(rows[i].id)] = {
+															id: String(rows[i].id),
+															name: rows[i].name
+														};
+		}
+		callback();
+	}.bind(this));
 }
 
 
@@ -273,19 +201,19 @@ PreloadDataClass.prototype.getSpineSlots = function()
 	* @since  03.04.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getInventorySlotsList = function()
+PreloadDataClass.prototype.getInventorySlotsList = function(callback)
 {
-	var invetorySlots = {},
-		req = SQL.querySync("SELECT `game_ItemsInventorySlotsList`.* FROM `game_ItemsInventorySlotsList`"),
-		rows = req.fetchAllSync();
-	for (var i=0, length = rows.length - 1; i <= length; i += 1){
-		invetorySlots[String(rows[i].id)] = {
-										id: String(rows[i].id),
-										imageId: String(rows[i].imageId),
-										order: String(rows[i].order)
-								};
-	}
-	return invetorySlots;
+	this.DATA.inventorySlotsList = {};
+	Mongo.find('game_ItemsInventorySlotsList', {}, function (rows) {
+		for(var i in rows){
+			this.DATA.inventorySlotsList[String(rows[i].id)] = {
+																	id: String(rows[i].id),
+																	imageId: String(rows[i].imageId),
+																	order: String(rows[i].order)
+																};
+		}
+		callback();
+	}.bind(this));
 }
 
 
@@ -308,31 +236,15 @@ PreloadDataClass.prototype.getInventorySlotsList = function()
 	* @since  05.05.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getNpcsInfo = function()
+PreloadDataClass.prototype.getNpcsInfo = function(callback)
 {
-	var npcsInfo = {},
-		npcsInfoReq = SQL.querySync("SELECT `game_Npcs`.* FROM `game_Npcs`"),
-		rows = npcsInfoReq.fetchAllSync();
-	for (var npcId in rows){
-		npcsInfo[String(rows[npcId].id)] = {
-											id: String(rows[npcId].id),
-											name: rows[npcId].name,
-											enName: rows[npcId].enName,
-											ruName: rows[npcId].ruName,
-											stats: {}
-										};
-		
-		var reqStats = SQL.querySync("SELECT `ns`.*, `gs`.`name` "+
-						"FROM `game_NpcsStats` `ns`, `game_Stats` `gs` "+
-						"WHERE `ns`.`npcId` = "+rows[npcId].id+" AND `gs`.`id` = `ns`.`statId`"),
-			statsRows = reqStats.fetchAllSync();
-		
-		for (var statId in statsRows){
-			npcsInfo[String(rows[npcId].id)].stats[statsRows[statId].name] = statsRows[statId].value;
+	this.DATA.npcsInfo = {};
+	Mongo.find('game_NpcsInfo', {}, function (rows) {
+		for(var i in rows){
+			this.DATA.npcsInfo[rows[i]._id] = rows[i];
 		}
-		
-	}
-	return npcsInfo;
+		callback();
+	}.bind(this));
 }
 
 
@@ -346,7 +258,7 @@ PreloadDataClass.prototype.getNpcsInfo = function()
 	* @since  05.05.14
 	* @author pcemma
 */
-PreloadDataClass.prototype.createGlobalNpcs = function()
+PreloadDataClass.prototype.createGlobalNpcs = function(callback)
 {
 	var npcCount = 1;
 	
@@ -362,6 +274,7 @@ PreloadDataClass.prototype.createGlobalNpcs = function()
 			npcCount++;
 		}
 	}
+	callback();
 }
 
 
@@ -430,22 +343,16 @@ PreloadDataClass.prototype.getBattleObstructions = function()
 	* @since  21.02.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getStats = function()
-{
-	var stats = {};
-	var req = SQL.querySync("SELECT `game_Stats`.* FROM `game_Stats`");
-	
-	
-	var rows = req.fetchAllSync();
-	for (var i=0, length = rows.length - 1; i <= length; i += 1){
-		stats[rows[i].name] = {
-										id: String(rows[i].id),
-										order: 0,
-										group: 0
-								};
-	}
-	
-	return stats;
+PreloadDataClass.prototype.getStats = function(callback)
+{	
+	this.DATA.stats = {};
+	Mongo.find('game_Stats', {}, function (rows) {
+		for(var i in rows){
+			rows[i].id = String(rows[i].id);
+			this.DATA.stats[rows[i].name] = rows[i];
+		}
+		callback();
+	}.bind(this));
 }
 
 
@@ -473,7 +380,7 @@ PreloadDataClass.prototype.getStats = function()
 	* @since  10.02.14
 	* @author pcemma
 */
-PreloadDataClass.prototype.createGlobalUsers = function()
+PreloadDataClass.prototype.createGlobalUsers = function(callback)
 {
 	// GLOBAL USERS ARRAY
 	this.USERS = {};
@@ -484,6 +391,7 @@ PreloadDataClass.prototype.createGlobalUsers = function()
 		this.USERS[users[key].id] = new UserClass();
 		this.USERS[users[key].id].getUserData(users[key].id);
 	}
+	callback();
 }
 
 
@@ -514,26 +422,24 @@ PreloadDataClass.prototype.createGlobalUsers = function()
 	* @since  31.03.14
 	* @author pcemma	
 */
-PreloadDataClass.prototype.createGlobalConstants = function(id)
+PreloadDataClass.prototype.createGlobalConstants = function(callback)
 {
-	var constants = {};
-	var req = SQL.querySync("SELECT * FROM  `game_GlobalConstants`");
-	var row = req.fetchAllSync();
 	
-	for(key in row)
-	{
-		// get client version
-		if(row[key].name == "clientVersion"){
-			// constants.clientVersion = lib.explode( ".", row[0].value );
-			constants.clientVersion = row[0].value.split(".");
-			console.log(constants.clientVersion);
+	this.globalConstants = {};
+	Mongo.find('game_GlobalConstants', {}, function (rows) {
+		for(var i in rows){
+			// get client version
+			if(rows[i].name == "clientVersion"){
+				rows[i].value = rows[i].value.split(".");
+			}
+			this.globalConstants[rows[i].name] = rows[i].value;
 		}
-		else
-			constants[row[key].name] = Number(row[key].value);
-	}
-	
-	return constants;
+		callback();
+	}.bind(this));
 }
+
+
+
 
 	
 /*
@@ -551,7 +457,6 @@ PreloadDataClass.prototype.createGlobalConstants = function(id)
 	* @since  31.03.14
 	* @author pcemma	
 */
-
 PreloadDataClass.prototype.checkVersion = function(version, need_version)
 {
 	if(!need_version){ 
