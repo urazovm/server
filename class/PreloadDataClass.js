@@ -4,9 +4,7 @@ console.log("PreloadData CLASS is connected");
 function PreloadDataClass() {
 	// this.initialize();
 	this.DATA = {};
-	// help array only for server
-	this.HELP = {};
-	
+
 	return this;
 }
 
@@ -24,6 +22,9 @@ PreloadDataClass.prototype.initialize = function()
 		
 		this.getStats.bind(this),
 		
+		this.getBattleInfo.bind(this),
+		
+		
 		// ITEMS
 		this.getInventorySlotsList.bind(this),
 		this.getSpineSlots.bind(this),
@@ -37,15 +38,12 @@ PreloadDataClass.prototype.initialize = function()
 		this.createGlobalNpcs.bind(this) // create NPC array
 	];
 
-
-	this.DATA.battleInfo = this.getBattleInfo();
-	
 	async.parallel(
 		queues,
 		function(err){
 			// All tasks are done now
 			// console.log(this.DATA.items[1]);
-			console.log(this);
+			// console.log(this.DATA.battleInfo);
 			console.log("PreloadDataClass is initialized!!!");
 		}.bind(this)
 	)
@@ -297,35 +295,15 @@ PreloadDataClass.prototype.createGlobalNpcs = function(callback)
 	* @since  08.02.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getBattleInfo = function()
+PreloadDataClass.prototype.getBattleInfo = function(callback)
 {
-	var battleInfo = {
-		obstructions: this.getBattleObstructions() // массив данных про препятсвия на карте боя
-	};
-	return battleInfo;
+	this.DATA.battleInfo = {};
+	Mongo.find('game_BattleInfo', {}, function (rows) {
+		this.DATA.battleInfo = rows[0];
+		callback();
+	}.bind(this));
 }
 
-
-/*
-	* Description:
-	*	Собирает инфу о препятсвиях на поле боя
-	*	
-	*	
-	*
-	* @since  08.02.15
-	* @author pcemma
-*/
-PreloadDataClass.prototype.getBattleObstructions = function()
-{
-	var obstructions = {};
-	var req = SQL.querySync("SELECT * FROM  `game_BattleObstructions`");
-	var row = req.fetchAllSync();
-	for(key in row)
-	{
-		obstructions[String(row[key].id)] = row[key];
-	}
-	return obstructions;
-}
 
 
 
@@ -462,13 +440,11 @@ PreloadDataClass.prototype.checkVersion = function(version, need_version)
 	if(!need_version){ 
 		need_version = this.globalConstants.clientVersion;
 	}else{
-		// need_version = lib.explode( ".", need_version );
-		need_version = need_version.split(".");;
+		need_version = need_version.split(".");
 	}	
 	if(version && version != '')
 	{
-		// var client_version = lib.explode( ".", version );
-		var client_version = version.split(".");;
+		var client_version = version.split(".");
 		for(var key in need_version)
 		{
 			if(Number(client_version[key]) > Number(need_version[key]))

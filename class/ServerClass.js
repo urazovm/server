@@ -1,5 +1,4 @@
 console.log("SERVER CLASS is connected");	
-// var http = require("http");
 var url = require("url");
 
 

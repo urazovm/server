@@ -312,6 +312,7 @@ BattleClass.prototype.createobstructionsHexes = function()
 			y = Math.floor(Math.random() * (this.hexesInCol + 1));
 		tmpArray[x+"."+y] = String(Math.floor(Math.random() * (lib.objectSize(GLOBAL.DATA.battleInfo.obstructions) - 1 + 1)) + 1);
 	}
+	console.log(tmpArray);
 	return tmpArray;
 }
 
