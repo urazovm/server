@@ -38,7 +38,7 @@ PreloadDataClass.prototype.initialize = function()
 		this.createGlobalNpcs.bind(this) // create NPC array
 	];
 
-	async.parallel(
+	async.waterfall(
 		queues,
 		function(err){
 			// All tasks are done now
@@ -241,6 +241,7 @@ PreloadDataClass.prototype.getNpcsInfo = function(callback)
 		for(var i in rows){
 			this.DATA.npcsInfo[rows[i]._id] = rows[i];
 		}
+		console.log("GET INFO IS DONE!!");
 		callback();
 	}.bind(this));
 }
@@ -258,21 +259,27 @@ PreloadDataClass.prototype.getNpcsInfo = function(callback)
 */
 PreloadDataClass.prototype.createGlobalNpcs = function(callback)
 {
-	var npcCount = 1;
+	setTimeout(
+		function(){
+			var npcCount = 1;
 	
-	// GLOBAL NPC ARRAY
-	this.NPCS = {};
+			// GLOBAL NPC ARRAY
+			this.NPCS = {};
+			
+			console.log("this.DATA.npcsInfo", this.DATA.npcsInfo);
+			for (var realNpcId in this.DATA.npcsInfo){
+				console.log(realNpcId);
+				for (var i = 1; i <= 10; i++){
+					var npcId = "npc"+npcCount;
+					this.NPCS[String(npcId)] = new NpcClass();
+					this.NPCS[String(npcId)].getUserData({npcId: realNpcId, userId: npcId});
+					npcCount++;
+				}
+			}
+			callback();
+		}.bind(this), 0
+	);
 	
-	
-	for (var realNpcId in this.DATA.npcsInfo){
-		for (var i = 1; i <= 10; i++){
-			var npcId = "npc"+npcCount;
-			this.NPCS[String(npcId)] = new NpcClass();
-			this.NPCS[String(npcId)].getUserData({npcId: realNpcId, userId: npcId});
-			npcCount++;
-		}
-	}
-	callback();
 }
 
 
