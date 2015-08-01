@@ -37,9 +37,6 @@ Npc.prototype.getUserData = function(data)
 	this.userId = data.userId; 	// Вид: "npc"+id, где ид - эт порядковый номер нпц в спике всех нпц
 	this.npcId = data.npcId;	// int, реальное ид нпц. из таблицы всех нпц
 	
-	console.log("this.npcId", this.npcId, "this.userId", this.userId);
-	
-	
 	//TODO взятие данных типа логин и прочие
 	this.userData.login = "npc"+this.userId;
 	this.userData.lastActionTime = 0;
