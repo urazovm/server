@@ -1,5 +1,5 @@
 console.log("DB CLASS is connected");	
-
+var domain = require('domain');
 
 function DBClass(data) {
 	this.connectionsCount = 5;
@@ -227,7 +227,9 @@ DBClass.prototype.createPoolConntections = function() {
 	* @author pcemma, tooreckiy
 */
 DBClass.prototype.queryAsync = function(query, callBack) {
-	this.poolConntections.query( query, d.bind(
+	var dServer = domain.create();
+	dServer.on('error', function(err) { lib.domainL(err); });
+	this.poolConntections.query( query, dServer.bind(
 											function(err, result, fields){																			
 												if (err){ 
 													err.stack = query+"\n".concat(err.stack);

@@ -9,7 +9,7 @@ function PreloadDataClass() {
 }
 
 
-PreloadDataClass.prototype.initialize = function()
+PreloadDataClass.prototype.initialize = function(callback)
 {
 	var queues = [
 		this.createGlobalConstants.bind(this), // собираем все константы
@@ -24,7 +24,6 @@ PreloadDataClass.prototype.initialize = function()
 		
 		this.getBattleInfo.bind(this),
 		
-		
 		// ITEMS
 		this.getInventorySlotsList.bind(this),
 		this.getSpineSlots.bind(this),
@@ -32,7 +31,6 @@ PreloadDataClass.prototype.initialize = function()
 		
 		// NPC INFO
 		this.getNpcsInfo.bind(this),
-		
 		
 		this.createGlobalUsers.bind(this), // create USERS array
 		this.createGlobalNpcs.bind(this) // create NPC array
@@ -45,6 +43,7 @@ PreloadDataClass.prototype.initialize = function()
 			// console.log(this.DATA.items[1]);
 			// console.log(this.DATA.battleInfo);
 			console.log("PreloadDataClass is initialized!!!");
+			callback();
 		}.bind(this)
 	)
 }

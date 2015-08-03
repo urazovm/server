@@ -1,5 +1,8 @@
 console.log("User CLASS is connected");	
 
+var crypto = require('crypto');
+
+
 function User() {
 
 	this.userId = 0;
