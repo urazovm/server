@@ -205,8 +205,9 @@ User.prototype.addNewUser = function(data)
 	//TODO:удалить или заменить это, это тестово
 	// Добавляем вещи юзеру сразу.
 	var sqlQueriesArr = [];
-	for(var i = 1; i <= 8; i++){
-		sqlQueriesArr.push("("+userId+", "+i+", 1)");
+	for(var itemId in GLOBAL.DATA.items){
+		console.log(GLOBAL.DATA.items[itemId]);
+		sqlQueriesArr.push("("+userId+", '"+itemId+"', 1)");
 	}
 	SQL.querySync("INSERT INTO `game_UsersItems`(`userId`, `itemId`, `count`) VALUES "+sqlQueriesArr.join(','));
 	

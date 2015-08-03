@@ -25,16 +25,17 @@ ServerClass.prototype.start = function()
 {
 	var dServer = domain.create();
 	dServer.on('error', function(err) { lib.domainL(err); });
-	dServer.run(function() {
-		var android_server = net.createServer(this.onSocketRequest).listen(config.port_config.port_number_socket, '0.0.0.0');
-		// var ios_server = net.createServer(onrequest).listen(config.port_config.port_number_ios, '0.0.0.0');
-		
-		console.log("\n\n -------------------------------------------------------------\n",
-						"SERVER START TIME:"+Date()+" \n",
-						"client version: ", GLOBAL.globalConstants.clientVersion+" \n", 
-						"Data version: ", GLOBAL.globalConstants.globalDataVersion+" \n",
-						"-------------------------------------------------------------\n\n");
-	});
+	// dServer.run(function() {
+	var android_server = net.createServer(this.onSocketRequest).listen(config.port_config.port_number_socket, '0.0.0.0');
+	dServer.add(android_server);
+	// var ios_server = net.createServer(onrequest).listen(config.port_config.port_number_ios, '0.0.0.0');
+	
+	console.log("\n\n -------------------------------------------------------------\n",
+					"SERVER START TIME:"+Date()+" \n",
+					"client version: ", GLOBAL.globalConstants.clientVersion+" \n", 
+					"Data version: ", GLOBAL.globalConstants.globalDataVersion+" \n",
+					"-------------------------------------------------------------\n\n");
+	// });
 }
 
 
@@ -51,7 +52,7 @@ ServerClass.prototype.start = function()
 */
 ServerClass.prototype.onSocketRequest = function(socket){
 	socket.setEncoding("utf8");
-
+	console.log("sdfsdf");
 	var oData = "",
 		dSocket = domain.create();
 	
@@ -138,5 +139,3 @@ ServerClass.prototype.onSocketRequest = function(socket){
 
 
 module.exports = ServerClass;
-
-

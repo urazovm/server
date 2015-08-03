@@ -43,7 +43,4 @@ Mongo = new MongoDBClass(function(){
 		var server = new ServerClass();
 		server.start();
 	});
-	
-	
-
 });
