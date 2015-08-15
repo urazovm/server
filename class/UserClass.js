@@ -185,6 +185,8 @@ User.prototype.addDefaultUser = function(data, callback)
 User.prototype.addDefaultStats = function()
 {
 	return {
+		hp: 				100,
+		currentHp:			100,
 		strength:			1,
 		agility:			1,
 		intuition:			1,
