@@ -201,6 +201,10 @@ BMClass.prototype.searchFreeHexesInArea = function(data)
 	return false;
 }
 
+
+
+
+
 /*
 	* Description: Очищает незакоченые бои в базе при старте сервера.
 	*

@@ -7,7 +7,8 @@ function Npc() {
 	// USER DATA
 	this.userData = {
 						items: {}, 	// Предметы
-						stuff: {} 	// Надетые вещи
+						stuff: {}, 	// Надетые вещи
+						stats: {} 	// Статы юзера
 					};
 }				
 
@@ -71,9 +72,7 @@ Npc.prototype.getUserData = function(data)
 */
 Npc.prototype.getStats = function()
 {
-	for (var key in GLOBAL.DATA.npcsInfo[this.npcId].stats){
-		this.userData[key] = GLOBAL.DATA.npcsInfo[this.npcId].stats[key];
-	}
+	this.userData.stats = GLOBAL.DATA.npcsInfo[this.npcId].stats;
 }
 
 
@@ -185,12 +184,12 @@ Npc.prototype.findHexIdToMove = function()
 				//TODO: переделать механизм выбора гекса для передвижения, в данный момент это просто любая свободная ячейка.
 				var hexToMoveId = Math.floor((Math.random() * hexesArray.length));
 				battlesManager.moveHero({id: this.userData.battleId, hexId: hexesArray[hexToMoveId], userId: this.userId});			
-				this.battleTimer = setTimeout(this.searchEnemyInArea.bind(this), this.userData.moveActionTime * 1000);								
+				this.battleTimer = setTimeout(this.searchEnemyInArea.bind(this), this.userData.stats.moveActionTime * 1000);								
 			}
 			else{
 				// Свободных гексов нет. Надо заново проверить область на поиск врага. 
 				// Используем moveActionTime, потому что дейсвтие должно быть сделано по таймеру движения. 
-				this.battleTimer = setTimeout(this.searchEnemyInArea().bind(this), this.userData.hitActionTime * 1000);
+				this.battleTimer = setTimeout(this.searchEnemyInArea().bind(this), this.userData.stats.hitActionTime * 1000);
 			}	
 		}
 		else{
@@ -214,10 +213,10 @@ Npc.prototype.heroMakeHit = function()
 	var currentTime = Math.floor(+new Date() / 1000),
 		isNpcHit = battlesManager.heroMakeHit({id: this.userData.battleId, hexId: this.userData.enemyHexId, userId: this.userId});
 	if(isNpcHit){
-		this.battleTimer = setTimeout(this.heroMakeHit.bind(this), this.userData.hitActionTime * 1000);
+		this.battleTimer = setTimeout(this.heroMakeHit.bind(this), this.userData.stats.hitActionTime * 1000);
 	}
 	else{
-		this.battleTimer = setTimeout(this.searchEnemyInArea().bind(this), this.userData.hitActionTime * 1000);
+		this.battleTimer = setTimeout(this.searchEnemyInArea().bind(this), this.userData.stats.hitActionTime * 1000);
 	}	
 }
 

@@ -3,6 +3,7 @@ var MongoClient = require('mongodb').MongoClient;
 
 function MongoDBClass(callback) {
 	this.connect(callback);
+	this.objectId = require('mongodb').ObjectID;
 }
 
 
@@ -18,12 +19,11 @@ MongoDBClass.prototype.connect = function(callback){
 }
 
 
-MongoDBClass.prototype.find = function(collection, searchData, callback) {
+MongoDBClass.prototype.find = function(collection, searchData, fields, callback) {
 	// Get the documents collection
 	var collection = this.db.collection(collection);
 	// Find some documents
-	collection.find({}).toArray(function(err, docs) {
-		// console.dir(docs);
+	collection.find(searchData, fields).toArray(function(err, docs) {
 		callback(docs);
 	});
 }
@@ -35,6 +35,7 @@ MongoDBClass.prototype.insert = function(collection, insertData, callback) {
 	// Insert some documents
 	collection.insert(insertData, function(err, result) {
 		// console.log(result);
+		if(err) { console.log(err); }
 		callback(result);
 	});
 }
@@ -74,18 +75,6 @@ MongoDBClass.prototype.remove = function(collection, searchData, callback) {
 	});
 }
 
-
-
-
-
-/*
-MongoDBClass.prototype.insertLastId = function(collection, insertData, callback) {
-	this.db.collection('counters').findAndModify({id: collection}, [], {$inc : {seq : 1}}, {new: true}, function(err, doc) {
-		insertData.id = doc.value.seq;
-		this.insert(collection, insertData, callback);	
-	}.bind(this));	
-}
-*/
 
 
 

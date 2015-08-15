@@ -190,7 +190,7 @@ BattleClass.prototype.moveHero = function(data)
 		
 		// Обновление героя
 		this.heroes[data.userId].userData.hexId = data.hexId;
-		this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.moveActionTime;
+		this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.stats.moveActionTime;
 		
 		this.socketWrite({
 							f: "battleMoveHero", 
@@ -247,7 +247,7 @@ BattleClass.prototype.heroMakeHit = function(data)
 			this.heroes[oponentUserId].userData.teamId != this.heroes[data.userId].userData.teamId	// противник ли в этой клетке?
 		){
 			// обновляем герою который совершал удар время таймаута
-			this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.moveActionTime;
+			this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.stats.moveActionTime;
 			
 			//TODO: считать увернулся ли противник
 		
@@ -256,10 +256,10 @@ BattleClass.prototype.heroMakeHit = function(data)
 			
 			//TODO: посчитать броню противника
 			
-			console.log("damage", damage, "oponentUserId", oponentUserId, "this.heroes[oponentUserId].userData.currentHp", this.heroes[oponentUserId].userData.currentHp);
+			console.log("damage", damage, "oponentUserId", oponentUserId, "this.heroes[oponentUserId].userData.stats.currentHp", this.heroes[oponentUserId].userData.stats.currentHp);
 			
 			// Обновляем противнику его текущее значение хп
-			this.heroes[oponentUserId].userData.currentHp -= damage;
+			this.heroes[oponentUserId].userData.stats.currentHp -= damage;
 			// Проверяет умер ли герой. Если да, то ставит герою соответствующие флаги
 			var isHeroAlive = this.heroes[oponentUserId].isAlive();
 			// Проверяем если герой умер то надо удалить его из гекса.
@@ -471,8 +471,9 @@ BattleClass.prototype.getHeroData = function(userId)
 					isAliveFlag:	this.heroes[userId].userData.isAliveFlag,
 					hexId: 			this.heroes[userId].userData.hexId,
 					login: 			this.heroes[userId].userData.login,
-					hp:				this.heroes[userId].userData.hp,
-					currentHp:		this.heroes[userId].userData.currentHp,
+					stats:			this.heroes[userId].userData.stats,
+					// hp:				this.heroes[userId].userData.stats.hp,
+					// currentHp:		this.heroes[userId].userData.stats.currentHp,
 					lastActionTime: (currentTime < this.heroes[userId].userData.lastActionTime) ? (this.heroes[userId].userData.lastActionTime - currentTime) : 0,
 					stuff: 			this.heroes[userId].userData.stuff
 				};

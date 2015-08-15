@@ -1,4 +1,3 @@
-geoip = require('./lib/geoip/geoip');
 async = require("async");
 
 

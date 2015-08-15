@@ -5,12 +5,15 @@ var crypto = require('crypto');
 
 function User() {
 
-	this.userId = 0;
+	// this.userId = 0;
 	
 	// USER DATA
+	this.autoConfigData = {};
+	
 	this.userData = {
 						items: {}, 	// Предметы
-						stuff: {} 	// Надетые вещи
+						stuff: {}, 	// Надетые вещи
+						stats: {} 	// Статы юзера
 					};
 				
 
@@ -51,89 +54,32 @@ User.prototype.socketWrite = function (data)
 	* @since  25.01.15
 	* @author pcemma
 */
-User.prototype.check = function(autoConfigData)
+User.prototype.check = function(autoConfigData, callback)
 {
-	console.log(autoConfigData);
-	var userId;
 	if(
 		autoConfigData && 
 		autoConfigData.email && autoConfigData.email != "" &&
 		autoConfigData.password && autoConfigData.password != ""
 	){
-		var req = SQL.querySync("SELECT `game_Users`.`id` FROM `game_Users` WHERE `game_Users`.`email` = '"+SQL.mysqlRealEscapeString((autoConfigData.email.toLowerCase()))+"' AND `password` = '"+crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex')+"' ");
-		var row = req.fetchAllSync();
-		if(row[0])
-			userId = row[0].id;
-	}
-	return userId;
-}
-
-
-/*
-	* Description:
-	*	function проверяет есть в базе пользователь с таким емайлом. Так же в функцию включена валидация емайла
-	*	
-	*	@autoConfigData:	array
-	*		@email:			str, email of the user
-	*	@takingIntoUser:	bool, флаг отвечает учитывать ли что емейл - это емейл того игрока, ктороый проверяет
-	*
-	*	return: flag:		boolean, да - если нашли такого юзера с таким же емайлом, нет - если не нашли
-	*
-	* @since  25.01.15
-	* @author pcemma
-*/
-User.prototype.chekEmail = function(autoConfigData, takingIntoUser)
-{
-	console.log("chekEmail");
-	console.log(autoConfigData);
-	var flag = false;
-	if(
-		autoConfigData && 
-		autoConfigData.email && autoConfigData.email != "" &&
-		lib.validateEmail(autoConfigData.email)
-	){
-		var req = SQL.querySync("SELECT `game_Users`.`id` FROM `game_Users` WHERE `game_Users`.`email` = '"+SQL.mysqlRealEscapeString((autoConfigData.email.toLowerCase()))+"' ");
-		var row = req.fetchAllSync();
-		if(row[0]){
-			if(row[0].id == this.userId && takingIntoUser){
-				flag = true;
-			}
-		}
-		else{
-			flag = true;
-		}
-	}
-	return flag;
-}
-
-
-/*
-	* Description:
-	*	function Изменяет данные пользователя емайл и пароль, а так же тип пользователя в зависимости от дейсвтия.
-	*	
-	*	@autoConfigData:
-	*		@email:		str, email of the user
-	*		@password:	str, password of the user
-	*
-	*
-	* @since  25.01.15
-	* @author pcemma
-*/
-User.prototype.changeEmailAndPassword = function(autoConfigData)
-{
-	console.log("changeEmailAndPassword");
-	console.log(autoConfigData);
-	if(
-		autoConfigData && 
-		autoConfigData.email && autoConfigData.email != "" &&
-		lib.validateEmail(autoConfigData.email) &&
-		autoConfigData.password && autoConfigData.password != ""
-	){
-		if(this.userType == 1)
-			this.userType = 2;
-		SQL.querySync("UPDATE `game_Users`SET `userType` = "+this.userType+", `email` = '"+SQL.mysqlRealEscapeString((autoConfigData.email.toLowerCase()))+"', `password` = '"+crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex')+"' WHERE `game_Users`.`id` = "+this.userId);
+		console.log(autoConfigData.email.toLowerCase(), crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex'));
+		Mongo.find(	'game_Users', 
+					{email: autoConfigData.email.toLowerCase(), password: crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex')},
+					{_id: true},
+					function (rows) {
+						console.log("CHECK USER!!!");
+						console.log(rows);
+						if(rows.length > 0){
+							this.userId = rows[0]._id;
+						}
+						callback();
+					}.bind(this));
 	}
 }
+
+
+
+
+
 
 
 /*
@@ -161,81 +107,84 @@ User.prototype.changeEmailAndPassword = function(autoConfigData)
 	* @since  25.01.15
 	* @author pcemma
 */
-User.prototype.addNewUser = function(data)
+User.prototype.createNewUser = function(data, callback)
 {
-	// new user. need to create begin data to array and db!
-	var userId 		= SQL.lastInsertIdSync("INSERT INTO `game_Users` (`id`) VALUES (NULL)"), 
-		login		= "guest"+userId, 
-		email 		= login+"@"+(+new Date())+"bew.net", 
-		password 	= Math.random().toString(36).substr(2, 10), 
-		userType 	= 1,
-		currentTime = Math.floor(+new Date() / 1000),
-		query 		= "";
+	console.log("ADD NEW USER!!!");
+	var queues = [
+		this.addDefaultUser.bind(this, data),
+		this.addDefaultItems.bind(this)
+	];
 	
-	if(
-		data.autoConfigData &&
-		data.autoConfigData.email && data.autoConfigData.email != "" &&
-		data.autoConfigData.password && data.autoConfigData.password != ""
-	){
-		email = data.autoConfigData.email.toLowerCase();
-		password = data.autoConfigData.password;
-		userType = 3;
-	}
+	async.waterfall(
+		queues,
+		function(err){
+			console.log("User createNewUser");
+			callback();
+		}.bind(this)
+	)
+}	
 	
-	// Обновляем данные для авторизации в базе
-	SQL.querySync("UPDATE `game_Users` SET "+
-							"`Login` = '"+login+"', "+
-							"`email` = '"+SQL.mysqlRealEscapeString(email)+"', "+
-							"`password` = '"+crypto.createHash('md5').update(String(password)).digest('hex')+"', "+
-							"`userType` = "+userType+", "+
-							"`registrationDate` = "+currentTime+", "+
-							
-							"`uid` = '"+SQL.mysqlRealEscapeString((data.uid) ? data.uid : "")+"', "+
-							"`langLocale` = '"+SQL.mysqlRealEscapeString((data.langLocale) ? data.langLocale : "")+"', "+
-							"`device` = '"+SQL.mysqlRealEscapeString((data.device) ? data.device : "")+"', "+
-							"`deviceSystemVersion` = '"+SQL.mysqlRealEscapeString((data.deviceSystemVersion) ? data.deviceSystemVersion : "")+"', "+
-							"`deviceToken` = '"+SQL.mysqlRealEscapeString((data.deviceToken) ? data.deviceToken : "")+"', "+
-							
-							"`ip` = '"+SQL.mysqlRealEscapeString((data.ip) ? data.ip : "")+"', "+
-							"`country` = '"+SQL.mysqlRealEscapeString((data.ip) ? lib.getCountryByIp(data.ip) : "")+"', "+
-							"`clientVersion` = '"+SQL.mysqlRealEscapeString((data.clientVersion) ? data.clientVersion : "")+"' "+
-							
-							"WHERE `id` = "+userId);
-	
-	//TODO:удалить или заменить это, это тестово
-	// Добавляем вещи юзеру сразу.
-	var sqlQueriesArr = [];
-	for(var itemId in GLOBAL.DATA.items){
-		console.log(GLOBAL.DATA.items[itemId]);
-		sqlQueriesArr.push("("+userId+", '"+itemId+"', 1)");
-	}
-	SQL.querySync("INSERT INTO `game_UsersItems`(`userId`, `itemId`, `count`) VALUES "+sqlQueriesArr.join(','));
-	
-	
-	
-	
-	
-	
-	// Добавляем статы игроку
-	this.addStats(userId);
-	
-	return {userId: userId, login: login, email: email, password: password};
-}
 
+/*
+	* Description:
+	*	function Заполняем все необходимые данные в базе данных о новом юзере. 
+	*	
+	*
+	*	@data:				array
+	*		@autoConfigData: 	array
+	*			@email:			str, email of the user
+	*			@password:		str, password of the user
+	*
+	*
+	* @since  10.08.15
+	* @author pcemma
+*/
+User.prototype.addDefaultUser = function(data, callback)
+{
+	var currentTime = Math.floor(+new Date() / 1000),
+		login =	"guest"+(+new Date());
+	this.autoConfigData = {
+		password: 	Math.random().toString(36).substr(2, 10),
+		login:	login,
+		email:	login+"@bew.net"
+	};
+	
+	Mongo.insert(
+		"game_Users", 
+		{
+			email: this.autoConfigData.email,
+			password: crypto.createHash('md5').update(String(this.autoConfigData.password)).digest('hex'),
+			registrationDate: currentTime,
+			userData: {
+				login: this.autoConfigData.login,
+				lastActionTime: 0,
+				inBattleFlag: false,
+				isAliveFlag: true,
+				items:{},
+				stuff: {},
+				stats: this.addDefaultStats()
+			},
+		}, 
+		function(rows){
+			this.userId = rows.ops[0]._id;
+			callback();
+		}.bind(this)); 		
+}
+	
 
 /*
 	* Description:
 	*	Добавляем статы новому игроку
 	*	
 	*	
-	*	return: 
+	*	return: array, массив с набором статов по умолчанию.
 	*
-	* @since  21.02.15
+	* @since  10.08.15
 	* @author pcemma
 */
-User.prototype.addStats = function(userId)
+User.prototype.addDefaultStats = function()
 {
-	var tempArray = {
+	return {
 		strength:			1,
 		agility:			1,
 		intuition:			1,
@@ -246,40 +195,140 @@ User.prototype.addStats = function(userId)
 		actionTime:			1,
 		moveActionTime:		2,
 		hitActionTime:		2
-	},
-	queryArray = [];
-	
-	for (var key in tempArray){
-		queryArray.push("("+userId+", "+GLOBAL.DATA.stats[key].id+", "+tempArray[key]+")");
 	}
-	SQL.querySync("INSERT INTO `game_UsersStats` (`userId`, `statId`, `value`) VALUES "+queryArray.join(",")+" ");
+}
+
+
+/*
+	* Description:
+	*	Добавляем вещи новому игроку
+	*	
+	*	
+	*
+	* @since  10.08.15
+	* @author pcemma
+*/
+User.prototype.addDefaultItems = function(callback)
+{
+	var defaultItemsArray = [
+			"55ba5662d95a08c8513f668b",
+			"55ba5662d95a08c8513f668d",
+			"55ba5662d95a08c8513f668e",
+			"55ba5662d95a08c8513f6690",
+			"55ba5662d95a08c8513f6691"
+		];
+	
+	for(var i in defaultItemsArray){
+		var itemId = defaultItemsArray[i];
+		this.addItem({
+			stats: GLOBAL.DATA.items[itemId].stats,
+			itemId: itemId,
+			count: 1
+		}, callback);
+	}
+	
 	
 }
 
 
+/*
+	* Description:
+	*	function Заполняем все необходимые данные в базе о информации о пользователе.. 
+	*	
+	*
+	*	@data:				array
+	*		@uid:				
+	*		@langLocale:		
+	*		@device:		
+	*		@deviceSystemVersion:		
+	*		@deviceToken:		
+	*		@clientVersion:		
+	*
+	*
+	* @since  10.08.15
+	* @author pcemma
+*/
+User.prototype.updateClientInfo = function(data, callback)
+{
+	var insertData = {$set:{
+		uid: (data.uid) ? data.uid : "",
+		langLocale: (data.langLocale) ? data.langLocale : "",
+		device: (data.device) ? data.device : "",
+		deviceSystemVersion: (data.deviceSystemVersion) ? data.deviceSystemVersion : "",
+		deviceToken: (data.deviceToken) ? data.deviceToken : "",
+		country: (data.ip) ? lib.getCountryByIp(data.ip) : "",
+		clientVersion: (data.clientVersion) ? data.clientVersion : "",
+		ip: (data.ip) ? data.ip : ""
+	}};
+	Mongo.update('game_Users', {_id: this.userId}, insertData, function(){
+		callback();
+	});
+}
 
 
 
 // AUTH //
 
+
 /*
 	* Description:
-	*	function auth user
+	*	function авторизация пользователя
 	*	
-	*	@data:	array, array of params
-	*	@userId:	int, id of the user for auth
 	*	
 	*	return: 
 	*
-	* @since  10.02.14
+	* @since  07.08.15
 	* @author pcemma
 */
-User.prototype.auth = function(data)
+User.prototype.authorization = function(data, callback)
 {
-	// Get verifyHash
-	this.socket = data.socket;
-	this.verifyHash = crypto.createHash('md5').update(String(+new Date()) + config.secretHashString + String(this.userId)).digest('hex');
-	this.ping = Math.floor(+new Date() / 1000);
+	var queues = [];
+	// проверяем на то что такой пользователь есть и верно введены данные для авторизации
+	if(
+		data.autoConfigData && 
+		((data.autoConfigData.email && data.autoConfigData.email != "") ||
+		(data.autoConfigData.password && data.autoConfigData.password != ""))
+	){
+		// Тут проверка без учета самого пользователя, который может проверять
+		queues.push(this.check.bind(this, data.autoConfigData));
+	}
+	else{
+		// проверка на то что мы делаем нового гостя. поля мейл и пароль пусты
+		queues.push(this.createNewUser.bind(this, data));
+	}
+	
+	// Обновление инфы об пользователе. Uid, ip etc.
+	queues.push(this.updateClientInfo.bind(this, data));
+	
+	// Сбор данных о юзере.
+	queues.push(this.getUserData.bind(this));
+	
+	async.waterfall(
+		queues,
+		function(err){
+			console.log("User authorization");
+			
+			// мы удачно все прошли, нашли нужного пользователя с теми данными что прислыли, либо создали гостя
+			if(this.userId){
+				// Get verifyHash
+				this.socket = data.socket;
+				this.verifyHash = crypto.createHash('md5').update(String(+new Date()) + config.secretHashString + String(this.userId)).digest('hex');
+				// this.ping = Math.floor(+new Date() / 1000);
+				var sendData =  {
+						userData: this.userData, 
+						userId: this.userId, 
+						verifyHash: this.verifyHash, 
+						autoConfigData: this.autoConfigData
+					};
+				this.socketWrite({f: "authorizationResponse", p: sendData});
+			}
+			else{
+				// Ответ что у мы не можем авторизоваться (не верные данные)
+				console.log("Not such user!!!");
+			}
+			callback();
+		}.bind(this)
+	)
 }
 
 
@@ -293,51 +342,27 @@ User.prototype.auth = function(data)
 	* @since  21.02.15
 	* @author pcemma
 */
-User.prototype.getUserData = function(userId)
+User.prototype.getUserData = function(callback)
 {
-	//TODO: перенести это в кеш!!! Тут должна сработаь функция взятия из кеша всех данных.
-	this.userId = userId;
-	//TODO взятие данных типа логин и прочие
-	this.userData.login = "guest"+this.userId;
-	this.userData.lastActionTime = 0;
-	
-	//Флаги
-	this.userData.inBattleFlag = false;
-	this.userData.isAliveFlag = true;
-	
-	
-	
-	// Собираем статы игрока те что в базе
-	this.getStats();
-	
-	this.getItems();
-	
-
-	
-	// пересчитываем статы игрока. с учетом всех данных
-	this.recountStats();
-}
-
-
-/*
-	* Description:
-	*	Собирает статы игрока которые есть в базе
-	*	
-	*	return: 
-	*
-	* @since  21.02.15
-	* @author pcemma
-*/
-User.prototype.getStats = function()
-{
-	var req = SQL.querySync("SELECT `us`.*, `gs`.`name` "+
-							"FROM `game_UsersStats` `us`, `game_Stats` `gs` "+
-							"WHERE `us`.`userId` = "+this.userId+" AND `gs`.`id` = `us`.`statId`");
-	var rows = req.fetchAllSync();
-	
-	for (var key in rows){
-		this.userData[rows[key].name] = rows[key].value;
-	}
+	Mongo.find('game_Users', {_id: this.userId}, {userData: true}, function(rows){
+		if(rows.length > 0){
+			this.userData = rows[0].userData;
+			var queues = [
+				// Собираем вещи юзера. Данные про вещи текущие в коллеции game_WorldItems
+				this.getItems.bind(this)
+			];
+			
+			async.waterfall(
+				queues,
+				function(err){
+					console.log("Get userData");
+					console.log(this.userData);
+					callback();
+				}.bind(this)
+			)
+		}
+		// callback();	
+	}.bind(this));	
 }
 
 
@@ -354,15 +379,14 @@ User.prototype.recountStats = function()
 {
 	
 	// minDamage
-	this.userData['minDamage'] = this.userData['strength'];
+	this.userData.stats['minDamage'] = this.userData.stats['strength'];
 	// maxDamage
-	this.userData['maxDamage'] = this.userData['strength'] * 3;
+	this.userData.stats['maxDamage'] = this.userData.stats['strength'] * 3;
 	// hp
-	this.userData['hp'] = this.userData['stamina'] * 8;
+	this.userData.stats['hp'] = this.userData.stats['stamina'] * 8;
 	// currentHp
-	this.userData['currentHp'] = this.userData['stamina'] * 8;
+	this.userData.stats['currentHp'] = this.userData.stats['stamina'] * 8;
 }
-
 
 
 
@@ -428,7 +452,7 @@ User.prototype.setBattleData = function(data)
 User.prototype.removeFromBattle = function(data)
 {
 	// TODO: это временное решение для того что бы можно было сразу вступить в бой заново!
-	this.userData.currentHp = this.userData.hp;
+	this.userData.stats.currentHp = this.userData.stats.hp;
 	this.userData.isAliveFlag = true;
 	
 	this.userData.inBattleFlag = false;
@@ -450,7 +474,7 @@ User.prototype.removeFromBattle = function(data)
 */
 User.prototype.countDamage = function()
 {
-	var damage = Math.floor(Math.random() * (this.userData.maxDamage - this.userData.minDamage + 1)) + this.userData.minDamage;
+	var damage = Math.floor(Math.random() * (this.userData.stats.maxDamage - this.userData.stats.minDamage + 1)) + this.userData.stats.minDamage;
 	return damage;
 }
 
@@ -464,8 +488,8 @@ User.prototype.countDamage = function()
 */
 User.prototype.isAlive = function()
 {
-	if(this.userData.currentHp <= 0 ){
-		this.userData.currentHp = 0;
+	if(this.userData.stats.currentHp <= 0 ){
+		this.userData.stats.currentHp = 0;
 		this.userData.isAliveFlag = false;
 	}
 	return this.userData.isAliveFlag;
@@ -482,31 +506,64 @@ User.prototype.isAlive = function()
 	* Description:
 	*	Собирает список итемов (предметов) у пользователя
 	*	
-	*	return: массив, итемов (предметов)
 	*
-	* @since  24.03.15
+	* @since  12.08.15
 	* @author pcemma
 */
-User.prototype.getItems = function()
+User.prototype.getItems = function(callback)
 {
-	var req = SQL.querySync("SELECT `game_UsersItems`.* "+
-							"FROM `game_UsersItems` "+
-							"WHERE `game_UsersItems`.`userId` = "+this.userId+" ");
-	var rows = req.fetchAllSync();
-	
-	for (var key in rows){
-		this.userData.items[String(rows[key].id)] = rows[key];
-		this.userData.items[String(rows[key].id)].itemId = String(this.userData.items[String(rows[key].id)].itemId);
-		if(rows[key].inventorySlotId != ''){
-			var arrayOfSlots = rows[key].inventorySlotId.split(',');
-			for(var i in arrayOfSlots){
-				var slotId = arrayOfSlots[i];
-				this.userData.stuff[String(slotId)] = {
-														userItemId: 	 String(rows[key].id),
-														itemId: 		 String(rows[key].itemId),
-														inventorySlotId: String(slotId)
+	console.log("GET ITEMS!!!");
+	Mongo.find("game_WorldItems", {userId: this.userId}, {}, function(rows){
+		console.log(rows);
+		for(var i in rows){
+			console.log(rows[i]);
+			var worldItemId = rows[i]._id.toHexString();
+			this.userData.items[worldItemId] = rows[i];
+			//Собираем данные а надетых вещах. 
+			// TODO: Вынести это в отдельный метод, который собирает надеый стафф! 
+			for(var j in rows[i].inventorySlotId){
+				var invetnorySlotId = String(rows[i].inventorySlotId[j]);
+				this.userData.stuff[invetnorySlotId] = {
+														userItemId: worldItemId,
+														itemId: 	String(rows[i].itemId)
 													};
 			}
+		}
+		callback();
+	}.bind(this));
+}
+
+
+/*
+	* Description:
+	*	Добавляет вещь пользователю. Сначало надо доабвить вещь в коллецию game_WorldItems. Если такая вещь есть, и ее она количественная то надо увеличить количество
+	*	
+	*
+	* @since  11.08.15
+	* @author pcemma
+*/
+
+User.prototype.addItem = function(data, callback)
+{
+	if(data.itemId in GLOBAL.DATA.items){
+		
+		// Если предмет исчесляемый, то если он есть надо увеличить количество.
+		if(GLOBAL.DATA.items[data.itemId].countableFlag){
+			
+			
+		}
+		else{
+			Mongo.insert("game_WorldItems", 
+				{
+					stats: data.stats,
+					itemId: data.itemId,
+					count: data.count,
+					userId: this.userId,
+				},  
+				function(rows){
+					console.log("Add item", rows.ops[0]._id);
+					callback();
+				}.bind(this)); 
 		}
 	}
 }
@@ -517,21 +574,22 @@ User.prototype.getItems = function()
 	*	Надевает вещь на героя
 	*	
 	*	@data:	array
-	*		@itemId:	int, id вещи из таблицы game_UsersItems
+	*		@itemId:	int, worldItemId - id из коллекции game_WorldItems
 	*	
 	*	
 	*
-	* @since  09.06.15
+	* @since  15.08.15
 	* @author pcemma
 */
 User.prototype.wearOnItem = function(data)
 {
+	var worldItemId = String(data.itemId);
 	if(
-		data.itemId in this.userData.items  // Проверка на то что такая вещь вообще есть у пользователя
+		worldItemId in this.userData.items  // Проверка на то что такая вещь вообще есть у пользователя
 											// TODO: Проверка на то что ее можно надеть, что она подходит по статам, и что она не надета уже!
 											// TODO: может стоит проверять еще и на ид в мире!
 	){
-		var itemId = this.userData.items[data.itemId].itemId;
+		var itemId = this.userData.items[worldItemId].itemId;
 		// Проверка на то, что такая вещь вообще есть в базе!
 		if(itemId in GLOBAL.DATA.items){
 			
@@ -551,20 +609,21 @@ User.prototype.wearOnItem = function(data)
 				
 				//TODO: добавлять статы вещи в статы юзера, все бонусы и прочее
 				this.userData.stuff[inventorySlotId] = {
-														userItemId: 	 String(data.itemId),
-														itemId: 		 String(itemId),
-														inventorySlotId: String(inventorySlotId)
+														userItemId: 	 worldItemId,
+														itemId: 		 String(itemId)
 													};
 			}
 			// Обновляем слот ид в массиве свойств вещи пользователя.
-			var slotsId = inventorySlotsArray.join(',');
-			this.userData.items[data.itemId].inventorySlotId = slotsId;
-			SQL.queryAsync("UPDATE `game_UsersItems` SET `game_UsersItems`.`inventorySlotId` = '"+slotsId+"' WHERE `game_UsersItems`.`id` = "+data.itemId+" ");
+			this.userData.items[worldItemId].inventorySlotId = inventorySlotsArray;
+			
+			var insertData = {$set:{inventorySlotId: inventorySlotsArray}};
+			// TODO: Добавить асинхроность тут
+			Mongo.update('game_WorldItems', {_id: Mongo.objectId(worldItemId)}, insertData, function(rows){});
 			
 			this.socketWrite({
 				f: "userWearOnItem", 
 				p: {
-					itemId: String(data.itemId)
+					itemId: worldItemId
 				}
 			});
 		}
@@ -586,35 +645,35 @@ User.prototype.wearOnItem = function(data)
 */
 User.prototype.wearOffItem = function(data)
 {
+	var worldItemId = String(data.itemId);
 	if(
-		data.itemId in this.userData.items  // Проверка на то что такая вещь вообще есть у пользователя
+		worldItemId in this.userData.items  // Проверка на то что такая вещь вообще есть у пользователя
 											// TODO: Проверка на то что ее можно надеть, что она подходит по статам, и что она не надета уже!
 											// TODO: может стоит проверять еще и на ид в мире!
 	){
-		var itemId = this.userData.items[data.itemId].itemId;
+		var itemId = this.userData.items[worldItemId].itemId;
 		// Проверка на то, что такая вещь вообще есть в базе!
 		if(itemId in GLOBAL.DATA.items){
 			// Проход по всем слотам, в которых надета вещь, и удаление данных о вещи.
-			var itemsArray = [];
 			for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots){
 				if(
 					inventorySlotId in this.userData.stuff && // проверка на что слот такой занят
-					this.userData.stuff[inventorySlotId].userItemId == data.itemId // Проверка что это именна та вещь вслоте, которую пытаются снять
+					this.userData.stuff[inventorySlotId].userItemId == worldItemId // Проверка что это именна та вещь вслоте, которую пытаются снять
 				){
-					itemsArray.push(this.userData.stuff[inventorySlotId].userItemId);
-					
 					//TODO: вычитать статы вещи из статов юзера, все бонусы и прочее
 					delete this.userData.stuff[inventorySlotId];
 				}
 			}
-			// Обновляем слот ид в массиве свойств вещи пользователя.
-			this.userData.items[data.itemId].inventorySlotId = '';
-			SQL.queryAsync("UPDATE `game_UsersItems` SET `game_UsersItems`.`inventorySlotId` = '' WHERE `game_UsersItems`.`id` IN ("+itemsArray.join(',')+") ");
 			
+			// Обновляем слот ид в массиве свойств вещи пользователя.
+			this.userData.items[worldItemId].inventorySlotId = [];
+			var insertData = {$set:{inventorySlotId: []}};
+			// TODO: Добавить асинхроность тут
+			Mongo.update('game_WorldItems', {_id: Mongo.objectId(worldItemId)}, insertData, function(rows){});
 			this.socketWrite({
 				f: "userWearOffItem", 
 				p: {
-					itemId: String(data.itemId)
+					itemId: String(worldItemId)
 				}
 			});
 		}

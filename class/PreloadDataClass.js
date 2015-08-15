@@ -4,7 +4,8 @@ console.log("PreloadData CLASS is connected");
 function PreloadDataClass() {
 	// this.initialize();
 	this.DATA = {};
-
+	this.USERS = {};
+	
 	return this;
 }
 
@@ -32,7 +33,7 @@ PreloadDataClass.prototype.initialize = function(callback)
 		// NPC INFO
 		this.getNpcsInfo.bind(this),
 		
-		this.createGlobalUsers.bind(this), // create USERS array
+		// this.createGlobalUsers.bind(this), // create USERS array
 		this.createGlobalNpcs.bind(this) // create NPC array
 	];
 
@@ -71,7 +72,7 @@ PreloadDataClass.prototype.initialize = function(callback)
 PreloadDataClass.prototype.getTownsList = function(callback)
 {
 	this.DATA.towns = {};
-	Mongo.find('game_Towns', {}, function (rows) {
+	Mongo.find('game_Towns', {}, {}, function (rows) {
 		for(var i in rows){
 			rows[i].id = String(rows[i].id);
 			this.DATA.towns[rows[i].id] = {
@@ -99,7 +100,7 @@ PreloadDataClass.prototype.getTownsList = function(callback)
 PreloadDataClass.prototype.getTownBuildingsTypes = function(callback)
 {
 	this.DATA.buildingsTypes = {};
-	Mongo.find('game_TownsBuildingsTypes', {}, function(rows){
+	Mongo.find('game_TownsBuildingsTypes', {}, {}, function(rows){
 		for(var i in rows){
 			rows[i].id = String(rows[i].id);
 			this.DATA.buildingsTypes[rows[i].id] = {
@@ -126,7 +127,7 @@ PreloadDataClass.prototype.getTownBuildingsList = function(callback)
 {
 		
 	this.DATA.buildings = {};
-	Mongo.find('game_TownsBuildings', {}, function(rows){
+	Mongo.find('game_TownsBuildings', {}, {}, function(rows){
 		for(var i in rows){
 			rows[i].id = String(rows[i].id);
 			rows[i].townId = String(rows[i].townId);
@@ -153,7 +154,7 @@ PreloadDataClass.prototype.getTownBuildingsList = function(callback)
 PreloadDataClass.prototype.getItems = function(callback)
 {
 	this.DATA.items = {};
-	Mongo.find('game_Items', {}, function (rows) {
+	Mongo.find('game_Items', {}, {}, function (rows) {
 		for(var i in rows){
 			rows[i]._id = rows[i]._id.toHexString();
 			this.DATA.items[rows[i]._id] = rows[i];
@@ -176,7 +177,7 @@ PreloadDataClass.prototype.getItems = function(callback)
 PreloadDataClass.prototype.getSpineSlots = function(callback)
 {
 	this.DATA.spineSlots = {};
-	Mongo.find('game_ItemsSpineSlots', {}, function (rows) {
+	Mongo.find('game_ItemsSpineSlots', {}, {}, function (rows) {
 		for(var i in rows){
 			this.DATA.spineSlots[String(rows[i].id)] = {
 															id: String(rows[i].id),
@@ -201,7 +202,7 @@ PreloadDataClass.prototype.getSpineSlots = function(callback)
 PreloadDataClass.prototype.getInventorySlotsList = function(callback)
 {
 	this.DATA.inventorySlotsList = {};
-	Mongo.find('game_ItemsInventorySlotsList', {}, function (rows) {
+	Mongo.find('game_ItemsInventorySlotsList', {}, {}, function (rows) {
 		for(var i in rows){
 			this.DATA.inventorySlotsList[String(rows[i].id)] = {
 																	id: String(rows[i].id),
@@ -236,7 +237,7 @@ PreloadDataClass.prototype.getInventorySlotsList = function(callback)
 PreloadDataClass.prototype.getNpcsInfo = function(callback)
 {
 	this.DATA.npcsInfo = {};
-	Mongo.find('game_NpcsInfo', {}, function (rows) {
+	Mongo.find('game_NpcsInfo', {}, {}, function (rows) {
 		for(var i in rows){
 			this.DATA.npcsInfo[rows[i]._id] = rows[i];
 		}
@@ -297,7 +298,7 @@ PreloadDataClass.prototype.createGlobalNpcs = function(callback)
 PreloadDataClass.prototype.getBattleInfo = function(callback)
 {
 	this.DATA.battleInfo = {};
-	Mongo.find('game_BattleInfo', {}, function (rows) {
+	Mongo.find('game_BattleInfo', {}, {}, function (rows) {
 		this.DATA.battleInfo = rows[0];
 		callback();
 	}.bind(this));
@@ -323,7 +324,7 @@ PreloadDataClass.prototype.getBattleInfo = function(callback)
 PreloadDataClass.prototype.getStats = function(callback)
 {	
 	this.DATA.stats = {};
-	Mongo.find('game_Stats', {}, function (rows) {
+	Mongo.find('game_Stats', {}, {}, function (rows) {
 		for(var i in rows){
 			rows[i].id = String(rows[i].id);
 			this.DATA.stats[rows[i].name] = rows[i];
@@ -357,6 +358,7 @@ PreloadDataClass.prototype.getStats = function(callback)
 	* @since  10.02.14
 	* @author pcemma
 */
+/*
 PreloadDataClass.prototype.createGlobalUsers = function(callback)
 {
 	// GLOBAL USERS ARRAY
@@ -370,7 +372,7 @@ PreloadDataClass.prototype.createGlobalUsers = function(callback)
 	}
 	callback();
 }
-
+*/
 
 
 
@@ -403,7 +405,7 @@ PreloadDataClass.prototype.createGlobalConstants = function(callback)
 {
 	
 	this.globalConstants = {};
-	Mongo.find('game_GlobalConstants', {}, function (rows) {
+	Mongo.find('game_GlobalConstants', {}, {}, function (rows) {
 		for(var i in rows){
 			// get client version
 			if(rows[i].name == "clientVersion"){

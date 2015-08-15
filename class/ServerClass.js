@@ -52,7 +52,6 @@ ServerClass.prototype.start = function()
 */
 ServerClass.prototype.onSocketRequest = function(socket){
 	socket.setEncoding("utf8");
-	console.log("sdfsdf");
 	var oData = "",
 		dSocket = domain.create();
 	
