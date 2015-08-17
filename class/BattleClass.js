@@ -6,13 +6,14 @@ function BattleClass() {
 	this.create();
 }
 
+
 /*
 	* Description:
 	*	function Создает новую битву.
 	*	
 	*
 	*
-	* @since  31.01.15
+	* @since  17.08.15
 	* @author pcemma
 */
 BattleClass.prototype.create = function()
@@ -49,7 +50,6 @@ BattleClass.prototype.check = function()
 {
 	// TODO: нормальная проверка, на свободные места, и прочее
 	if(	
-		
 		this.endFlag == 0
 	){
 		return true;

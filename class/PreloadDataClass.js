@@ -33,8 +33,10 @@ PreloadDataClass.prototype.initialize = function(callback)
 		// NPC INFO
 		this.getNpcsInfo.bind(this),
 		
-		// this.createGlobalUsers.bind(this), // create USERS array
-		this.createGlobalNpcs.bind(this) // create NPC array
+		// this.fillNpcsCollectionWithData.bind(this),
+		
+		
+		// this.createGlobalNpcs.bind(this) // create NPC array
 	];
 
 	async.waterfall(
@@ -253,9 +255,10 @@ PreloadDataClass.prototype.getNpcsInfo = function(callback)
 	*	
 	*	
 	*
-	* @since  05.05.14
+	* @since  05.05.15
 	* @author pcemma
 */
+/*
 PreloadDataClass.prototype.createGlobalNpcs = function(callback)
 {
 	
@@ -274,8 +277,28 @@ PreloadDataClass.prototype.createGlobalNpcs = function(callback)
 	}
 	callback();
 }
+*/
 
 
+/*
+	* Description:
+	*	Заполняет коллекцию нпц полным списком нпц которые находятся в игровом мире.
+	*	
+	*	
+	*	
+	*
+	* @since  16.08.15
+	* @author pcemma
+*/
+PreloadDataClass.prototype.fillNpcsCollectionWithData = function(callback)
+{
+	for(var npcId in this.DATA.npcsInfo){
+		for(var count = 1; count <= this.DATA.npcsInfo[npcId].count; count++){
+			var newNpc = new NpcClass();
+			newNpc.createNewUser({npcId: npcId}, callback);
+		}
+	}
+}
 
 
 
@@ -332,52 +355,6 @@ PreloadDataClass.prototype.getStats = function(callback)
 		callback();
 	}.bind(this));
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**************** USERS ************/
-
-/*
-	* Description:
-	*	Create the Global users array
-	*	
-	*	
-	*	
-	*
-	* @since  10.02.14
-	* @author pcemma
-*/
-/*
-PreloadDataClass.prototype.createGlobalUsers = function(callback)
-{
-	// GLOBAL USERS ARRAY
-	this.USERS = {};
-	var usersCountRow = SQL.querySync("SELECT `id` FROM `game_Users`");
-	var users = usersCountRow.fetchAllSync();
-	
-	for (var key in users){
-		this.USERS[users[key].id] = new UserClass();
-		this.USERS[users[key].id].getUserData(users[key].id);
-	}
-	callback();
-}
-*/
-
-
-
-
-
 
 
 

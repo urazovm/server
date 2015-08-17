@@ -21,6 +21,94 @@ Npc.prototype.constructor = Npc;
 
 /*
 	* Description:
+	*	function Заполняем все необходимые данные в базе данных о новом нпц. 
+	*	
+	*
+	*	@data:				array
+	*		
+	*
+	*
+	* @since  17.08.15
+	* @author pcemma
+*/
+Npc.prototype.addDefaultUser = function(data, callback)
+{
+	this.npcId = data.npcId;
+	
+	Mongo.insert(
+		"game_Npcs", 
+		{
+			userData: {
+				npcId: data.npcId,
+				login: GLOBAL.DATA.npcsInfo[data.npcId].name,
+				lastActionTime: 0,
+				inBattleFlag: false,
+				isAliveFlag: true,
+				items:{},
+				stuff: {},
+				stats: this.addDefaultStats()
+			},
+		}, 
+		function(rows){
+			this.userId = rows.ops[0]._id;
+			callback();
+		}.bind(this)); 		
+}
+
+
+/*
+	* Description:
+	*	Добавляем статы новому нпц
+	*	
+	*	
+	*	return: array, массив с набором статов по умолчанию.
+	*
+	* @since  17.08.15
+	* @author pcemma
+*/
+Npc.prototype.addDefaultStats = function()
+{
+	return GLOBAL.DATA.npcsInfo[this.npcId].stats;
+}
+
+
+/*
+	* Description:
+	*	Добавляем вещи новому нпц
+	*	
+	*	
+	*
+	* @since  10.08.15
+	* @author pcemma
+*/
+Npc.prototype.addDefaultItems = function(callback)
+{
+	for(var i in GLOBAL.DATA.npcsInfo[this.npcId].items){
+		var itemId = defaultItemsArray[i],
+			inventorySlotArray = [];
+		for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots){
+			inventorySlotArray.push(inventorySlotId);
+		}	
+		
+		this.addItem({
+			stats: GLOBAL.DATA.items[itemId].stats,
+			itemId: itemId,
+			count: 1,
+			inventorySlotId: inventorySlotArray
+		}, callback);
+	}	
+}
+
+
+
+
+
+
+
+
+
+/*
+	* Description:
 	*	Собирает массив данных о нпц. 
 	*	@data:	array
 	*		@npcId:		int, ид нпц из базы всех нпц.
@@ -31,6 +119,7 @@ Npc.prototype.constructor = Npc;
 	* @since  07.05.15
 	* @author pcemma
 */
+/*
 Npc.prototype.getUserData = function(data)
 {
 	
@@ -58,7 +147,7 @@ Npc.prototype.getUserData = function(data)
 	// пересчитываем статы игрока. с учетом всех данных
 	this.recountStats();	
 }
-
+*/
 
 
 /*
@@ -70,11 +159,38 @@ Npc.prototype.getUserData = function(data)
 	* @since  07.05.15
 	* @author pcemma
 */
+/*
 Npc.prototype.getStats = function()
 {
 	this.userData.stats = GLOBAL.DATA.npcsInfo[this.npcId].stats;
 }
 
+*/
+
+
+/*
+	* Description:
+	*	Собирает статы игрока которые есть в базе
+	*	
+	*	return: 
+	*
+	* @since  21.02.15
+	* @author pcemma
+*/
+/*
+Npc.prototype.recountStats = function()
+{
+	
+	// minDamage
+	this.userData.stats['minDamage'] = this.userData.stats['strength'];
+	// maxDamage
+	this.userData.stats['maxDamage'] = this.userData.stats['strength'] * 3;
+	// hp
+	this.userData.stats['hp'] = this.userData.stats['stamina'] * 8;
+	// currentHp
+	this.userData.stats['currentHp'] = this.userData.stats['stamina'] * 8;
+}
+*/
 
 
 

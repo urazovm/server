@@ -184,9 +184,8 @@ User.prototype.addDefaultUser = function(data, callback)
 */
 User.prototype.addDefaultStats = function()
 {
+	// TODO: для каждого класса вынести в отдельную коллекцию.
 	return {
-		hp: 				100,
-		currentHp:			100,
 		strength:			1,
 		agility:			1,
 		intuition:			1,
@@ -194,9 +193,26 @@ User.prototype.addDefaultStats = function()
 		intellect:			1,
 		stamina:			1,
 		luck:				1,
-		actionTime:			1,
+		minDamage:			3,
+		maxDamage:			5,
+		dodge:				0,
+		antiDodge:			0,
+		criticalHit:		0,
+		antiCriticalHit:	0,
+		mana:				0,
+		currentMana:		0,
+		minMagicDamage:		0,
+		maxMagicDamage:		0,
+		hp: 				100,
+		currentHp:			100,
+		capacity:			0,
+		currentCapacity:	0,
+		chance:				0,
+		exp:				0,
+		currentExp:			0,
 		moveActionTime:		2,
-		hitActionTime:		2
+		hitActionTime:		2,
+		actionTime:			1
 	}
 }
 
@@ -212,6 +228,7 @@ User.prototype.addDefaultStats = function()
 */
 User.prototype.addDefaultItems = function(callback)
 {
+	// TODO: добавить стандартный массив вещей, который дается сразу юзеру при старте. 
 	var defaultItemsArray = [
 			"55ba5662d95a08c8513f668b",
 			"55ba5662d95a08c8513f668d",
@@ -227,9 +244,7 @@ User.prototype.addDefaultItems = function(callback)
 			itemId: itemId,
 			count: 1
 		}, callback);
-	}
-	
-	
+	}	
 }
 
 
@@ -368,29 +383,6 @@ User.prototype.getUserData = function(callback)
 }
 
 
-/*
-	* Description:
-	*	Собирает статы игрока которые есть в базе
-	*	
-	*	return: 
-	*
-	* @since  21.02.15
-	* @author pcemma
-*/
-User.prototype.recountStats = function()
-{
-	
-	// minDamage
-	this.userData.stats['minDamage'] = this.userData.stats['strength'];
-	// maxDamage
-	this.userData.stats['maxDamage'] = this.userData.stats['strength'] * 3;
-	// hp
-	this.userData.stats['hp'] = this.userData.stats['stamina'] * 8;
-	// currentHp
-	this.userData.stats['currentHp'] = this.userData.stats['stamina'] * 8;
-}
-
-
 
 
 /*****************	BATTLE	******************/
@@ -516,13 +508,11 @@ User.prototype.getItems = function(callback)
 {
 	console.log("GET ITEMS!!!");
 	Mongo.find("game_WorldItems", {userId: this.userId}, {}, function(rows){
-		console.log(rows);
 		for(var i in rows){
-			console.log(rows[i]);
 			var worldItemId = rows[i]._id.toHexString();
 			this.userData.items[worldItemId] = rows[i];
-			//Собираем данные а надетых вещах. 
-			// TODO: Вынести это в отдельный метод, который собирает надеый стафф! 
+			//Собираем данные о надетых вещах. 
+			// TODO: Вынести это в отдельный метод, который собирает надетый стафф! 
 			for(var j in rows[i].inventorySlotId){
 				var invetnorySlotId = String(rows[i].inventorySlotId[j]);
 				this.userData.stuff[invetnorySlotId] = {
@@ -544,7 +534,6 @@ User.prototype.getItems = function(callback)
 	* @since  11.08.15
 	* @author pcemma
 */
-
 User.prototype.addItem = function(data, callback)
 {
 	if(data.itemId in GLOBAL.DATA.items){
@@ -561,6 +550,7 @@ User.prototype.addItem = function(data, callback)
 					itemId: data.itemId,
 					count: data.count,
 					userId: this.userId,
+					inventorySlotId: data.inventorySlotId || []
 				},  
 				function(rows){
 					console.log("Add item", rows.ops[0]._id);
