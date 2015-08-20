@@ -1,9 +1,18 @@
 console.log("BattleClass CLASS is connected");	
 
 function BattleClass() {
-
-	
-	this.create();
+	var currentTime = Math.floor(+new Date() / 1000);
+	// this.id = battleId;
+	this.startTime = currentTime;
+	this.endFlag = false;
+	this.hexesInRow = 8;
+	this.hexesInCol = 7;
+	this.obstructionsHexes = this.createobstructionsHexes();
+	this.hexes = this.createGrid();
+	this.heroes = {};
+	// массив команда. одна команда это массив ид пользователей, нпц которые в этой команде
+	//TODO: Пересмотреть объект команд
+	this.teams = {'1': [], '2': []};
 }
 
 
@@ -16,24 +25,23 @@ function BattleClass() {
 	* @since  17.08.15
 	* @author pcemma
 */
-BattleClass.prototype.create = function()
+BattleClass.prototype.create = function(callback)
 {
-	var currentTime = Math.floor(+new Date() / 1000),
-		battleId = SQL.lastInsertIdSync("INSERT INTO `game_Battles` (`id`, `startTime`) VALUES (NULL, "+currentTime+")");
-		
-	
-	
-	this.id = battleId;
-	this.startTime = currentTime;
-	this.endFlag = 0;
-	this.hexesInRow = 8;
-	this.hexesInCol = 7;
-	this.obstructionsHexes = this.createobstructionsHexes();
-	this.hexes = this.createGrid();
-	this.heroes = {};
-	// массив команда. одна команда это массив ид пользователей, нпц которые в этой команде
-	this.teams = {'1': [], '2': []};
-
+	Mongo.insert(
+		"game_Battles", 
+		{
+			startTime: this.startTime,
+			endFlag: this.endFlag,
+			hexesInRow: this.hexesInRow,
+			hexesInCol: this.hexesInCol,
+			// obstructionsHexes: this.obstructionsHexes,
+			teams: this.teams
+		}, 
+		function(rows){
+			console.log(rows);
+			this.id = rows.ops[0]._id;
+			callback();
+		}.bind(this)); 
 }
 
 
@@ -50,7 +58,7 @@ BattleClass.prototype.check = function()
 {
 	// TODO: нормальная проверка, на свободные места, и прочее
 	if(	
-		this.endFlag == 0
+		!this.endFlag
 	){
 		return true;
 	}
@@ -86,8 +94,8 @@ BattleClass.prototype.completion = function(data)
 	
 	// TODO: Статистика
 	
-	// Обновление таблиц				
-	SQL.querySync("UPDATE `game_Battles` SET `game_Battles`.`endFlag` = 1 WHERE `game_Battles`.`id` = "+this.id);				
+	// Обновление таблиц
+	Mongo.update({collection: 'game_Battles', searchData: {_id: this.id}, insertData: {$set: {endFlag: true}}});			
 	
 	//TODO: Пересмотреть механизм удаления боя
 	battlesManager.removeBattle({id: this.id});
@@ -99,39 +107,40 @@ BattleClass.prototype.completion = function(data)
 /*
 	* Description:
 	*	function Добавляет героя в битву
-	*	
-	*	@hero:		obj, Объект пользователя, либо объект нпц который предварительно создан
-	*	@teamId:	int, номер команды в которую, надо занести героя
+	*	@data: obj
+	*		@hero:		obj, Объект пользователя, либо объект нпц который предварительно создан
+	*		@teamId:	str, номер команды в которую, надо занести героя
 	*
 	* @since  31.01.15
 	* @author pcemma
 */
-BattleClass.prototype.addHero = function(hero, teamId)
+BattleClass.prototype.addHero = function(data, callback)
 {
+	var hero = data.hero;
 	// отправляем пользователю, те данные что уже есть. положение всех воинов на поле боя
 	hero.socketWrite({
 						f: "battleCreate", 
 						p: this.getBattleStatus()
 					});
 	
-	// TODO: если такой герой есть, то скорее всего это повторное подключение. Перепоределить сокет ??
-	if(!this.heroes[String(hero.userId)] || lib.objectSize(this.heroes[String(hero.userId)]) <= 0){
+	// TODO: если такой герой есть, то скорее всего это повторное подключение. Переопределить сокет ??
+	if(!(hero.userId in this.heroes)){
 	
 		var tempTeamId = 1,
 			hexId = "0.0";
 			
 			
-		this.heroes[String(hero.userId)] = hero;
+		this.heroes[hero.userId] = hero;
 		
-		// это времено, раскидываем по одному в команду.
-		if((this.teams['1'].length <= this.teams['2'].length && !teamId) || teamId == 1){
-			this.teams['1'].push(String(hero.userId));
+		// TODO: remove -> это времено, раскидываем по одному в команду.
+		if((this.teams['1'].length <= this.teams['2'].length && !data.teamId) || data.teamId === 1){
+			this.teams['1'].push(hero.userId);
 			var x = 0,
 				y = Math.floor(Math.random() * (4 + 1));
 			hexId = x+"."+y;
 		}
 		else{
-			this.teams['2'].push(String(hero.userId));
+			this.teams['2'].push(hero.userId);
 			tempTeamId = 2;
 			var x = 6,
 				y = Math.floor(Math.random() * (4 + 1));
@@ -142,7 +151,7 @@ BattleClass.prototype.addHero = function(hero, teamId)
 		this.hexes[hexId].addHero({userId: hero.userId});
 		
 		// Тут апдейта массива юзера с данными о битве
-		this.heroes[String(hero.userId)].addToBattle({
+		this.heroes[hero.userId].addToBattle({
 														battleId: 	this.id,
 														teamId: 	tempTeamId,
 														hexId: 		hexId
@@ -155,6 +164,7 @@ BattleClass.prototype.addHero = function(hero, teamId)
 							p: this.getHeroData(hero.userId)
 						});
 	}
+	callback();
 }
 
 
@@ -177,7 +187,7 @@ BattleClass.prototype.moveHero = function(data)
 	if(
 		this.heroes[data.userId] && 										// Проверяем на то есть ли вообще такой герой у нас
 		this.heroes[data.userId].userData.inBattleFlag && 					// Проверяем на то что герой этот в бою
-		this.heroes[data.userId].userData.battleId == this.id &&			// Проверка что герой в этом самом бою
+		this.heroes[data.userId].userData.battleId === this.id &&			// Проверка что герой в этом самом бою
 		this.heroes[data.userId].isAlive() &&								// живой ли герой, мертвые не ходят!
 		this.heroes[data.userId].userData.lastActionTime <= currentTime && 	// Проверка на возможность делать ход, не включен ли таймаут
 		this.hexes[data.hexId] && 											// Проверяем на то что такой гекс вообще есть!
@@ -195,7 +205,7 @@ BattleClass.prototype.moveHero = function(data)
 		this.socketWrite({
 							f: "battleMoveHero", 
 							p: {
-								userId: String(data.userId),
+								userId: data.userId,
 								hexId: data.hexId
 							}
 						});
@@ -225,7 +235,7 @@ BattleClass.prototype.heroMakeHit = function(data)
 	if(
 		this.heroes[data.userId] && 										// Проверяем на то есть ли вообще такой герой у нас
 		this.heroes[data.userId].userData.inBattleFlag && 					// Проверяем на то что герой этот в бою
-		this.heroes[data.userId].userData.battleId == this.id &&			// Проверка что герой в этом самом бою
+		this.heroes[data.userId].userData.battleId === this.id &&			// Проверка что герой в этом самом бою
 		this.heroes[data.userId].isAlive() &&								// живой ли герой, мертвые не сражаются!
 		this.heroes[data.userId].userData.lastActionTime <= currentTime && 	// Проверка на возможность делать удар, не включен ли таймаут
 		this.hexes[data.hexId] && 											// Проверяем на то что такой гекс вообще есть!
@@ -240,11 +250,11 @@ BattleClass.prototype.heroMakeHit = function(data)
 			
 			// TODO: вынести этот кусок в метод класса юзер
 			this.heroes[oponentUserId].userData.inBattleFlag && 		// Проверяем на то что герой этот в бою
-			this.heroes[oponentUserId].userData.battleId == this.id &&	// Проверка что герой в этом самом бою
+			this.heroes[oponentUserId].userData.battleId === this.id &&	// Проверка что герой в этом самом бою
 			this.heroes[oponentUserId].isAlive() &&						// живой ли герой, мертвых не бьют!
 			
 			
-			this.heroes[oponentUserId].userData.teamId != this.heroes[data.userId].userData.teamId	// противник ли в этой клетке?
+			this.heroes[oponentUserId].userData.teamId !== this.heroes[data.userId].userData.teamId	// противник ли в этой клетке?
 		){
 			// обновляем герою который совершал удар время таймаута
 			this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.stats.moveActionTime;
@@ -270,8 +280,8 @@ BattleClass.prototype.heroMakeHit = function(data)
 			this.socketWrite({
 								f: "battleHeroMakeHit", 
 								p: {
-									userId: String(data.userId),
-									oponentUserId: String(oponentUserId),
+									userId: data.userId,
+									oponentUserId: oponentUserId,
 									damage: damage
 								}
 							});
@@ -281,7 +291,7 @@ BattleClass.prototype.heroMakeHit = function(data)
 			if(!isHeroAlive && !this.isAliveHeroesInTeam(this.heroes[oponentUserId].userData.teamId)){
 				console.log("DONT OPEN!! DEAD INSIDE!!!");
 				this.completion({
-									winTeamId: (this.heroes[oponentUserId].userData.teamId == 1) ? 2 : 1 
+									winTeamId: (this.heroes[oponentUserId].userData.teamId === 1) ? 2 : 1 
 								});
 			}
 			return true;
@@ -312,7 +322,7 @@ BattleClass.prototype.createobstructionsHexes = function()
 			y = Math.floor(Math.random() * (this.hexesInCol + 1));
 		tmpArray[x+"."+y] = String(Math.floor(Math.random() * (lib.objectSize(GLOBAL.DATA.battleInfo.obstructions) - 1 + 1)) + 1);
 	}
-	console.log(tmpArray);
+	// console.log(tmpArray);
 	return tmpArray;
 }
 
@@ -336,7 +346,7 @@ BattleClass.prototype.createGrid = function()
 				dy = Math.fmod(y, 2),
 				isObstruction = (this.obstructionsHexes[x+"."+y]) ? true : false; // Флаг определяет будет ли на эом гексе препятствие
 			
-			if(!(dy == 1 && i == this.hexesInRow)){ // не рисуем в четных рядах последний гекс для красивого отображения сетки
+			if(!(dy === 1 && i === this.hexesInRow)){ // не рисуем в четных рядах последний гекс для красивого отображения сетки
 				tmpArray[x+"."+y] = new HexagonClass({x: x, y: y, isObstruction: isObstruction});
 			}
 		}
@@ -375,9 +385,9 @@ BattleClass.prototype.searchEnemyInArea = function(data)
 				if(
 					this.heroes[oponentUserId] && 								// Проверяем на то есть ли вообще такой герой у нас
 					this.heroes[oponentUserId].userData.inBattleFlag && 		// Проверяем на то что герой этот в бою
-					this.heroes[oponentUserId].userData.battleId == this.id &&	// Проверка что герой в этом самом бою
+					this.heroes[oponentUserId].userData.battleId === this.id &&	// Проверка что герой в этом самом бою
 					this.heroes[oponentUserId].isAlive() &&						// живой ли герой, мертвых не бьют!
-					this.heroes[oponentUserId].userData.teamId != this.heroes[data.userId].userData.teamId	// противник ли в этой клетке?
+					this.heroes[oponentUserId].userData.teamId !== this.heroes[data.userId].userData.teamId	// противник ли в этой клетке?
 				){
 					hexesArray.push(hexIdInArea);
 				}
@@ -463,17 +473,16 @@ BattleClass.prototype.getBattleStatus = function()
 */
 BattleClass.prototype.getHeroData = function(userId)
 {
+	// TODO: это ж userData надо просто ее возвращать!
 	var currentTime = Math.floor(+new Date() / 1000);
 		info = {
-					id: 			String(this.heroes[userId].userId),
+					id: 			this.heroes[userId].userId,
 					npcId:			this.heroes[userId].npcId, // передаем нпц ид для определения герой это или нпц на клиенте.
 					teamId: 		this.heroes[userId].userData.teamId,
 					isAliveFlag:	this.heroes[userId].userData.isAliveFlag,
 					hexId: 			this.heroes[userId].userData.hexId,
 					login: 			this.heroes[userId].userData.login,
 					stats:			this.heroes[userId].userData.stats,
-					// hp:				this.heroes[userId].userData.stats.hp,
-					// currentHp:		this.heroes[userId].userData.stats.currentHp,
 					lastActionTime: (currentTime < this.heroes[userId].userData.lastActionTime) ? (this.heroes[userId].userData.lastActionTime - currentTime) : 0,
 					stuff: 			this.heroes[userId].userData.stuff
 				};

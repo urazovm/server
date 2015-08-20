@@ -43,7 +43,7 @@ HexagonClass.prototype.__constructor = function(data)
 HexagonClass.prototype.addHero = function(data)
 {
 	this.isFree = false;
-	this.userId = String(data.userId);
+	this.userId = data.userId;
 }
 
 
@@ -84,8 +84,8 @@ HexagonClass.prototype.isNeighbor = function(data)
 		
 	for(var i in directions[parity]){
 		if(
-			data.x == this.x + directions[parity][i][0] && 
-			data.y == this.y + directions[parity][i][1]
+			data.x === this.x + directions[parity][i][0] && 
+			data.y === this.y + directions[parity][i][1]
 		){
 			return true;
 		}

@@ -24,7 +24,7 @@ Router.prototype.route = function(pathname, data) {
 		// data = JSON.parse(data);
 		// console.log(data);
 		// GLOBAL CHECKING IF USER EXIST AND VERIFYING
-		if( pathname == 'getGlobalData' || pathname == 'authorization' || pathname == 'makeClientsErrorLogs' || ( GLOBAL.USERS[data.userId] && GLOBAL.USERS[data.userId].verifyHash == data.verifyHash)){
+		if( pathname === 'getGlobalData' || pathname === 'authorization' || pathname === 'makeClientsErrorLogs' || ( GLOBAL.USERS[data.userId] && GLOBAL.USERS[data.userId].verifyHash === data.verifyHash)){
 			this[pathname](data);
 		}
 	} else {
@@ -66,7 +66,7 @@ Router.prototype['/'] = function (response, data) {
 */
 Router.prototype.makeClientsErrorLogs = function (data) {
 	console.log("data.error_message",data);
-	data.userId = Number(data.userId);
+	data.userId = data.userId;
 	if(data.userId || data.userId === 0){
 		// Добавить новую ошибку либо обновить статус у старой
 		Mongo.findAndModify(	
@@ -96,7 +96,7 @@ Router.prototype.makeClientsErrorLogs = function (data) {
 					insertData["$set"].clientVersion = data.clientVersion;
 					insertData["$set"].state = (doc.value.state > 0) ? 2 : 0; 
 				}
-				Mongo.update('game_ErrorsClientList', {_id: doc.value._id}, insertData, function(){});
+				Mongo.update({collection: 'game_ErrorsClientList', searchData: {_id: doc.value._id}, insertData: insertData});
 				
 				// Занести в список ошибок (лист)
 				Mongo.insert('game_ErrorsClient', {date: + new Date(), errorId: doc.value._id.toHexString(), clientVersion: data.clientVersion, userId: data.userId}, function(doc){});
@@ -147,7 +147,7 @@ Router.prototype.getGlobalData = function (data) {
 	// SEND DATA TO CLIENT
 	var sendData =  {
 					// проверяем версию Данных
-					globalData: (Number(data.globalDataVersion) != Number(GLOBAL.globalConstants.globalDataVersion) || config._DEBUG) ? GLOBAL.DATA : {}, 
+					globalData: (Number(data.globalDataVersion) !== Number(GLOBAL.globalConstants.globalDataVersion) || config._DEBUG) ? GLOBAL.DATA : {}, 
 					globalDataVersion: GLOBAL.globalConstants.globalDataVersion
 				};
 	if(data.socket){
@@ -171,20 +171,11 @@ Router.prototype.getGlobalData = function (data) {
 	* @author pcemma
 */
 Router.prototype.authorization = function (data) {
-	
-	
 	var newUser = new UserClass(),
 		queues = [
 			newUser.authorization.bind(newUser, data),
-			function(callback){
-				console.log("authorization 1");
-				GLOBAL.USERS[newUser.userId] = newUser;
-				callback();
-			}
-		],
-		//TODO разобраься с этим. Это при отрпавке клиенту надо отправлять.
-		sendData = {incorrectFlag: true};
-	
+			GLOBAL.addUserToGlobalUsersArray.bind(GLOBAL, newUser)
+		];
 	async.waterfall(
 		queues,
 		function(err){
@@ -219,11 +210,13 @@ Router.prototype.authorization = function (data) {
 	* @since  31.01.15
 	* @author pcemma
 */
+/*
 Router.prototype.battleCreate = function (data) {
 	if(data){
 		battlesManager.createBattle();
 	}
 }
+*/
 
 
 /*
@@ -239,7 +232,7 @@ Router.prototype.battleCreate = function (data) {
 */
 Router.prototype.enterBattle = function (data) {
 	if(data){
-		battlesManager.enterBattle({id: data.id, user: GLOBAL.USERS[data.userId], battleType: data.battleType});
+		battlesManager.enterBattle({id: data.id, hero: GLOBAL.USERS[data.userId], battleType: data.battleType});
 	}
 }
 

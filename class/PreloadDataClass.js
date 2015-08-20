@@ -32,8 +32,7 @@ PreloadDataClass.prototype.initialize = function(callback)
 		
 		// NPC INFO
 		this.getNpcsInfo.bind(this),
-		
-		// this.fillNpcsCollectionWithData.bind(this),
+		// this.fillNpcsCollectionWithData.bind(this), // Функцию надо запустить для создания коллекции всех нпц в игровом мире
 		
 		
 		// this.createGlobalNpcs.bind(this) // create NPC array
@@ -74,7 +73,7 @@ PreloadDataClass.prototype.initialize = function(callback)
 PreloadDataClass.prototype.getTownsList = function(callback)
 {
 	this.DATA.towns = {};
-	Mongo.find('game_Towns', {}, {}, function (rows) {
+	Mongo.find({collection: 'game_Towns', callback: function (rows) {
 		for(var i in rows){
 			rows[i].id = String(rows[i].id);
 			this.DATA.towns[rows[i].id] = {
@@ -84,7 +83,7 @@ PreloadDataClass.prototype.getTownsList = function(callback)
 			};
 		}
 		callback();
-	}.bind(this));
+	}.bind(this)});
 }
 
 
@@ -102,7 +101,7 @@ PreloadDataClass.prototype.getTownsList = function(callback)
 PreloadDataClass.prototype.getTownBuildingsTypes = function(callback)
 {
 	this.DATA.buildingsTypes = {};
-	Mongo.find('game_TownsBuildingsTypes', {}, {}, function(rows){
+	Mongo.find({collection: 'game_TownsBuildingsTypes', callback: function(rows){
 		for(var i in rows){
 			rows[i].id = String(rows[i].id);
 			this.DATA.buildingsTypes[rows[i].id] = {
@@ -111,7 +110,7 @@ PreloadDataClass.prototype.getTownBuildingsTypes = function(callback)
 			};
 		}
 		callback();
-	}.bind(this));
+	}.bind(this)});
 }
 
 
@@ -127,16 +126,15 @@ PreloadDataClass.prototype.getTownBuildingsTypes = function(callback)
 */
 PreloadDataClass.prototype.getTownBuildingsList = function(callback)
 {
-		
 	this.DATA.buildings = {};
-	Mongo.find('game_TownsBuildings', {}, {}, function(rows){
+	Mongo.find({collection: 'game_TownsBuildings', callback: function(rows){
 		for(var i in rows){
 			rows[i].id = String(rows[i].id);
 			rows[i].townId = String(rows[i].townId);
 			this.DATA.buildings[rows[i].id] = rows[i];
 		}
 		callback();
-	}.bind(this));	
+	}.bind(this)});	
 }
 
 
@@ -156,13 +154,13 @@ PreloadDataClass.prototype.getTownBuildingsList = function(callback)
 PreloadDataClass.prototype.getItems = function(callback)
 {
 	this.DATA.items = {};
-	Mongo.find('game_Items', {}, {}, function (rows) {
+	Mongo.find({collection: 'game_Items', callback: function (rows) {
 		for(var i in rows){
 			rows[i]._id = rows[i]._id.toHexString();
 			this.DATA.items[rows[i]._id] = rows[i];
 		}
 		callback();
-	}.bind(this));
+	}.bind(this)});
 }
 
 
@@ -179,15 +177,17 @@ PreloadDataClass.prototype.getItems = function(callback)
 PreloadDataClass.prototype.getSpineSlots = function(callback)
 {
 	this.DATA.spineSlots = {};
-	Mongo.find('game_ItemsSpineSlots', {}, {}, function (rows) {
+	
+	Mongo.find({collection: 'game_ItemsSpineSlots', callback: function (rows) {
 		for(var i in rows){
-			this.DATA.spineSlots[String(rows[i].id)] = {
-															id: String(rows[i].id),
-															name: rows[i].name
-														};
+			rows[i].id = String(rows[i].id);
+			this.DATA.spineSlots[rows[i].id] = {
+													id: rows[i].id,
+													name: rows[i].name
+												};
 		}
 		callback();
-	}.bind(this));
+	}.bind(this)});
 }
 
 
@@ -204,16 +204,17 @@ PreloadDataClass.prototype.getSpineSlots = function(callback)
 PreloadDataClass.prototype.getInventorySlotsList = function(callback)
 {
 	this.DATA.inventorySlotsList = {};
-	Mongo.find('game_ItemsInventorySlotsList', {}, {}, function (rows) {
+	Mongo.find({collection: 'game_ItemsInventorySlotsList', callback: function (rows) {
 		for(var i in rows){
-			this.DATA.inventorySlotsList[String(rows[i].id)] = {
-																	id: String(rows[i].id),
-																	imageId: String(rows[i].imageId),
-																	order: String(rows[i].order)
-																};
+			rows[i].id = String(rows[i].id);
+			this.DATA.inventorySlotsList[rows[i].id] = {
+															id: rows[i].id,
+															imageId: String(rows[i].imageId),
+															order: String(rows[i].order)
+														};
 		}
 		callback();
-	}.bind(this));
+	}.bind(this)});
 }
 
 
@@ -239,12 +240,12 @@ PreloadDataClass.prototype.getInventorySlotsList = function(callback)
 PreloadDataClass.prototype.getNpcsInfo = function(callback)
 {
 	this.DATA.npcsInfo = {};
-	Mongo.find('game_NpcsInfo', {}, {}, function (rows) {
+	Mongo.find({collection: 'game_NpcsInfo', callback: function (rows) {
 		for(var i in rows){
 			this.DATA.npcsInfo[rows[i]._id] = rows[i];
 		}
 		callback();
-	}.bind(this));
+	}.bind(this)});
 }
 
 
@@ -304,6 +305,27 @@ PreloadDataClass.prototype.fillNpcsCollectionWithData = function(callback)
 
 
 
+/**************** USERS ************/	
+
+/*
+	* Description:
+	*	Добавляет пользователя в глобальный массив
+	*	
+	*	@user: object, type User
+	*
+	* @since  19.08.15
+	* @author pcemma
+*/
+PreloadDataClass.prototype.addUserToGlobalUsersArray = function(user, callback)
+{
+	console.log("addUserToGlobalUsersArray");
+	this.USERS[user.userId] = user;
+	callback();
+}
+
+
+
+
 
 
 /**************** BATTLE INFO ************/	
@@ -321,10 +343,10 @@ PreloadDataClass.prototype.fillNpcsCollectionWithData = function(callback)
 PreloadDataClass.prototype.getBattleInfo = function(callback)
 {
 	this.DATA.battleInfo = {};
-	Mongo.find('game_BattleInfo', {}, {}, function (rows) {
+	Mongo.find({collection: 'game_BattleInfo', callback: function (rows) {
 		this.DATA.battleInfo = rows[0];
 		callback();
-	}.bind(this));
+	}.bind(this)});
 }
 
 
@@ -347,13 +369,14 @@ PreloadDataClass.prototype.getBattleInfo = function(callback)
 PreloadDataClass.prototype.getStats = function(callback)
 {	
 	this.DATA.stats = {};
-	Mongo.find('game_Stats', {}, {}, function (rows) {
+	
+	Mongo.find({collection: 'game_Stats', callback: function (rows) {
 		for(var i in rows){
 			rows[i].id = String(rows[i].id);
 			this.DATA.stats[rows[i].name] = rows[i];
 		}
 		callback();
-	}.bind(this));
+	}.bind(this)});
 }
 
 
@@ -380,18 +403,17 @@ PreloadDataClass.prototype.getStats = function(callback)
 */
 PreloadDataClass.prototype.createGlobalConstants = function(callback)
 {
-	
 	this.globalConstants = {};
-	Mongo.find('game_GlobalConstants', {}, {}, function (rows) {
+	Mongo.find({collection: 'game_GlobalConstants', callback: function (rows) {
 		for(var i in rows){
 			// get client version
-			if(rows[i].name == "clientVersion"){
+			if(rows[i].name === "clientVersion"){
 				rows[i].value = rows[i].value.split(".");
 			}
 			this.globalConstants[rows[i].name] = rows[i].value;
 		}
 		callback();
-	}.bind(this));
+	}.bind(this)});
 }
 
 
@@ -420,7 +442,7 @@ PreloadDataClass.prototype.checkVersion = function(version, need_version)
 	}else{
 		need_version = need_version.split(".");
 	}	
-	if(version && version != '')
+	if(version && version !== '')
 	{
 		var client_version = version.split(".");
 		for(var key in need_version)

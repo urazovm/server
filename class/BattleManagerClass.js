@@ -12,20 +12,46 @@ function BMClass() {
 	*	
 	*
 	*
-	* @since  31.01.15
+	* @since  20.08.15
 	* @author pcemma
 */
-BMClass.prototype.createBattle = function()
+/*
+BMClass.prototype.createBattle = function(callback)
 {
-	var battle = new BattleClass({}),
-		battleId = battle.id;
-	if(battle){
-		this.battles[battleId] = battle;
-	}
-	console.log("battleId", battleId);
+	var battle = new Battle(),
+		queues = [
+			battle.create.bind(battle),
+			this.addBattleToGlobalArray.bind(this, battle)
+		];
 	
-	return battle.id
+	async.waterfall(
+		queues,
+		function(err){
+			console.log("Battle is created!");
+			console.log(this.battles);
+			callback();
+		}
+	)
 }
+*/
+
+/*
+	* Description:
+	*	function Добавляет бой в глобальный массив 
+	*	
+	*	@battle: object, type Battle
+	*
+	*
+	* @since  19.08.15
+	* @author pcemma
+*/
+BMClass.prototype.addBattleToGlobalArray = function(battle, callback)
+{
+	console.log("addBattleToGlobalArray");
+	this.battles[battle.id] = battle;
+	callback();
+}
+
 
 
 /*
@@ -51,47 +77,62 @@ BMClass.prototype.removeBattle = function(data)
 	* Description:
 	*	function вход в битву 
 	*		@data: array
-	*			@id: 	int, ид боя
-	*			@user:	obj, объект пользователя
+	*			@id: 			str, ид боя
+	*			@hero:			obj, объект пользователя
+	*			@teamId:		str, ид команды в которой будет игрок!
+	*			@battleType:	str, тип боя - временно! TODO: remove this!
 	*
 	* @since  31.01.15
 	* @author pcemma
 */
 BMClass.prototype.enterBattle = function(data)
 {
+	var queues = [],
+		battle = {};
 	if(
 		data && data.id &&
 		this.battles[data.id] && this.battles[data.id].check()
 	){
 		console.log("enterBattle 1");
-		this.battles[data.id].addHero(data.user);
+		battle = this.battles[data.id];
+		queues.push(battle.addHero.bind(battle, data)); // .addHero(GLOBAL.NPCS["npc"+i], 2);
 	}
-	
-	else if(lib.objectSize(this.battles) == 0){
+	else if(lib.objectSize(this.battles) === 0){
 		console.log("enterBattle 2");
-		var battleId = this.createBattle();
-		this.battles[battleId].addHero(data.user);
-		
+		battle = new BattleClass();
+		queues.push(battle.create.bind(battle));
+		queues.push(this.addBattleToGlobalArray.bind(this, battle));
+		queues.push(battle.addHero.bind(battle, data));
 		
 		//TODO: временно добавляем нпц в бой сразу за героем. Для тестов и показа издателю.
 		// добавляем первого нпц тупо.
-		if(data.battleType == "npc"){
-			for(var i = 1; i <= 3; i++){
-				this.battles[battleId].addHero(GLOBAL.NPCS["npc"+i], 2);
+		if(data.battleType === "npc"){
+			npcCount = 0;
+			for(var npcId in GLOBAL.NPCS){
+				queues.push(battle.addHero.bind(battle, {hero: GLOBAL.NPCS[npcId], teamId: '2'}));
+				npcCount++;
+				if(npcCount === 3)
+					break;
 			}
 		}
 	}
-	
 	else{
 		// TODO: Временно для кнопки вступить в бой. Находим первый бой в который можно вступить
 		console.log("enterBattle 3");
 		for(var battleId in this.battles){
 			if(this.battles[battleId] && this.battles[battleId].check()){
-				this.battles[battleId].addHero(data.user);
+				queues.push(this.battles[battleId].addHero.bind(this.battles[battleId], data));
 				break;
 			}
 		}
 	}
+	
+	async.waterfall(
+		queues,
+		function(err){
+			console.log("enterBattle");
+		}
+	)
 }
 
 
@@ -214,8 +255,8 @@ BMClass.prototype.searchFreeHexesInArea = function(data)
 */
 BMClass.prototype.deleteAllNotEndedBattles = function()
 {
-	console.log("DELETE ALL OLD BATTLES!!");
-	SQL.querySync("UPDATE `game_Battles` SET `game_Battles`.`endFlag` = 1");
+	console.log("FINISH ALL OLD BATTLES!!");
+	Mongo.update({collection: 'game_Battles', insertData: {$set:{endFlag: true}}, options: {multi: true}}); 
 }
 
 	

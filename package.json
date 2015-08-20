@@ -4,8 +4,6 @@
   "description": "Server For Bew\r ================",
   "main": "index.js",
   "dependencies": {
-    "mysql": "~2.7.0",
-    "mysql-libmysqlclient": "~1.4.0",
     "async": "~1.4.0",
     "mongodb": "~2.0.39"
   },

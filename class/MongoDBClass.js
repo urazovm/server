@@ -19,10 +19,22 @@ MongoDBClass.prototype.connect = function(callback){
 }
 
 
-MongoDBClass.prototype.find = function(collection, searchData, fields, callback) {
-	// Get the documents collection
-	var collection = this.db.collection(collection);
-	// Find some documents
+/*
+	* Description:
+	* Поиск данных в коллекции
+	* @data:
+	*	@collection: 	str, Название коллекции
+	*	@searchData: 	obj
+	*	@fields: 		obj, 
+	*	@callback:		func, 
+	* @since  21.08.15
+	* @author pcemma
+*/
+MongoDBClass.prototype.find = function(data) {
+	var collection = this.db.collection(data.collection),
+		searchData = data.searchData || {},
+		fields = data.fields || {},
+		callback = data.callback || function(){};
 	collection.find(searchData, fields).toArray(function(err, docs) {
 		callback(docs);
 	});
@@ -40,12 +52,26 @@ MongoDBClass.prototype.insert = function(collection, insertData, callback) {
 	});
 }
 
+
 /*
-insertData: obj, {$set : {a: 2}}
+	* Description:
+	* Обновление данных в коллекции
+	* @data:
+	*	@collection: 	str, Название коллекции
+	*	@searchData: 	obj
+	*	@insertData: 	obj, {$set : {a: 2}}
+	*	@options:		obj
+	*	@callback:		func, 
+	* @since  21.08.15
+	* @author pcemma
 */
-MongoDBClass.prototype.update = function(collection, searchData, insertData, callback) {
-	var collection = this.db.collection(collection);
-	collection.update(searchData, insertData, function(err, result) {
+MongoDBClass.prototype.update = function(data) {
+	var collection = this.db.collection(data.collection),
+		searchData = data.searchData || {},
+		insertData = data.insertData || {},
+		options = data.options || {},
+		callback = data.callback || function(){};
+	collection.update(searchData, insertData, options, function(err, result) {
 		callback(result);
 	});  
 }

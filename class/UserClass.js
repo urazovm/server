@@ -15,8 +15,6 @@ function User() {
 						stuff: {}, 	// Надетые вещи
 						stats: {} 	// Статы юзера
 					};
-				
-
 }
 
 
@@ -58,21 +56,23 @@ User.prototype.check = function(autoConfigData, callback)
 {
 	if(
 		autoConfigData && 
-		autoConfigData.email && autoConfigData.email != "" &&
-		autoConfigData.password && autoConfigData.password != ""
+		autoConfigData.email && autoConfigData.email !== "" &&
+		autoConfigData.password && autoConfigData.password !== ""
 	){
 		console.log(autoConfigData.email.toLowerCase(), crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex'));
-		Mongo.find(	'game_Users', 
-					{email: autoConfigData.email.toLowerCase(), password: crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex')},
-					{_id: true},
-					function (rows) {
-						console.log("CHECK USER!!!");
-						console.log(rows);
-						if(rows.length > 0){
-							this.userId = rows[0]._id;
-						}
-						callback();
-					}.bind(this));
+		Mongo.find(	{
+						collection: 'game_Users', 
+						searchData: {email: autoConfigData.email.toLowerCase(), password: crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex')},
+						fields: {_id: true},
+						callback: function (rows) {
+									console.log("CHECK USER!!!");
+									console.log(rows);
+									if(rows.length > 0){
+										this.userId = rows[0]._id;
+									}
+									callback();
+								}.bind(this)
+					});
 	}
 }
 
@@ -277,9 +277,8 @@ User.prototype.updateClientInfo = function(data, callback)
 		clientVersion: (data.clientVersion) ? data.clientVersion : "",
 		ip: (data.ip) ? data.ip : ""
 	}};
-	Mongo.update('game_Users', {_id: this.userId}, insertData, function(){
-		callback();
-	});
+	Mongo.update({collection: 'game_Users', searchData: {_id: this.userId}, insertData: insertData, callback: function(rows){ callback(); }});
+	
 }
 
 
@@ -303,8 +302,8 @@ User.prototype.authorization = function(data, callback)
 	// проверяем на то что такой пользователь есть и верно введены данные для авторизации
 	if(
 		data.autoConfigData && 
-		((data.autoConfigData.email && data.autoConfigData.email != "") ||
-		(data.autoConfigData.password && data.autoConfigData.password != ""))
+		((data.autoConfigData.email && data.autoConfigData.email !== "") ||
+		(data.autoConfigData.password && data.autoConfigData.password !== ""))
 	){
 		// Тут проверка без учета самого пользователя, который может проверять
 		queues.push(this.check.bind(this, data.autoConfigData));
@@ -329,14 +328,17 @@ User.prototype.authorization = function(data, callback)
 			if(this.userId){
 				// Get verifyHash
 				this.socket = data.socket;
-				this.verifyHash = crypto.createHash('md5').update(String(+new Date()) + config.secretHashString + String(this.userId)).digest('hex');
+				this.verifyHash = crypto.createHash('md5').update(String(+new Date()) + config.secretHashString + this.userId).digest('hex');
 				// this.ping = Math.floor(+new Date() / 1000);
+				//TODO: стоит удалять this.autoConfigData, на всякий случай :)
 				var sendData =  {
 						userData: this.userData, 
 						userId: this.userId, 
 						verifyHash: this.verifyHash, 
 						autoConfigData: this.autoConfigData
 					};
+				//TODO разобраься с этим. Это при отрпавке клиенту надо отправлять.
+				// sendData = {incorrectFlag: true};	
 				this.socketWrite({f: "authorizationResponse", p: sendData});
 			}
 			else{
@@ -361,7 +363,8 @@ User.prototype.authorization = function(data, callback)
 */
 User.prototype.getUserData = function(callback)
 {
-	Mongo.find('game_Users', {_id: this.userId}, {userData: true}, function(rows){
+	console.log("this.userId", this.userId);
+	Mongo.find({collection: 'game_Users', searchData: {_id: this.userId}, fields: {userData: true}, callback: function(rows){
 		if(rows.length > 0){
 			this.userData = rows[0].userData;
 			var queues = [
@@ -379,7 +382,7 @@ User.prototype.getUserData = function(callback)
 			)
 		}
 		// callback();	
-	}.bind(this));	
+	}.bind(this)});	
 }
 
 
@@ -507,7 +510,8 @@ User.prototype.isAlive = function()
 User.prototype.getItems = function(callback)
 {
 	console.log("GET ITEMS!!!");
-	Mongo.find("game_WorldItems", {userId: this.userId}, {}, function(rows){
+	Mongo.find({collection: 'game_WorldItems', searchData: {userId: Mongo.objectId(this.userId)}, callback: function(rows){
+		console.log(rows);
 		for(var i in rows){
 			var worldItemId = rows[i]._id.toHexString();
 			this.userData.items[worldItemId] = rows[i];
@@ -517,12 +521,12 @@ User.prototype.getItems = function(callback)
 				var invetnorySlotId = String(rows[i].inventorySlotId[j]);
 				this.userData.stuff[invetnorySlotId] = {
 														userItemId: worldItemId,
-														itemId: 	String(rows[i].itemId)
+														itemId: 	rows[i].itemId
 													};
 			}
 		}
 		callback();
-	}.bind(this));
+	}.bind(this)});
 }
 
 
@@ -575,7 +579,7 @@ User.prototype.addItem = function(data, callback)
 */
 User.prototype.wearOnItem = function(data)
 {
-	var worldItemId = String(data.itemId);
+	var worldItemId = data.itemId;
 	if(
 		worldItemId in this.userData.items  // Проверка на то что такая вещь вообще есть у пользователя
 											// TODO: Проверка на то что ее можно надеть, что она подходит по статам, и что она не надета уже!
@@ -602,7 +606,7 @@ User.prototype.wearOnItem = function(data)
 				//TODO: добавлять статы вещи в статы юзера, все бонусы и прочее
 				this.userData.stuff[inventorySlotId] = {
 														userItemId: 	 worldItemId,
-														itemId: 		 String(itemId)
+														itemId: 		 itemId
 													};
 			}
 			// Обновляем слот ид в массиве свойств вещи пользователя.
@@ -610,7 +614,7 @@ User.prototype.wearOnItem = function(data)
 			
 			var insertData = {$set:{inventorySlotId: inventorySlotsArray}};
 			// TODO: Добавить асинхроность тут
-			Mongo.update('game_WorldItems', {_id: Mongo.objectId(worldItemId)}, insertData, function(rows){});
+			Mongo.update({collection: 'game_WorldItems', searchData: {_id: Mongo.objectId(worldItemId)}, insertData: insertData});
 			
 			this.socketWrite({
 				f: "userWearOnItem", 
@@ -637,7 +641,7 @@ User.prototype.wearOnItem = function(data)
 */
 User.prototype.wearOffItem = function(data)
 {
-	var worldItemId = String(data.itemId);
+	var worldItemId = data.itemId;
 	if(
 		worldItemId in this.userData.items  // Проверка на то что такая вещь вообще есть у пользователя
 											// TODO: Проверка на то что ее можно надеть, что она подходит по статам, и что она не надета уже!
@@ -650,7 +654,7 @@ User.prototype.wearOffItem = function(data)
 			for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots){
 				if(
 					inventorySlotId in this.userData.stuff && // проверка на что слот такой занят
-					this.userData.stuff[inventorySlotId].userItemId == worldItemId // Проверка что это именна та вещь вслоте, которую пытаются снять
+					this.userData.stuff[inventorySlotId].userItemId === worldItemId // Проверка что это именна та вещь вслоте, которую пытаются снять
 				){
 					//TODO: вычитать статы вещи из статов юзера, все бонусы и прочее
 					delete this.userData.stuff[inventorySlotId];
@@ -661,11 +665,11 @@ User.prototype.wearOffItem = function(data)
 			this.userData.items[worldItemId].inventorySlotId = [];
 			var insertData = {$set:{inventorySlotId: []}};
 			// TODO: Добавить асинхроность тут
-			Mongo.update('game_WorldItems', {_id: Mongo.objectId(worldItemId)}, insertData, function(rows){});
+			Mongo.update({collection: 'game_WorldItems', searchData: {_id: Mongo.objectId(worldItemId)}, insertData: insertData});
 			this.socketWrite({
 				f: "userWearOffItem", 
 				p: {
-					itemId: String(worldItemId)
+					itemId: worldItemId
 				}
 			});
 		}

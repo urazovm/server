@@ -15,12 +15,10 @@ lib =  require("./lib/lib.js");
 // classes	
 RouterClass 		= require("./class/RouterClass.js");
 ServerClass 		= require("./class/ServerClass.js");
-DbClass 			= require("./class/DBClass.js");
 MongoDBClass 		= require("./class/MongoDBClass.js");
 PreloadDataClass 	= require("./class/PreloadDataClass.js");
 UserClass 			= require("./class/UserClass.js");
 NpcClass 			= require("./class/NpcClass.js");
-
 BattleManagerClass 	= require("./class/BattleManagerClass.js");
 BattleClass			= require("./class/BattleClass.js");
 HexagonClass		= require("./class/HexagonClass.js");
@@ -28,10 +26,6 @@ HexagonClass		= require("./class/HexagonClass.js");
 
 
 /************** 	OBJECTS		********************/
-
-
-// start sql pool connection
-SQL = new DbClass();
 
 Mongo = new MongoDBClass(function(){
 	GLOBAL = new PreloadDataClass();

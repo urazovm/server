@@ -96,7 +96,7 @@ ServerClass.prototype.onSocketRequest = function(socket){
 				// console.log(data);
 				
 				// Для авторизации надо передать сокет
-				if(data.route == "authorization" || data.route == "getGlobalData"){
+				if(data.route === "authorization" || data.route === "getGlobalData"){
 					data.p.socket = socket;
 				}
 				router.route(data.route, data.p);
