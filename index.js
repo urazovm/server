@@ -1,11 +1,6 @@
 async = require("async");
 
 
-// syncMysql = require("mysql-libmysqlclient");
-// asyncMysql = require('mysql');
-
-
-
 
 // add personal config package
 config = require("./config/personal_config.js");
