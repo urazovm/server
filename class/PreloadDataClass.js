@@ -10,8 +10,7 @@ function PreloadDataClass() {
 }
 
 
-PreloadDataClass.prototype.initialize = function(callback)
-{
+PreloadDataClass.prototype.initialize = function(callback) {
 	var queues = [
 		this.createGlobalConstants.bind(this), // собираем все константы
 		
@@ -40,7 +39,7 @@ PreloadDataClass.prototype.initialize = function(callback)
 
 	async.waterfall(
 		queues,
-		function(err){
+		function(err) {
 			// All tasks are done now
 			// console.log(this.DATA.items[1]);
 			// console.log(this.DATA.battleInfo);
@@ -70,11 +69,10 @@ PreloadDataClass.prototype.initialize = function(callback)
 	* @since  21.07.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getTownsList = function(callback)
-{
+PreloadDataClass.prototype.getTownsList = function(callback) {
 	this.DATA.towns = {};
-	Mongo.find({collection: 'game_Towns', callback: function (rows) {
-		for(var i in rows){
+	Mongo.find({collection: 'game_Towns', callback: function(rows) {
+		for(var i in rows) {
 			rows[i].id = String(rows[i].id);
 			this.DATA.towns[rows[i].id] = {
 				id: rows[i].id,
@@ -98,11 +96,10 @@ PreloadDataClass.prototype.getTownsList = function(callback)
 	* @since  17.06.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getTownBuildingsTypes = function(callback)
-{
+PreloadDataClass.prototype.getTownBuildingsTypes = function(callback) {
 	this.DATA.buildingsTypes = {};
-	Mongo.find({collection: 'game_TownsBuildingsTypes', callback: function(rows){
-		for(var i in rows){
+	Mongo.find({collection: 'game_TownsBuildingsTypes', callback: function(rows) {
+		for(var i in rows) {
 			rows[i].id = String(rows[i].id);
 			this.DATA.buildingsTypes[rows[i].id] = {
 				id: rows[i].id,
@@ -124,11 +121,10 @@ PreloadDataClass.prototype.getTownBuildingsTypes = function(callback)
 	* @since  14.06.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getTownBuildingsList = function(callback)
-{
+PreloadDataClass.prototype.getTownBuildingsList = function(callback) {
 	this.DATA.buildings = {};
-	Mongo.find({collection: 'game_TownsBuildings', callback: function(rows){
-		for(var i in rows){
+	Mongo.find({collection: 'game_TownsBuildings', callback: function(rows) {
+		for(var i in rows) {
 			rows[i].id = String(rows[i].id);
 			rows[i].townId = String(rows[i].townId);
 			this.DATA.buildings[rows[i].id] = rows[i];
@@ -151,11 +147,10 @@ PreloadDataClass.prototype.getTownBuildingsList = function(callback)
 	* @since  22.12.14
 	* @author pcemma
 */
-PreloadDataClass.prototype.getItems = function(callback)
-{
+PreloadDataClass.prototype.getItems = function(callback) {
 	this.DATA.items = {};
-	Mongo.find({collection: 'game_Items', callback: function (rows) {
-		for(var i in rows){
+	Mongo.find({collection: 'game_Items', callback: function(rows) {
+		for(var i in rows) {
 			rows[i]._id = rows[i]._id.toHexString();
 			this.DATA.items[rows[i]._id] = rows[i];
 		}
@@ -174,12 +169,11 @@ PreloadDataClass.prototype.getItems = function(callback)
 	* @since  26.03.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getSpineSlots = function(callback)
-{
+PreloadDataClass.prototype.getSpineSlots = function(callback) {
 	this.DATA.spineSlots = {};
 	
-	Mongo.find({collection: 'game_ItemsSpineSlots', callback: function (rows) {
-		for(var i in rows){
+	Mongo.find({collection: 'game_ItemsSpineSlots', callback: function(rows) {
+		for(var i in rows) {
 			rows[i].id = String(rows[i].id);
 			this.DATA.spineSlots[rows[i].id] = {
 													id: rows[i].id,
@@ -201,11 +195,10 @@ PreloadDataClass.prototype.getSpineSlots = function(callback)
 	* @since  03.04.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getInventorySlotsList = function(callback)
-{
+PreloadDataClass.prototype.getInventorySlotsList = function(callback) {
 	this.DATA.inventorySlotsList = {};
-	Mongo.find({collection: 'game_ItemsInventorySlotsList', callback: function (rows) {
-		for(var i in rows){
+	Mongo.find({collection: 'game_ItemsInventorySlotsList', callback: function(rows) {
+		for(var i in rows) {
 			rows[i].id = String(rows[i].id);
 			this.DATA.inventorySlotsList[rows[i].id] = {
 															id: rows[i].id,
@@ -237,48 +230,15 @@ PreloadDataClass.prototype.getInventorySlotsList = function(callback)
 	* @since  05.05.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getNpcsInfo = function(callback)
-{
+PreloadDataClass.prototype.getNpcsInfo = function(callback) {
 	this.DATA.npcsInfo = {};
-	Mongo.find({collection: 'game_NpcsInfo', callback: function (rows) {
-		for(var i in rows){
+	Mongo.find({collection: 'game_NpcsInfo', callback: function(rows) {
+		for(var i in rows) {
 			this.DATA.npcsInfo[rows[i]._id] = rows[i];
 		}
 		callback();
 	}.bind(this)});
 }
-
-
-/*
-	* Description:
-	*	Создает глобальный массив всех нпц на карте!
-	*	
-	*	
-	*	
-	*
-	* @since  05.05.15
-	* @author pcemma
-*/
-/*
-PreloadDataClass.prototype.createGlobalNpcs = function(callback)
-{
-	
-	var npcCount = 1;
-
-	// GLOBAL NPC ARRAY
-	this.NPCS = {};
-	
-	for (var realNpcId in this.DATA.npcsInfo){
-		for (var i = 1; i <= 10; i++){
-			var npcId = "npc"+npcCount;
-			this.NPCS[String(npcId)] = new NpcClass();
-			this.NPCS[String(npcId)].getUserData({npcId: realNpcId, userId: npcId});
-			npcCount++;
-		}
-	}
-	callback();
-}
-*/
 
 
 /*
@@ -291,10 +251,9 @@ PreloadDataClass.prototype.createGlobalNpcs = function(callback)
 	* @since  16.08.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.fillNpcsCollectionWithData = function(callback)
-{
-	for(var npcId in this.DATA.npcsInfo){
-		for(var count = 1; count <= this.DATA.npcsInfo[npcId].count; count++){
+PreloadDataClass.prototype.fillNpcsCollectionWithData = function(callback) {
+	for(var npcId in this.DATA.npcsInfo) {
+		for(var count = 1; count <= this.DATA.npcsInfo[npcId].count; count++) {
 			var newNpc = new NpcClass();
 			newNpc.createNewUser({npcId: npcId}, callback);
 		}
@@ -316,8 +275,7 @@ PreloadDataClass.prototype.fillNpcsCollectionWithData = function(callback)
 	* @since  19.08.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.addUserToGlobalUsersArray = function(user, callback)
-{
+PreloadDataClass.prototype.addUserToGlobalUsersArray = function(user, callback) {
 	console.log("addUserToGlobalUsersArray");
 	this.USERS[user.userId] = user;
 	callback();
@@ -340,10 +298,9 @@ PreloadDataClass.prototype.addUserToGlobalUsersArray = function(user, callback)
 	* @since  08.02.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getBattleInfo = function(callback)
-{
+PreloadDataClass.prototype.getBattleInfo = function(callback) {
 	this.DATA.battleInfo = {};
-	Mongo.find({collection: 'game_BattleInfo', callback: function (rows) {
+	Mongo.find({collection: 'game_BattleInfo', callback: function(rows) {
 		this.DATA.battleInfo = rows[0];
 		callback();
 	}.bind(this)});
@@ -366,12 +323,11 @@ PreloadDataClass.prototype.getBattleInfo = function(callback)
 	* @since  21.02.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getStats = function(callback)
-{	
+PreloadDataClass.prototype.getStats = function(callback) {	
 	this.DATA.stats = {};
 	
-	Mongo.find({collection: 'game_Stats', callback: function (rows) {
-		for(var i in rows){
+	Mongo.find({collection: 'game_Stats', callback: function(rows) {
+		for(var i in rows) {
 			rows[i].id = String(rows[i].id);
 			this.DATA.stats[rows[i].name] = rows[i];
 		}
@@ -401,13 +357,12 @@ PreloadDataClass.prototype.getStats = function(callback)
 	* @since  31.03.14
 	* @author pcemma	
 */
-PreloadDataClass.prototype.createGlobalConstants = function(callback)
-{
+PreloadDataClass.prototype.createGlobalConstants = function(callback) {
 	this.globalConstants = {};
-	Mongo.find({collection: 'game_GlobalConstants', callback: function (rows) {
-		for(var i in rows){
+	Mongo.find({collection: 'game_GlobalConstants', callback: function(rows) {
+		for(var i in rows) {
 			// get client version
-			if(rows[i].name === "clientVersion"){
+			if(rows[i].name === "clientVersion") {
 				rows[i].value = rows[i].value.split(".");
 			}
 			this.globalConstants[rows[i].name] = rows[i].value;
@@ -435,22 +390,22 @@ PreloadDataClass.prototype.createGlobalConstants = function(callback)
 	* @since  31.03.14
 	* @author pcemma	
 */
-PreloadDataClass.prototype.checkVersion = function(version, need_version)
-{
-	if(!need_version){ 
+PreloadDataClass.prototype.checkVersion = function(version, need_version) {
+	if(!need_version) {
 		need_version = this.globalConstants.clientVersion;
-	}else{
+	} 
+	else {
 		need_version = need_version.split(".");
 	}	
-	if(version && version !== '')
-	{
+	if(version && version !== '') {
 		var client_version = version.split(".");
-		for(var key in need_version)
-		{
-			if(Number(client_version[key]) > Number(need_version[key]))
+		for(var key in need_version) {
+			if(Number(client_version[key]) > Number(need_version[key])) {
 				return true;
-			if(Number(client_version[key]) < Number(need_version[key]))
+			}
+			if(Number(client_version[key]) < Number(need_version[key])) {
 				return false;
+			}
 		}
 	}
 	return true;
