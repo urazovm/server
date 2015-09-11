@@ -25,8 +25,7 @@ function BattleClass() {
 	* @since  17.08.15
 	* @author pcemma
 */
-BattleClass.prototype.create = function(callback)
-{
+BattleClass.prototype.create = function(callback) {
 	Mongo.insert(
 		"game_Battles", 
 		{
@@ -37,7 +36,7 @@ BattleClass.prototype.create = function(callback)
 			// obstructionsHexes: this.obstructionsHexes,
 			teams: this.teams
 		}, 
-		function(rows){
+		function(rows) {
 			console.log(rows);
 			this.id = rows.ops[0]._id;
 			callback();
@@ -54,12 +53,11 @@ BattleClass.prototype.create = function(callback)
 	* @since  31.01.15
 	* @author pcemma
 */
-BattleClass.prototype.check = function()
-{
+BattleClass.prototype.check = function() {
 	// TODO: нормальная проверка, на свободные места, и прочее
 	if(	
 		!this.endFlag
-	){
+	) {
 		return true;
 	}
 	return false;
@@ -77,10 +75,9 @@ BattleClass.prototype.check = function()
 	* @since  06.03.15
 	* @author pcemma
 */
-BattleClass.prototype.completion = function(data)
-{	
+BattleClass.prototype.completion = function(data) {	
 	// 1. Пройтись по всем юзерам и поставить что они не в бою. 
-	for (var heroId in this.heroes){
+	for (var heroId in this.heroes) {
 		this.heroes[heroId].removeFromBattle();
 	}
 	
@@ -114,8 +111,7 @@ BattleClass.prototype.completion = function(data)
 	* @since  31.01.15
 	* @author pcemma
 */
-BattleClass.prototype.addHero = function(data, callback)
-{
+BattleClass.prototype.addHero = function(data, callback) {
 	var hero = data.hero;
 	// отправляем пользователю, те данные что уже есть. положение всех воинов на поле боя
 	hero.socketWrite({
@@ -124,7 +120,7 @@ BattleClass.prototype.addHero = function(data, callback)
 					});
 	
 	// TODO: если такой герой есть, то скорее всего это повторное подключение. Переопределить сокет ??
-	if(!(hero.userId in this.heroes)){
+	if(!(hero.userId in this.heroes)) {
 	
 		var tempTeamId = 1,
 			hexId = "0.0";
@@ -133,13 +129,13 @@ BattleClass.prototype.addHero = function(data, callback)
 		this.heroes[hero.userId] = hero;
 		
 		// TODO: remove -> это времено, раскидываем по одному в команду.
-		if((this.teams['1'].length <= this.teams['2'].length && !data.teamId) || data.teamId === 1){
+		if((this.teams['1'].length <= this.teams['2'].length && !data.teamId) || data.teamId === 1) {
 			this.teams['1'].push(hero.userId);
 			var x = 0,
 				y = Math.floor(Math.random() * (4 + 1));
 			hexId = x+"."+y;
 		}
-		else{
+		else {
 			this.teams['2'].push(hero.userId);
 			tempTeamId = 2;
 			var x = 6,
@@ -152,10 +148,10 @@ BattleClass.prototype.addHero = function(data, callback)
 		
 		// Тут апдейта массива юзера с данными о битве
 		this.heroes[hero.userId].addToBattle({
-														battleId: 	this.id,
-														teamId: 	tempTeamId,
-														hexId: 		hexId
-													});
+												battleId: 	this.id,
+												teamId: 	tempTeamId,
+												hexId: 		hexId
+											});
 		
 		
 		// тут должна отправляться вся инфа о пользователе. ид, логин, вещи, хп, манна,на какой позиции, команда, 
@@ -179,21 +175,19 @@ BattleClass.prototype.addHero = function(data, callback)
 	* @since  06.02.15
 	* @author pcemma
 */
-BattleClass.prototype.moveHero = function(data)
-{
+BattleClass.prototype.moveHero = function(data) {
 	console.log("moveHero", data.userId);
 	var currentTime = Math.floor(+new Date() / 1000);
 		
 	if(
 		this.heroes[data.userId] && 										// Проверяем на то есть ли вообще такой герой у нас
-		this.heroes[data.userId].userData.inBattleFlag && 					// Проверяем на то что герой этот в бою
-		this.heroes[data.userId].userData.battleId === this.id &&			// Проверка что герой в этом самом бою
+		this.heroes[data.userId].isInCurrentBattle(this.id) && 				// Проверяем на то что герой этот в бою
 		this.heroes[data.userId].isAlive() &&								// живой ли герой, мертвые не ходят!
 		this.heroes[data.userId].userData.lastActionTime <= currentTime && 	// Проверка на возможность делать ход, не включен ли таймаут
 		this.hexes[data.hexId] && 											// Проверяем на то что такой гекс вообще есть!
 		this.hexes[data.hexId].isFree && 									// Проверка на то что гекс в который хотят передвинуть свободен
 		this.hexes[this.heroes[data.userId].userData.hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) // и находится в радиусе шага
-	){
+	) {
 		// Обновление гекса
 		this.hexes[data.hexId].addHero({userId: data.userId});
 		this.hexes[this.heroes[data.userId].userData.hexId].removeHero();
@@ -226,36 +220,29 @@ BattleClass.prototype.moveHero = function(data)
 	* @since  25.02.15
 	* @author pcemma
 */
-BattleClass.prototype.heroMakeHit = function(data)
-{
+BattleClass.prototype.heroMakeHit = function(data) {
 	var currentTime = Math.floor(+new Date() / 1000);
 	
 	// TODO: переделать проверку соседей на проверку в радиусе
 	
 	if(
 		this.heroes[data.userId] && 										// Проверяем на то есть ли вообще такой герой у нас
-		this.heroes[data.userId].userData.inBattleFlag && 					// Проверяем на то что герой этот в бою
-		this.heroes[data.userId].userData.battleId === this.id &&			// Проверка что герой в этом самом бою
+		this.heroes[data.userId].isInCurrentBattle(this.id) &&				// Проверка что герой в этом самом бою
 		this.heroes[data.userId].isAlive() &&								// живой ли герой, мертвые не сражаются!
 		this.heroes[data.userId].userData.lastActionTime <= currentTime && 	// Проверка на возможность делать удар, не включен ли таймаут
 		this.hexes[data.hexId] && 											// Проверяем на то что такой гекс вообще есть!
 		this.hexes[this.heroes[data.userId].userData.hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) && // и находится в радиусе удара
 		this.hexes[data.hexId].userId										// Проверяем на то что в этом гексе есть герой
-	){		 
+	) {		 
 		//Берем ид героя(противника) в гексе
 		var oponentUserId = this.hexes[data.hexId].userId;
 		
 		if(
 			this.heroes[oponentUserId] && 								// Проверяем на то есть ли вообще такой герой у нас
-			
-			// TODO: вынести этот кусок в метод класса юзер
-			this.heroes[oponentUserId].userData.inBattleFlag && 		// Проверяем на то что герой этот в бою
-			this.heroes[oponentUserId].userData.battleId === this.id &&	// Проверка что герой в этом самом бою
+			this.heroes[oponentUserId].isInCurrentBattle(this.id) &&	// Проверка что герой в этом самом бою
 			this.heroes[oponentUserId].isAlive() &&						// живой ли герой, мертвых не бьют!
-			
-			
 			this.heroes[oponentUserId].userData.teamId !== this.heroes[data.userId].userData.teamId	// противник ли в этой клетке?
-		){
+		) {
 			// обновляем герою который совершал удар время таймаута
 			this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.stats.moveActionTime;
 			
@@ -273,7 +260,7 @@ BattleClass.prototype.heroMakeHit = function(data)
 			// Проверяет умер ли герой. Если да, то ставит герою соответствующие флаги
 			var isHeroAlive = this.heroes[oponentUserId].isAlive();
 			// Проверяем если герой умер то надо удалить его из гекса.
-			if(!isHeroAlive){
+			if(!isHeroAlive) {
 				this.hexes[this.heroes[oponentUserId].userData.hexId].removeHero();
 			}
 			
@@ -288,7 +275,7 @@ BattleClass.prototype.heroMakeHit = function(data)
 			
 			// Проверяет остались ли в команде героя по которому нанесли урон живые. 
 			// Если живых нет, то надо закончить бой
-			if(!isHeroAlive && !this.isAliveHeroesInTeam(this.heroes[oponentUserId].userData.teamId)){
+			if(!isHeroAlive && !this.isAliveHeroesInTeam(this.heroes[oponentUserId].userData.teamId)) {
 				console.log("DONT OPEN!! DEAD INSIDE!!!");
 				this.completion({
 									winTeamId: (this.heroes[oponentUserId].userData.teamId === 1) ? 2 : 1 
@@ -314,10 +301,9 @@ BattleClass.prototype.heroMakeHit = function(data)
 	* @since  14.02.15
 	* @author pcemma
 */
-BattleClass.prototype.createobstructionsHexes = function()
-{
+BattleClass.prototype.createobstructionsHexes = function() {
 	var tmpArray = {};
-	for (var i= 1; i <= Math.floor(Math.random() * (3 - 1 + 1)) + 1; i++ ){
+	for (var i= 1; i <= Math.floor(Math.random() * (3 - 1 + 1)) + 1; i++ ) {
 		var x = Math.floor(Math.random() * (this.hexesInRow + 1)),
 			y = Math.floor(Math.random() * (this.hexesInCol + 1));
 		tmpArray[x+"."+y] = String(Math.floor(Math.random() * (lib.objectSize(GLOBAL.DATA.battleInfo.obstructions) - 1 + 1)) + 1);
@@ -336,17 +322,16 @@ BattleClass.prototype.createobstructionsHexes = function()
 	* @since  31.01.15
 	* @author pcemma
 */
-BattleClass.prototype.createGrid = function()
-{
+BattleClass.prototype.createGrid = function() {
 	var tmpArray = {};
-	for (var i = 1; i <= this.hexesInRow; i++){
-		for (var j = 1; j <= this.hexesInCol; j++){
+	for (var i = 1; i <= this.hexesInRow; i++) {
+		for (var j = 1; j <= this.hexesInCol; j++) {
 			var x = i - 1,
 				y = j - 1;
 				dy = Math.fmod(y, 2),
 				isObstruction = (this.obstructionsHexes[x+"."+y]) ? true : false; // Флаг определяет будет ли на эом гексе препятствие
 			
-			if(!(dy === 1 && i === this.hexesInRow)){ // не рисуем в четных рядах последний гекс для красивого отображения сетки
+			if(!(dy === 1 && i === this.hexesInRow)) { // не рисуем в четных рядах последний гекс для красивого отображения сетки
 				tmpArray[x+"."+y] = new HexagonClass({x: x, y: y, isObstruction: isObstruction});
 			}
 		}
@@ -366,29 +351,27 @@ BattleClass.prototype.createGrid = function()
 	* @since  16.05.15
 	* @author pcemma
 */
-BattleClass.prototype.searchEnemyInArea = function(data)
-{
+BattleClass.prototype.searchEnemyInArea = function(data) {
 	var hexId = data.hexId,
 		hexesArray = [];
-	if(hexId in this.hexes){
+	if(hexId in this.hexes) {
 		var area = this.hexes[hexId].getHitArea();
 		// TODO: проверить, что быстрее форич или простой цикл
-		for(var hexesCount in area){
+		for(var hexesCount in area) {
 			var hexIdInArea = area[hexesCount].x+"."+area[hexesCount].y;
 			if(
 				this.hexes[hexIdInArea] && 											// Проверяем на то что такой гекс вообще есть!
 				this.hexes[hexIdInArea].userId										// Проверяем на то что в этом гексе есть герой
-			){
+			) {
 				//Берем ид героя(противника) в гексе
 				var oponentUserId = this.hexes[hexIdInArea].userId;
 				
 				if(
 					this.heroes[oponentUserId] && 								// Проверяем на то есть ли вообще такой герой у нас
-					this.heroes[oponentUserId].userData.inBattleFlag && 		// Проверяем на то что герой этот в бою
-					this.heroes[oponentUserId].userData.battleId === this.id &&	// Проверка что герой в этом самом бою
+					this.heroes[oponentUserId].isInCurrentBattle(this.id) && 	// Проверка что герой в этом самом бою
 					this.heroes[oponentUserId].isAlive() &&						// живой ли герой, мертвых не бьют!
 					this.heroes[oponentUserId].userData.teamId !== this.heroes[data.userId].userData.teamId	// противник ли в этой клетке?
-				){
+				) {
 					hexesArray.push(hexIdInArea);
 				}
 			}
@@ -409,19 +392,18 @@ BattleClass.prototype.searchEnemyInArea = function(data)
 	* @since  01.06.15
 	* @author pcemma
 */
-BattleClass.prototype.searchFreeHexesInArea = function(data)
-{
+BattleClass.prototype.searchFreeHexesInArea = function(data) {
 	var hexId = data.hexId,
 		hexesArray = [];
-	if(hexId in this.hexes){
+	if(hexId in this.hexes) {
 		var area = this.hexes[hexId].getMoveArea();
 		// TODO: проверить, что быстрее форич или простой цикл
-		for(var hexesCount in area){
+		for(var hexesCount in area) {
 			var hexIdInArea = area[hexesCount].x+"."+area[hexesCount].y;
 			if(
 				this.hexes[hexIdInArea] && 											// Проверяем на то что такой гекс вообще есть!
 				this.hexes[hexIdInArea].isFree										// Проверяем на то что гекс пустой
-			){
+			) {
 				hexesArray.push(hexIdInArea);
 			}
 		}
@@ -443,8 +425,7 @@ BattleClass.prototype.searchFreeHexesInArea = function(data)
 	* @since  31.01.15
 	* @author pcemma
 */
-BattleClass.prototype.getBattleStatus = function()
-{
+BattleClass.prototype.getBattleStatus = function() {
 	var battleInfo = {
 		id: 				this.id,
 		heroes: 			{},
@@ -453,7 +434,7 @@ BattleClass.prototype.getBattleStatus = function()
 	};
 	
 	
-	for (var i in this.heroes){
+	for (var i in this.heroes) {
 		battleInfo.heroes[i] = this.getHeroData(i);
 	}
 	
@@ -471,8 +452,7 @@ BattleClass.prototype.getBattleStatus = function()
 	* @since  21.02.15
 	* @author pcemma
 */
-BattleClass.prototype.getHeroData = function(userId)
-{
+BattleClass.prototype.getHeroData = function(userId) {
 	// TODO: это ж userData надо просто ее возвращать!
 	var currentTime = Math.floor(+new Date() / 1000);
 		info = {
@@ -500,10 +480,9 @@ BattleClass.prototype.getHeroData = function(userId)
 	* @since  01.03.15
 	* @author pcemma
 */
-BattleClass.prototype.isAliveHeroesInTeam = function(teamId)
-{
-	for (var heroId in this.teams[teamId]){
-		if(this.heroes[this.teams[teamId][heroId]].isAlive()){
+BattleClass.prototype.isAliveHeroesInTeam = function(teamId) {
+	for(var heroId in this.teams[teamId]) {
+		if(this.heroes[this.teams[teamId][heroId]].isAlive()) {
 			return true;
 		}
 	}
@@ -534,10 +513,9 @@ BattleClass.prototype.isAliveHeroesInTeam = function(teamId)
 	* @since  31.01.15
 	* @author pcemma
 */
-BattleClass.prototype.socketWrite = function(data)
-{
+BattleClass.prototype.socketWrite = function(data) {
 	// console.log("\n\n BattleClass.prototype.socketWrite");
-	for(var i in this.heroes){
+	for(var i in this.heroes) {
 		// console.log("heroId", i);
 		this.heroes[i].socketWrite(data);
 	}

@@ -382,6 +382,34 @@ User.prototype.getUserData = function(callback) {
 
 
 /*
+	* Description: Функция Проверяет в бою ли игрок
+	*
+	*
+	*
+	* @since  11.09.15
+	* @author pcemma
+*/
+User.prototype.isInBattle = function() {
+	return this.userData.inBattleFlag;
+}
+
+
+/*
+	* Description: Функция Проверяет, что игрок именно в этом бою и в бою вообще.
+	*
+	*	@data:	arr,
+	*		battleId: 	int, ид боя
+	*
+	*
+	* @since  11.09.15
+	* @author pcemma
+*/
+User.prototype.isInCurrentBattle = function(battleId) {
+	return this.isInBattle() && this.userData.battleId === battleId;
+}
+
+
+/*
 	* Description: Функция добавляет героя в бой.
 	*
 	*	@data:	arr,
