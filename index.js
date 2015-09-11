@@ -1,8 +1,8 @@
 async = require("async");
 
 
-syncMysql = require("mysql-libmysqlclient");
-asyncMysql = require('mysql');
+// syncMysql = require("mysql-libmysqlclient");
+// asyncMysql = require('mysql');
 
 
 
