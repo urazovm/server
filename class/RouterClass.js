@@ -67,24 +67,24 @@ Router.prototype['/'] = function (response, data) {
 Router.prototype.makeClientsErrorLogs = function (data) {
 	console.log("data.error_message",data);
 	data.userId = data.userId;
-	if(data.userId || data.userId === 0){
+	if(data.userId || data.userId === 0) {
 		// Добавить новую ошибку либо обновить статус у старой
-		Mongo.findAndModify(	
-			'game_ErrorsClientList', 
-			{functionName: data.functionName}, 
-			[],  
-			{
+		
+		Mongo.findAndModify({
+			collection: 'game_ErrorsClientList', 
+			criteria: {functionName: data.functionName}, 
+			update : {
 				$set: { 
 					functionName: data.functionName, 
 					error: data.error
 				},
 				$inc: {count: 1}
-			},
-			{
+			}, 
+			options: {
 				upsert: true,
 				new: true
-			},
-			function(doc){
+			}, 
+			callback: function(doc) {
 				var insertData = {$set:{}};
 				// Проверяем не увеличилась ли клиент версия, на которой случилась ошибка, либо что это новая ошибка
 				// В этом случае надо обновить в БД поля clientVersion и state.
@@ -99,9 +99,18 @@ Router.prototype.makeClientsErrorLogs = function (data) {
 				Mongo.update({collection: 'game_ErrorsClientList', searchData: {_id: doc.value._id}, insertData: insertData});
 				
 				// Занести в список ошибок (лист)
-				Mongo.insert('game_ErrorsClient', {date: + new Date(), errorId: doc.value._id.toHexString(), clientVersion: data.clientVersion, userId: data.userId}, function(doc){});
+				Mongo.insert({
+					collection: 'game_ErrorsClient', 
+					insertData: {
+						date: + new Date(), 
+						errorId: doc.value._id.toHexString(), 
+						clientVersion: data.clientVersion, 
+						userId: data.userId
+					}
+				});
 			}
-		);
+
+		});
 	}
 }
 

@@ -145,9 +145,9 @@ User.prototype.addDefaultUser = function(data, callback) {
 		email:	login+"@bew.net"
 	};
 	
-	Mongo.insert(
-		"game_Users", 
-		{
+	Mongo.insert({
+		collection: "game_Users", 
+		insertData: {
 			email: this.autoConfigData.email,
 			password: crypto.createHash('md5').update(String(this.autoConfigData.password)).digest('hex'),
 			registrationDate: currentTime,
@@ -161,10 +161,11 @@ User.prototype.addDefaultUser = function(data, callback) {
 				stats: this.addDefaultStats()
 			},
 		}, 
-		function(rows) {
+		callback: function(rows) {
 			this.userId = rows.ops[0]._id;
 			callback();
-		}.bind(this)); 		
+		}.bind(this)
+	}); 		
 }
 	
 
@@ -561,18 +562,20 @@ User.prototype.addItem = function(data, callback) {
 			
 		}
 		else {
-			Mongo.insert("game_WorldItems", 
-				{
+			Mongo.insert({
+				collection: "game_WorldItems", 
+				insertData: {
 					stats: data.stats,
 					itemId: data.itemId,
 					count: data.count,
 					userId: this.userId,
 					inventorySlotId: data.inventorySlotId || []
 				},  
-				function(rows) {
+				callback: function(rows) {
 					console.log("Add item", rows.ops[0]._id);
 					callback();
-				}.bind(this)); 
+				}.bind(this)
+			}); 
 		}
 	}
 }

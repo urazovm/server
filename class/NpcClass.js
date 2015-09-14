@@ -33,10 +33,9 @@ Npc.prototype.constructor = Npc;
 */
 Npc.prototype.addDefaultUser = function(data, callback) {
 	this.npcId = data.npcId;
-	
-	Mongo.insert(
-		"game_Npcs", 
-		{
+	Mongo.insert({
+		collection: "game_Npcs", 
+		insertData: {
 			userData: {
 				npcId: data.npcId,
 				login: GLOBAL.DATA.npcsInfo[data.npcId].name,
@@ -48,10 +47,11 @@ Npc.prototype.addDefaultUser = function(data, callback) {
 				stats: this.addDefaultStats()
 			},
 		}, 
-		function(rows) {
+		callback: function(rows) {
 			this.userId = rows.ops[0]._id;
 			callback();
-		}.bind(this)); 		
+		}.bind(this)
+	}); 		
 }
 
 

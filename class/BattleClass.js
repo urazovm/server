@@ -26,21 +26,21 @@ function BattleClass() {
 	* @author pcemma
 */
 BattleClass.prototype.create = function(callback) {
-	Mongo.insert(
-		"game_Battles", 
-		{
+	Mongo.insert({
+		collection: "game_Battles", 
+		insertData: {
 			startTime: this.startTime,
 			endFlag: this.endFlag,
 			hexesInRow: this.hexesInRow,
 			hexesInCol: this.hexesInCol,
-			// obstructionsHexes: this.obstructionsHexes,
 			teams: this.teams
 		}, 
-		function(rows) {
+		callback: function(rows) {
 			console.log(rows);
 			this.id = rows.ops[0]._id;
 			callback();
-		}.bind(this)); 
+		}.bind(this)
+	}); 
 }
 
 
