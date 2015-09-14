@@ -146,13 +146,9 @@ Npc.prototype.removeFromBattleListener = function() {
 	* @author pcemma
 */
 Npc.prototype.searchEnemyInArea = function() {
-	var currentTime = Math.floor(+new Date() / 1000);
 	// TODO: Сделать поверку на то что бой еще идет. 
-	if(
-		this.isInBattle() &&
-		this.isAlive() 	// живой ли герой, мертвые не сражаются!
-	) {
-		if(this.userData.lastActionTime <= currentTime ) { 	// Проверка на возможность делать удар, не включен ли таймаут
+	if(this.isInBattle() && this.isAlive()) {
+		if(this.canDoAction()) {
 			var hexesArray = battlesManager.searchEnemyInArea({id: this.userData.battleId, hexId: this.userData.hexId, userId: this.userId});
 			// Проверяем вернулся ли нам массив. Если нет, то боя такого нет, нам более нет надобности заводить таймеры для нпц.
 			if(hexesArray) {
@@ -189,13 +185,9 @@ Npc.prototype.searchEnemyInArea = function() {
 	* @author pcemma
 */
 Npc.prototype.findHexIdToMove = function() {
-	var currentTime = Math.floor(+new Date() / 1000);
 	// TODO: Сделать поверку на то что бой еще идет. 
-	if(
-		this.isInBattle() &&
-		this.isAlive()	// живой ли герой, мертвые не сражаются!
-	) {
-		if(this.userData.lastActionTime <= currentTime) {  	// Проверка на возможность делать удар, не включен ли таймаут
+	if(	this.isInBattle() && this.isAlive()) {
+		if(this.canDoAction()) { 
 			var hexesArray = battlesManager.searchFreeHexesInArea({id: this.userData.battleId, hexId: this.userData.hexId, userId: this.userId});
 			// Проверяем вернулся ли нам массив. Если нет, то пустых гексовдля передвижения в области нет. 
 			// Проверка на количество гексов для передвижения.

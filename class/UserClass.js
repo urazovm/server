@@ -423,6 +423,82 @@ User.prototype.isInCurrentBattle = function(battleId) {
 
 
 /*
+	* Description: Проверка мерт ли герой. 
+	*
+	*
+	* @since  01.03.15
+	* @author pcemma
+*/
+User.prototype.isAlive = function() {
+	if(this.userData.stats.currentHp <= 0 ) {
+		this.userData.stats.currentHp = 0;
+		this.userData.isAliveFlag = false;
+	}
+	return this.userData.isAliveFlag;
+}
+
+
+/*
+	* Description: Проверка является ли врагом данный игрок. 
+	*
+	*	@data:
+	*		@teamId: 	str, ид команды в которой данный игрок не должен находиться!
+	*
+	*
+	* @since  14.09.15
+	* @author pcemma
+*/
+User.prototype.isEnemy = function(teamId) {
+	return this.userData.teamId !== teamId;
+}
+
+
+/*
+	* Description: Проверка на доступный ли этот игрок для действий над ним со стороны опонента. 
+	*
+	*	@data:
+	*		@battleId: 	str, ид боя для проверки нахождения игрока именно в этмо бою.
+	*		@teamId: 	str, ид команды в которой данный игрок не должен находиться!
+	*
+	*
+	* @since  14.09.15
+	* @author pcemma
+*/
+User.prototype.isAvailableEnemy = function(data) {
+	return this.isInCurrentBattle(data.battleId) && this.isAlive() && this.isEnemy(data.teamId);
+}
+
+
+/*
+	* Description: Проверка на доступнонсть делать действие в бою. 
+	*
+	*	@data:
+	*		@battleId: 	str, ид боя для проверки нахождения игрока именно в этмо бою.
+	*
+	*
+	* @since  14.09.15
+	* @author pcemma
+*/
+User.prototype.isReadyForAction = function(data) {
+	return this.isInCurrentBattle(data.battleId) && this.isAlive() && this.canDoAction();
+}
+
+
+/*
+	* Description: Проверка на доступнонсть делать действие. 
+	*
+	*
+	*
+	* @since  14.09.15
+	* @author pcemma
+*/
+User.prototype.canDoAction = function() {
+	var currentTime = Math.floor(+new Date() / 1000);
+	return this.userData.lastActionTime <= currentTime;
+}
+
+
+/*
 	* Description: Функция добавляет героя в бой.
 	*
 	*	@data:	arr,
@@ -502,21 +578,6 @@ User.prototype.countDamage = function() {
 	return damage;
 }
 
-
-/*
-	* Description: Проверка мерт ли герой. 
-	*
-	*
-	* @since  01.03.15
-	* @author pcemma
-*/
-User.prototype.isAlive = function() {
-	if(this.userData.stats.currentHp <= 0 ) {
-		this.userData.stats.currentHp = 0;
-		this.userData.isAliveFlag = false;
-	}
-	return this.userData.isAliveFlag;
-}
 
 
 

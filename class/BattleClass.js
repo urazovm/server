@@ -180,10 +180,10 @@ BattleClass.prototype.moveHero = function(data) {
 	var currentTime = Math.floor(+new Date() / 1000);
 		
 	if(
-		this.heroes[data.userId] && 										// Проверяем на то есть ли вообще такой герой у нас
-		this.heroes[data.userId].isInCurrentBattle(this.id) && 				// Проверяем на то что герой этот в бою
-		this.heroes[data.userId].isAlive() &&								// живой ли герой, мертвые не ходят!
-		this.heroes[data.userId].userData.lastActionTime <= currentTime && 	// Проверка на возможность делать ход, не включен ли таймаут
+		// Проверяем на то есть ли вообще такой герой у нас И может ли он совершать действие
+		this.heroes[data.userId] && 										
+		this.heroes[data.userId].isReadyForAction({battleId: this.id}) &&
+		
 		this.hexes[data.hexId] && 											// Проверяем на то что такой гекс вообще есть!
 		this.hexes[data.hexId].isFree && 									// Проверка на то что гекс в который хотят передвинуть свободен
 		this.hexes[this.heroes[data.userId].userData.hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) // и находится в радиусе шага
@@ -226,10 +226,10 @@ BattleClass.prototype.heroMakeHit = function(data) {
 	// TODO: переделать проверку соседей на проверку в радиусе
 	
 	if(
-		this.heroes[data.userId] && 										// Проверяем на то есть ли вообще такой герой у нас
-		this.heroes[data.userId].isInCurrentBattle(this.id) &&				// Проверка что герой в этом самом бою
-		this.heroes[data.userId].isAlive() &&								// живой ли герой, мертвые не сражаются!
-		this.heroes[data.userId].userData.lastActionTime <= currentTime && 	// Проверка на возможность делать удар, не включен ли таймаут
+		// Проверяем на то есть ли вообще такой герой у нас И может ли он совершать действие
+		this.heroes[data.userId] && 										
+		this.heroes[data.userId].isReadyForAction({battleId: this.id}) &&
+		
 		this.hexes[data.hexId] && 											// Проверяем на то что такой гекс вообще есть!
 		this.hexes[this.heroes[data.userId].userData.hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) && // и находится в радиусе удара
 		this.hexes[data.hexId].userId										// Проверяем на то что в этом гексе есть герой
@@ -238,10 +238,9 @@ BattleClass.prototype.heroMakeHit = function(data) {
 		var oponentUserId = this.hexes[data.hexId].userId;
 		
 		if(
-			this.heroes[oponentUserId] && 								// Проверяем на то есть ли вообще такой герой у нас
-			this.heroes[oponentUserId].isInCurrentBattle(this.id) &&	// Проверка что герой в этом самом бою
-			this.heroes[oponentUserId].isAlive() &&						// живой ли герой, мертвых не бьют!
-			this.heroes[oponentUserId].userData.teamId !== this.heroes[data.userId].userData.teamId	// противник ли в этой клетке?
+			// Доступен ли игрок для действий
+			this.heroes[oponentUserId] && 
+			this.heroes[oponentUserId].isAvailableEnemy({battleId: this.id, teamId: this.heroes[data.userId].userData.teamId}) 	
 		) {
 			// обновляем герою который совершал удар время таймаута
 			this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.stats.moveActionTime;
@@ -366,10 +365,9 @@ BattleClass.prototype.searchEnemyInArea = function(data) {
 				var oponentUserId = this.hexes[hexIdInArea].userId;
 				
 				if(
-					this.heroes[oponentUserId] && 								// Проверяем на то есть ли вообще такой герой у нас
-					this.heroes[oponentUserId].isInCurrentBattle(this.id) && 	// Проверка что герой в этом самом бою
-					this.heroes[oponentUserId].isAlive() &&						// живой ли герой, мертвых не бьют!
-					this.heroes[oponentUserId].userData.teamId !== this.heroes[data.userId].userData.teamId	// противник ли в этой клетке?
+					// Доступен ли игрок для действий
+					this.heroes[oponentUserId] && 
+					this.heroes[oponentUserId].isAvailableEnemy({battleId: this.id, teamId: this.heroes[data.userId].userData.teamId})
 				) {
 					hexesArray.push(hexIdInArea);
 				}
@@ -396,12 +394,11 @@ BattleClass.prototype.searchFreeHexesInArea = function(data) {
 		hexesArray = [];
 	if(hexId in this.hexes) {
 		var area = this.hexes[hexId].getMoveArea();
-		// TODO: проверить, что быстрее форич или простой цикл
 		for(var hexesCount in area) {
 			var hexIdInArea = area[hexesCount].x+"."+area[hexesCount].y;
 			if(
-				this.hexes[hexIdInArea] && 											// Проверяем на то что такой гекс вообще есть!
-				this.hexes[hexIdInArea].isFree										// Проверяем на то что гекс пустой
+				this.hexes[hexIdInArea] && 		// Проверяем на то что такой гекс вообще есть!
+				this.hexes[hexIdInArea].isFree	// Проверяем на то что гекс пустой
 			) {
 				hexesArray.push(hexIdInArea);
 			}
