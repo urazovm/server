@@ -26,7 +26,7 @@ BMClass.prototype.createBattle = function(callback)
 	
 	async.waterfall(
 		queues,
-		function(err){
+		function(err) {
 			console.log("Battle is created!");
 			console.log(this.battles);
 			callback();
@@ -45,8 +45,7 @@ BMClass.prototype.createBattle = function(callback)
 	* @since  19.08.15
 	* @author pcemma
 */
-BMClass.prototype.addBattleToGlobalArray = function(battle, callback)
-{
+BMClass.prototype.addBattleToGlobalArray = function(battle, callback) {
 	console.log("addBattleToGlobalArray");
 	this.battles[battle.id] = battle;
 	callback();
@@ -65,9 +64,8 @@ BMClass.prototype.addBattleToGlobalArray = function(battle, callback)
 	* @since  07.03.15
 	* @author pcemma
 */
-BMClass.prototype.removeBattle = function(data)
-{
-	if(data && data.id){
+BMClass.prototype.removeBattle = function(data) {
+	if(data && data.id) {
 		delete this.battles[data.id];
 	}
 }
@@ -85,19 +83,18 @@ BMClass.prototype.removeBattle = function(data)
 	* @since  31.01.15
 	* @author pcemma
 */
-BMClass.prototype.enterBattle = function(data)
-{
+BMClass.prototype.enterBattle = function(data) {
 	var queues = [],
 		battle = {};
 	if(
 		data && data.id &&
 		this.battles[data.id] && this.battles[data.id].check()
-	){
+	) {
 		console.log("enterBattle 1");
 		battle = this.battles[data.id];
 		queues.push(battle.addHero.bind(battle, data)); // .addHero(GLOBAL.NPCS["npc"+i], 2);
 	}
-	else if(lib.objectSize(this.battles) === 0){
+	else if(lib.objectSize(this.battles) === 0) {
 		console.log("enterBattle 2");
 		battle = new BattleClass();
 		queues.push(battle.create.bind(battle));
@@ -106,9 +103,9 @@ BMClass.prototype.enterBattle = function(data)
 		
 		//TODO: временно добавляем нпц в бой сразу за героем. Для тестов и показа издателю.
 		// добавляем первого нпц тупо.
-		if(data.battleType === "npc"){
+		if(data.battleType === "npc") {
 			npcCount = 0;
-			for(var npcId in GLOBAL.NPCS){
+			for(var npcId in GLOBAL.NPCS) {
 				queues.push(battle.addHero.bind(battle, {hero: GLOBAL.NPCS[npcId], teamId: '2'}));
 				npcCount++;
 				if(npcCount === 3)
@@ -116,11 +113,11 @@ BMClass.prototype.enterBattle = function(data)
 			}
 		}
 	}
-	else{
+	else {
 		// TODO: Временно для кнопки вступить в бой. Находим первый бой в который можно вступить
 		console.log("enterBattle 3");
-		for(var battleId in this.battles){
-			if(this.battles[battleId] && this.battles[battleId].check()){
+		for(var battleId in this.battles) {
+			if(this.battles[battleId] && this.battles[battleId].check()) {
 				queues.push(this.battles[battleId].addHero.bind(this.battles[battleId], data));
 				break;
 			}
@@ -129,7 +126,7 @@ BMClass.prototype.enterBattle = function(data)
 	
 	async.waterfall(
 		queues,
-		function(err){
+		function(err) {
 			console.log("enterBattle");
 		}
 	)
@@ -147,15 +144,14 @@ BMClass.prototype.enterBattle = function(data)
 	* @since  06.02.15
 	* @author pcemma
 */
-BMClass.prototype.moveHero = function(data)
-{
+BMClass.prototype.moveHero = function(data) {
 	// console.log("\n BM moveHero");
 	// console.log("data.userId", data.userId);
 	// console.log("-------------------- \n\n");
 	if(
 		data && data.id &&
 		this.battles[data.id] && this.battles[data.id].check()
-	){
+	) {
 		return this.battles[data.id].moveHero(data);
 	}
 }
@@ -172,15 +168,14 @@ BMClass.prototype.moveHero = function(data)
 	* @since  25.02.15
 	* @author pcemma
 */
-BMClass.prototype.heroMakeHit = function(data)
-{
+BMClass.prototype.heroMakeHit = function(data) {
 	console.log("\n BM heroMakeHit");
 	console.log("data.userId", data.userId);
 	console.log("-------------------- \n\n");
 	if(
 		data && data.id &&
 		this.battles[data.id] && this.battles[data.id].check()
-	){
+	) {
 		return this.battles[data.id].heroMakeHit(data);
 	}
 	return false;
@@ -202,15 +197,14 @@ BMClass.prototype.heroMakeHit = function(data)
 	* @since  16.05.15
 	* @author pcemma
 */
-BMClass.prototype.searchEnemyInArea = function(data)
-{
+BMClass.prototype.searchEnemyInArea = function(data) {
 	console.log("\n BM searchEnemyInArea");
 	console.log("data.userId", data.userId);
 	console.log("-------------------- \n\n");
 	if(
 		data && data.id &&
 		this.battles[data.id] && this.battles[data.id].check()
-	){
+	) {
 		return this.battles[data.id].searchEnemyInArea(data);
 	}
 	return false;
@@ -228,15 +222,14 @@ BMClass.prototype.searchEnemyInArea = function(data)
 	* @since  01.06.15
 	* @author pcemma
 */
-BMClass.prototype.searchFreeHexesInArea = function(data)
-{
+BMClass.prototype.searchFreeHexesInArea = function(data) {
 	console.log("\n BM searchFreeHexesInArea");
 	console.log("data.userId", data.userId);
 	console.log("-------------------- \n\n");
 	if(
 		data && data.id &&
 		this.battles[data.id] && this.battles[data.id].check()
-	){
+	) {
 		return this.battles[data.id].searchFreeHexesInArea(data);
 	}
 	return false;
@@ -253,8 +246,7 @@ BMClass.prototype.searchFreeHexesInArea = function(data)
 	* @since  08.03.15
 	* @author pcemma
 */
-BMClass.prototype.deleteAllNotEndedBattles = function()
-{
+BMClass.prototype.deleteAllNotEndedBattles = function() {
 	console.log("FINISH ALL OLD BATTLES!!");
 	Mongo.update({collection: 'game_Battles', insertData: {$set:{endFlag: true}}, options: {multi: true}}); 
 }
