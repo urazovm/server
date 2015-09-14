@@ -17,6 +17,7 @@ function HexagonClass(data) {
 HexagonClass.prototype.__constructor = function(data) {
 	this.isFree = true;
 	this.userId = false;
+	this.isObstructions = false;
 	this.x = data.x;
 	this.y = data.y;
 	this.directions = [
@@ -25,10 +26,24 @@ HexagonClass.prototype.__constructor = function(data) {
 	];
 	
 	if(data.isObstruction) {
-		this.isObstructions = true;
-		this.isFree = false;
-		this.obstructionId = Math.floor(Math.random() * (lib.objectSize(GLOBAL.DATA.battleInfo.obstructions) - 1 + 1)) + 1;
+		this.makeObstraction();
 	}
+}
+
+
+/*
+	* Description:
+	*	Делает гекс непроходимым с припятствиями
+	*	
+	*	
+	*
+	* @since  14.09.15
+	* @author pcemma
+*/
+HexagonClass.prototype.makeObstraction = function() {
+	this.isObstructions = true;
+	this.isFree = false;
+	// this.obstructionId = Math.floor(Math.random() * (lib.objectSize(GLOBAL.DATA.battleInfo.obstructions) - 1 + 1)) + 1;
 }
 
 
@@ -36,8 +51,6 @@ HexagonClass.prototype.__constructor = function(data) {
 	* Description:
 	*	function добавляет героя в гекс
 	*	
-	*	@data:			arr
-	*		@userId:	str, id of the user
 	*
 	* @since  08.02.15
 	* @author pcemma
