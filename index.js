@@ -1,7 +1,6 @@
 async = require("async");
 
 
-
 // add personal config package
 config = require("./config/personal_config.js");
 
@@ -21,14 +20,11 @@ HexagonClass		= require("./class/HexagonClass.js");
 
 
 
-/************** 	OBJECTS		********************/
-
-Mongo = new MongoDBClass(function(){
+/************** 	START SERVER		********************/
+Mongo = new MongoDBClass(function() {
 	GLOBAL = new PreloadDataClass();
-	GLOBAL.initialize(function(){
+	GLOBAL.initialize(function() {
 		battlesManager = new BattleManagerClass();
-
-		// start server
 		var server = new ServerClass();
 		server.start();
 	});

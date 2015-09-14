@@ -94,7 +94,7 @@ BMClass.prototype.enterBattle = function(data) {
 		battle = this.battles[data.id];
 		queues.push(battle.addHero.bind(battle, data)); // .addHero(GLOBAL.NPCS["npc"+i], 2);
 	}
-	else if(lib.objectSize(this.battles) === 0) {
+	else if(Object.keys(this.battles).length === 0) {
 		console.log("enterBattle 2");
 		battle = new BattleClass();
 		queues.push(battle.create.bind(battle));

@@ -59,18 +59,21 @@ User.prototype.check = function(autoConfigData, callback) {
 	) {
 		// console.log(autoConfigData.email.toLowerCase(), crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex'));
 		Mongo.find({
-						collection: 'game_Users', 
-						searchData: {email: autoConfigData.email.toLowerCase(), password: crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex')},
-						fields: {_id: true},
-						callback: function (rows) {
-									console.log("CHECK USER!!!");
-									console.log(rows);
-									if(rows.length > 0) {
-										this.userId = rows[0]._id;
-									}
-									callback();
-								}.bind(this)
-					});
+			collection: 'game_Users', 
+			searchData: {
+				email: autoConfigData.email.toLowerCase(), 
+				password: crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex')
+			},
+			fields: {_id: true},
+			callback: function (rows) {
+				console.log("CHECK USER!!!");
+				console.log(rows);
+				if(rows.length > 0) {
+					this.userId = rows[0]._id;
+				}
+				callback();
+			}.bind(this)
+		});
 	}
 }
 
@@ -276,6 +279,9 @@ User.prototype.updateClientInfo = function(data, callback) {
 
 
 
+
+
+
 // AUTH //
 
 
@@ -315,7 +321,7 @@ User.prototype.authorization = function(data, callback) {
 		queues,
 		function(err) {
 			console.log("User authorization");
-			
+			var sendData = {};
 			// мы удачно все прошли, нашли нужного пользователя с теми данными что прислыли, либо создали гостя
 			if(this.userId) {
 				// Get verifyHash
@@ -323,20 +329,21 @@ User.prototype.authorization = function(data, callback) {
 				this.verifyHash = crypto.createHash('md5').update(String(+new Date()) + config.secretHashString + this.userId).digest('hex');
 				// this.ping = Math.floor(+new Date() / 1000);
 				//TODO: стоит удалять this.autoConfigData, на всякий случай :)
-				var sendData =  {
-						userData: this.userData, 
-						userId: this.userId, 
-						verifyHash: this.verifyHash, 
-						autoConfigData: this.autoConfigData
-					};
-				//TODO разобраься с этим. Это при отрпавке клиенту надо отправлять.
-				// sendData = {incorrectFlag: true};	
-				this.socketWrite({f: "authorizationResponse", p: sendData});
+				sendData =  {
+					userData: this.userData, 
+					userId: this.userId, 
+					verifyHash: this.verifyHash, 
+					autoConfigData: this.autoConfigData
+				};	
 			}
 			else {
 				// Ответ что у мы не можем авторизоваться (не верные данные)
 				console.log("Not such user!!!");
+				sendData = {incorrectFlag: true};
 			}
+
+			this.socketWrite({f: "authorizationResponse", p: sendData});
+
 			callback();
 		}.bind(this)
 	)
@@ -355,25 +362,30 @@ User.prototype.authorization = function(data, callback) {
 */
 User.prototype.getUserData = function(callback) {
 	console.log("this.userId", this.userId);
-	Mongo.find({collection: 'game_Users', searchData: {_id: this.userId}, fields: {userData: true}, callback: function(rows) {
-		if(rows.length > 0) {
-			this.userData = rows[0].userData;
-			var queues = [
-				// Собираем вещи юзера. Данные про вещи текущие в коллеции game_WorldItems
-				this.getItems.bind(this)
-			];
-			
-			async.waterfall(
-				queues,
-				function(err) {
-					console.log("Get userData");
-					console.log(this.userData);
-					callback();
-				}.bind(this)
-			)
-		}
-		// callback();	
-	}.bind(this)});	
+	Mongo.find({
+		collection: 'game_Users', 
+		searchData: {_id: this.userId}, 
+		fields: {userData: true}, 
+		callback: function(rows) {
+			if(rows.length > 0) {
+				this.userData = rows[0].userData;
+				var queues = [
+					// Собираем вещи юзера. Данные про вещи текущие в коллеции game_WorldItems
+					this.getItems.bind(this)
+				];
+				
+				async.waterfall(
+					queues,
+					function(err) {
+						console.log("Get userData");
+						console.log(this.userData);
+						callback();
+					}.bind(this)
+				);
+			}
+			// callback();	
+		}.bind(this)
+	});	
 }
 
 
