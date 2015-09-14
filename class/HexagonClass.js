@@ -1,10 +1,9 @@
 console.log("HexagonClass CLASS is connected");	
 
 function HexagonClass(data) {
-
-	
 	this.__constructor(data);
 }
+
 
 /*
 	* Description:
@@ -15,14 +14,17 @@ function HexagonClass(data) {
 	* @since  08.02.15
 	* @author pcemma
 */
-HexagonClass.prototype.__constructor = function(data)
-{
+HexagonClass.prototype.__constructor = function(data) {
 	this.isFree = true;
 	this.userId = false;
 	this.x = data.x;
 	this.y = data.y;
+	this.directions = [
+		[ [1, 0], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1]],
+		[ [1, 0], [1, -1], [0, -1], [-1, 0], [0, 1], [1, 1]]
+	];
 	
-	if(data.isObstruction){
+	if(data.isObstruction) {
 		this.isObstructions = true;
 		this.isFree = false;
 		this.obstructionId = Math.floor(Math.random() * (lib.objectSize(GLOBAL.DATA.battleInfo.obstructions) - 1 + 1)) + 1;
@@ -40,8 +42,7 @@ HexagonClass.prototype.__constructor = function(data)
 	* @since  08.02.15
 	* @author pcemma
 */
-HexagonClass.prototype.addHero = function(data)
-{
+HexagonClass.prototype.addHero = function(data) {
 	this.isFree = false;
 	this.userId = data.userId;
 }
@@ -56,8 +57,7 @@ HexagonClass.prototype.addHero = function(data)
 	* @since  08.02.15
 	* @author pcemma
 */
-HexagonClass.prototype.removeHero = function(data)
-{
+HexagonClass.prototype.removeHero = function() {
 	this.isFree = true;
 	this.userId = false;
 }
@@ -74,19 +74,14 @@ HexagonClass.prototype.removeHero = function(data)
 	* @since  11.02.15
 	* @author pcemma
 */
-HexagonClass.prototype.isNeighbor = function(data)
-{
-	var directions = [
-				[ [1, 0], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1]],
-				[ [1, 0], [1, -1], [0, -1], [-1, 0], [0, 1], [1, 1]]
-			],
-		parity = this.y % 2;
+HexagonClass.prototype.isNeighbor = function(data) {
+	var parity = this.y % 2;
 		
-	for(var i in directions[parity]){
+	for(var i in this.directions[parity]) {
 		if(
-			data.x === this.x + directions[parity][i][0] && 
-			data.y === this.y + directions[parity][i][1]
-		){
+			data.x === this.x + this.directions[parity][i][0] && 
+			data.y === this.y + this.directions[parity][i][1]
+		) {
 			return true;
 		}
 	}
@@ -104,17 +99,12 @@ HexagonClass.prototype.isNeighbor = function(data)
 	* @since  16.05.15
 	* @author pcemma
 */
-HexagonClass.prototype.getHitArea = function()
-{
-	var directions = [
-				[ [1, 0], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1]],
-				[ [1, 0], [1, -1], [0, -1], [-1, 0], [0, 1], [1, 1]]
-			],
-		parity = this.y % 2,
+HexagonClass.prototype.getHitArea = function() {
+	var parity = this.y % 2,
 		hexesArray = [];
 		
-	for(var i in directions[parity]){
-		hexesArray.push({x: this.x + directions[parity][i][0], y: this.y + directions[parity][i][1]});
+	for(var i in this.directions[parity]) {
+		hexesArray.push({x: this.x + this.directions[parity][i][0], y: this.y + this.directions[parity][i][1]});
 	}
 	return hexesArray;
 }
@@ -131,17 +121,12 @@ HexagonClass.prototype.getHitArea = function()
 	* @since  01.06.15
 	* @author pcemma
 */
-HexagonClass.prototype.getMoveArea = function()
-{
-	var directions = [
-				[ [1, 0], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1]],
-				[ [1, 0], [1, -1], [0, -1], [-1, 0], [0, 1], [1, 1]]
-			],
-		parity = this.y % 2,
+HexagonClass.prototype.getMoveArea = function() {
+	var parity = this.y % 2,
 		hexesArray = [];
 		
-	for(var i in directions[parity]){
-		hexesArray.push({x: this.x + directions[parity][i][0], y: this.y + directions[parity][i][1]});
+	for(var i in this.directions[parity]) {
+		hexesArray.push({x: this.x + this.directions[parity][i][0], y: this.y + this.directions[parity][i][1]});
 	}
 	return hexesArray;
 }
