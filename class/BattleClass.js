@@ -1,6 +1,20 @@
 console.log("BattleClass CLASS is connected");	
 
 function BattleClass() {
+	this.__constructor();
+}
+
+
+/*
+	* Description:
+	*	function Конструктор класса.
+	*	
+	*
+	*
+	* @since  17.08.15
+	* @author pcemma
+*/
+BattleClass.prototype.__constructor = function() {
 	var currentTime = Math.floor(+new Date() / 1000);
 	// this.id = battleId;
 	this.startTime = currentTime;
@@ -183,7 +197,7 @@ BattleClass.prototype.moveHero = function(data) {
 		// Проверяем на то есть ли вообще такой герой у нас И может ли он совершать действие
 		this.heroes[data.userId] && 										
 		this.heroes[data.userId].isReadyForAction({battleId: this.id}) &&
-		
+
 		this.hexes[data.hexId] && 											// Проверяем на то что такой гекс вообще есть!
 		this.hexes[data.hexId].isFree && 									// Проверка на то что гекс в который хотят передвинуть свободен
 		this.hexes[this.heroes[data.userId].userData.hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) // и находится в радиусе шага
