@@ -21,11 +21,9 @@ function ServerClass() {
 	* @since  31.03.14
 	* @author pcemma
 */
-ServerClass.prototype.start = function()
-{
+ServerClass.prototype.start = function() {
 	var dServer = domain.create();
 	dServer.on('error', function(err) { lib.domainL(err); });
-	// dServer.run(function() {
 	var android_server = net.createServer(this.onSocketRequest).listen(config.port_config.port_number_socket, '0.0.0.0');
 	dServer.add(android_server);
 	// var ios_server = net.createServer(onrequest).listen(config.port_config.port_number_ios, '0.0.0.0');
@@ -35,7 +33,6 @@ ServerClass.prototype.start = function()
 					"client version: ", GLOBAL.globalConstants.clientVersion+" \n", 
 					"Data version: ", GLOBAL.globalConstants.globalDataVersion+" \n",
 					"-------------------------------------------------------------\n\n");
-	// });
 }
 
 
@@ -50,7 +47,7 @@ ServerClass.prototype.start = function()
 	* @since  31.03.14
 	* @author pcemma
 */
-ServerClass.prototype.onSocketRequest = function(socket){
+ServerClass.prototype.onSocketRequest = function(socket) {
 	socket.setEncoding("utf8");
 	var oData = "",
 		dSocket = domain.create();
@@ -61,11 +58,10 @@ ServerClass.prototype.onSocketRequest = function(socket){
 	dSocket.add(socket);
 	
 	//connect
-	socket.on('connect', function () 
-	{
+	socket.on('connect', function () {
 		// проверка на подключение пустого сокета. пустые сокеты которые открыли соединение но не прсилали команды авторизациинадо выкидывать
 		socket.empty_connection = true;
-		socket.timer_for_off_empty_socket = setTimeout(function(){lib.closeSocket(socket);}, 10000)
+		socket.timer_for_off_empty_socket = setTimeout(function() { lib.closeSocket(socket); }, 10000)
 
 		console.log(" -------------------------------------------------------------\n",
 					"Connection client, EMPTY SOCKET \n",
@@ -75,17 +71,15 @@ ServerClass.prototype.onSocketRequest = function(socket){
 	
 	
 	//geting data
-	socket.on("data", function(data) 
-	{
+	socket.on("data", function(data) {
 		oData += data;
 		var testData = oData,
 			testByte = Number(testData.slice(0,6)),
 			testCommand = testData.slice(6,testData.lenght);
 		
 		// ВОЗМОЖНО ПРОВЕРКУ АНДО ПОМЕСТИТЬ В ВАЙЛ
-		if ( Number( testCommand.length ) >= Number( testCommand.NumberByByte(testByte) ) ){
-			while(oData.length > 0)
-			{
+		if ( Number( testCommand.length ) >= Number( testCommand.NumberByByte(testByte) ) ) {
+			while(oData.length > 0) {
 				var n = oData.slice(0,6);
 				oData = oData.substring(6);
 				var number_of_char = oData.NumberByByte(Number(n));
@@ -96,7 +90,7 @@ ServerClass.prototype.onSocketRequest = function(socket){
 				// console.log(data);
 				
 				// Для авторизации надо передать сокет
-				if(data.route === "authorization" || data.route === "getGlobalData"){
+				if(data.route === "authorization" || data.route === "getGlobalData") {
 					data.p.socket = socket;
 				}
 				router.route(data.route, data.p);
