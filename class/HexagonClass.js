@@ -78,32 +78,6 @@ HexagonClass.prototype.removeHero = function() {
 
 /*
 	* Description:
-	*	function проверяет является ли гекс с координатами, которые передали, соседом
-	*	
-	*	@data: array, {x, y}
-	*
-	*	return: bool, true/false
-	*
-	* @since  11.02.15
-	* @author pcemma
-*/
-HexagonClass.prototype.isNeighbor = function(data) {
-	var parity = this.y % 2;
-		
-	for(var i in this.directions[parity]) {
-		if(
-			data.x === this.x + this.directions[parity][i][0] && 
-			data.y === this.y + this.directions[parity][i][1]
-		) {
-			return true;
-		}
-	}
-	return false;
-}
-
-
-/*
-	* Description:
 	*	Ищет все гексы в обалсти удара.
 	*	
 	*
@@ -121,7 +95,6 @@ HexagonClass.prototype.getHitArea = function() {
 	}
 	return hexesArray;
 }
-
 
 
 /*
@@ -143,6 +116,63 @@ HexagonClass.prototype.getMoveArea = function() {
 	}
 	return hexesArray;
 }
+
+
+/*
+	* Description:
+	*	Возвращает ид героя в гексе.
+	*	
+	*
+	*	return: array, массив гексов, которые находятся в области у текущего гекса
+	*
+	* @since  01.06.15
+	* @author pcemma
+*/
+HexagonClass.prototype.getUserId = function() {
+	return this.userId;
+}
+
+
+
+
+
+
+/*
+	* Description:
+	*	function проверяет является ли гекс с координатами, которые передали, соседом
+	*	
+	*	@data: array, {x, y}
+	*
+	*	return: bool, true/false
+	*
+	* @since  11.02.15
+	* @author pcemma
+*/
+HexagonClass.prototype.isNeighbor = function(data) {
+	var parity = this.y % 2;
+	for(var i in this.directions[parity]) {
+		return(
+			data.x === this.x + this.directions[parity][i][0] && 
+			data.y === this.y + this.directions[parity][i][1]
+		);
+	}
+}
+
+
+/*
+	* Description:
+	*	function проверяет является ли гекс свободным
+	*	
+	*
+	*	return: bool, true/false
+	*
+	* @since  16.09.15
+	* @author pcemma
+*/
+HexagonClass.prototype.isFree = function() {
+	return this.isFree;
+}
+
 
 
 module.exports = HexagonClass;

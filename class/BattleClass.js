@@ -19,10 +19,12 @@ BattleClass.prototype.__constructor = function() {
 	// this.id = battleId;
 	this.startTime = currentTime;
 	this.endFlag = false;
-	this.hexesInRow = 8;
-	this.hexesInCol = 7;
-	this.obstructionsHexes = this.createobstructionsHexes();
-	this.hexes = this.createGrid();
+
+	this.grid = new GridClass();
+
+	// this.hexes = this.createGrid();
+	
+
 	this.heroes = {};
 	// массив команда. одна команда это массив ид пользователей, нпц которые в этой команде
 	//TODO: Пересмотреть объект команд
@@ -45,8 +47,8 @@ BattleClass.prototype.create = function(callback) {
 		insertData: {
 			startTime: this.startTime,
 			endFlag: this.endFlag,
-			hexesInRow: this.hexesInRow,
-			hexesInCol: this.hexesInCol,
+			hexesInRow: this.grid.hexesInRow,
+			hexesInCol: this.grid.hexesInCol,
 			teams: this.teams
 		}, 
 		callback: function(rows) {
@@ -158,7 +160,7 @@ BattleClass.prototype.addHero = function(data, callback) {
 		}
 		
 		// Обновление гекса
-		this.hexes[hexId].addHero({userId: hero.userId});
+		this.grid.addHeroToHex({userId: hero.userId, hexId: hexId});
 		
 		// Тут апдейта массива юзера с данными о битве
 		this.heroes[hero.userId].addToBattle({
@@ -198,13 +200,14 @@ BattleClass.prototype.moveHero = function(data) {
 		this.heroes[data.userId] && 										
 		this.heroes[data.userId].isReadyForAction({battleId: this.id}) &&
 
-		this.hexes[data.hexId] && 											// Проверяем на то что такой гекс вообще есть!
-		this.hexes[data.hexId].isFree && 									// Проверка на то что гекс в который хотят передвинуть свободен
+		//TODO:!!!!!!!!!!!!!!!!!!!!!!! ДОДЕЛАТЬ ПЕРЕНОС ВСЕ В КЛАСС СЕТКИ!!!
+		this.grid.canHeroMoveToHex({hexId: data.hexId}) &&
 		this.hexes[this.heroes[data.userId].userData.hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) // и находится в радиусе шага
 	) {
 		// Обновление гекса
-		this.hexes[data.hexId].addHero({userId: data.userId});
-		this.hexes[this.heroes[data.userId].userData.hexId].removeHero();
+		this.grid.addHeroToHex({userId: data.userId, hexId: data.hexId});
+		this.grid.removeHeroFromHex(this.heroes[data.userId].userData.hexId);
+		
 		
 		// Обновление героя
 		this.heroes[data.userId].userData.hexId = data.hexId;
@@ -249,7 +252,7 @@ BattleClass.prototype.heroMakeHit = function(data) {
 		this.hexes[data.hexId].userId										// Проверяем на то что в этом гексе есть герой
 	) {		 
 		//Берем ид героя(противника) в гексе
-		var oponentUserId = this.hexes[data.hexId].userId;
+		var oponentUserId = this.grid.getUserIdInHex(data.hexId);
 		
 		if(
 			// Доступен ли игрок для действий
@@ -274,7 +277,7 @@ BattleClass.prototype.heroMakeHit = function(data) {
 			var isHeroAlive = this.heroes[oponentUserId].isAlive();
 			// Проверяем если герой умер то надо удалить его из гекса.
 			if(!isHeroAlive) {
-				this.hexes[this.heroes[oponentUserId].userData.hexId].removeHero();
+				this.grid.removeHeroFromHex(this.heroes[oponentUserId].userData.hexId);
 			}
 			
 			this.socketWrite({
@@ -305,51 +308,9 @@ BattleClass.prototype.heroMakeHit = function(data) {
 
 
 
-/*
-	* Description:
-	*	function создает массив непроходимых гексов с препятствиями
-	*	
-	*
-	*
-	* @since  14.02.15
-	* @author pcemma
-*/
-BattleClass.prototype.createobstructionsHexes = function() {
-	var tmpArray = {};
-	for (var i= 1; i <= Math.floor(Math.random() * (3 - 1 + 1)) + 1; i++ ) {
-		var x = Math.floor(Math.random() * (this.hexesInRow + 1)),
-			y = Math.floor(Math.random() * (this.hexesInCol + 1));
-		tmpArray[x+"."+y] = String(Math.floor(Math.random() * (Object.keys(GLOBAL.DATA.battleInfo.obstructions).length - 1 + 1)) + 1);
-	}
-	return tmpArray;
-}
 
 
-/*
-	* Description:
-	*	function создает массив гексов
-	*	
-	*
-	*
-	* @since  31.01.15
-	* @author pcemma
-*/
-BattleClass.prototype.createGrid = function() {
-	var tmpArray = {};
-	for (var i = 1; i <= this.hexesInRow; i++) {
-		for (var j = 1; j <= this.hexesInCol; j++) {
-			var x = i - 1,
-				y = j - 1;
-				dy = Math.fmod(y, 2),
-				isObstruction = (this.obstructionsHexes[x+"."+y]) ? true : false; // Флаг определяет будет ли на эом гексе препятствие
-			
-			if(!(dy === 1 && i === this.hexesInRow)) { // не рисуем в четных рядах последний гекс для красивого отображения сетки
-				tmpArray[x+"."+y] = new HexagonClass({x: x, y: y, isObstruction: isObstruction});
-			}
-		}
-	}
-	return tmpArray;
-}
+
 
 
 /*
@@ -404,21 +365,7 @@ BattleClass.prototype.searchEnemyInArea = function(data) {
 	* @author pcemma
 */
 BattleClass.prototype.searchFreeHexesInArea = function(data) {
-	var hexId = data.hexId,
-		hexesArray = [];
-	if(hexId in this.hexes) {
-		var area = this.hexes[hexId].getMoveArea();
-		for(var hexesCount in area) {
-			var hexIdInArea = area[hexesCount].x+"."+area[hexesCount].y;
-			if(
-				this.hexes[hexIdInArea] && 		// Проверяем на то что такой гекс вообще есть!
-				this.hexes[hexIdInArea].isFree	// Проверяем на то что гекс пустой
-			) {
-				hexesArray.push(hexIdInArea);
-			}
-		}
-	}
-	return hexesArray;
+	return this.grid.searchFreeHexesInArea(data);
 }
 
 
@@ -439,7 +386,7 @@ BattleClass.prototype.getBattleStatus = function() {
 	var battleInfo = {
 		id: 				this.id,
 		heroes: 			{},
-		obstructionsHexes: 	this.obstructionsHexes,
+		obstructionsHexes: 	this.grid.obstructionsHexes,
 		teams:				this.teams	
 	};
 	
