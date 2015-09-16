@@ -62,7 +62,8 @@ GridClass.prototype.fill = function() {
 				isObstruction = (this.obstructionsHexes[x+"."+y]) ? true : false; // Флаг определяет будет ли на эом гексе препятствие
 			
 			if(!(dy === 1 && i === this.hexesInRow)) { // не рисуем в четных рядах последний гекс для красивого отображения сетки
-				tmpArray[x+"."+y] = new HexagonClass({x: x, y: y, isObstruction: isObstruction});
+				var newHex = new HexagonClass({x: x, y: y, isObstruction: isObstruction})
+				tmpArray[newHex.getId()] = newHex;
 			}
 		}
 	}
@@ -83,13 +84,13 @@ GridClass.prototype.fill = function() {
 GridClass.prototype.searchFreeHexesInArea = function(data) {
 	var hexId = data.hexId,
 		hexesArray = [];
-	if(hexId in this.hexes) {
+	if(this.isHexExist(hexId)) {
 		var area = this.hexes[hexId].getMoveArea();
 		for(var hexesCount in area) {
-			var hexIdInArea = area[hexesCount].x+"."+area[hexesCount].y;
+			var hexIdInArea = area[hexesCount].getId();
 			if(
-				this.hexes[hexIdInArea] && 		// Проверяем на то что такой гекс вообще есть!
-				this.hexes[hexIdInArea].isFree	// Проверяем на то что гекс пустой
+				this.isHexExist(hexIdInArea) &&
+				this.isHexFree(hexIdInArea)
 			) {
 				hexesArray.push(hexIdInArea);
 			}
@@ -99,7 +100,39 @@ GridClass.prototype.searchFreeHexesInArea = function(data) {
 }
 
 
-
+/*
+	* Description:
+	*	function Поиск врагов в области удара игрока.
+	*	
+	*	@data: array
+	*		@hexId: 	str, ид гекса центра области. Гекса в котором находится герой.
+	*  		@checkHero: func, функция проверки нахождения врага в гексе
+	*
+	*
+	* 
+	* @since  16.05.15
+	* @author pcemma
+*/
+GridClass.prototype.searchEnemyInArea = function(data) {
+	var hexId = data.hexId,
+		hexesArray = [];
+	if(this.isHexExist(hexId)) {
+		var area = this.hexes[hexId].getHitArea();
+		for(var hexesCount in area) {
+			
+			var hexIdInArea = area[hexesCount].getId();
+			
+			if(
+				this.isHexExist(hexIdInArea) &&
+				this.getUserIdInHex(hexIdInArea) &&
+				data.checkHero(this.getUserIdInHex(hexIdInArea))
+			) {
+				hexesArray.push(hexIdInArea);
+			}
+		}
+	}
+	return hexesArray;
+}
 
 
 /*
@@ -146,7 +179,6 @@ GridClass.prototype.getUserIdInHex = function(hexId) {
 }
 
 
-
 /*
 	* Description:
 	*	function Проверяет существует ли гекс.
@@ -177,22 +209,55 @@ GridClass.prototype.isHexFree = function(hexId) {
 
 /*
 	* Description:
+	*	function Находится ли гекс с ид hexId в области передвижения/удара вокруг гекса currentHexId.
+	*	
+	*	@hexId: 		str, ид гекса.
+	*	@currentHexId: 	str, ид гекса в обалсти которого ведутся поиски.
+	*
+	* @since  16.09.15
+	* @author pcemma
+*/
+GridClass.prototype.isInArea = function(currentHexId, hexId) {
+	return this.hexes[currentHexId].isInArea(this.hexes[hexId].getCoordinats());
+}
+
+
+/*
+	* Description:
 	*	function Проверяет возможно ли герою перейти в гекс.
 	*	
 	*	
 	*	@data:
-	*		@hexId: 	str, ид гекса.
+	*		@hexId: 		str, ид гекса.
+	*		@currentHexId: 	str, ид гекса на котором сейчас находится герой.
 	*
 	* @since  16.09.15
 	* @author pcemma
 */
 GridClass.prototype.canHeroMoveToHex = function(data) {
 	return 	this.isHexExist(data.hexId) &&
-			this.isHexFree(data.hexId);
+			this.isHexFree(data.hexId) &&
+			this.isInArea(data.currentHexId, data.hexId);	
 }
 
 
-
+/*
+	* Description:
+	*	function Проверяет возможно ли герою атаковать цель в гексе.
+	*	
+	*	
+	*	@data:
+	*		@hexId: 		str, ид гекса.
+	*		@currentHexId: 	str, ид гекса на котором сейчас находится герой.
+	*
+	* @since  16.09.15
+	* @author pcemma
+*/
+GridClass.prototype.canHeroAttackHex = function(data) {
+	return 	this.isHexExist(data.hexId) &&
+			this.getUserIdInHex(data.hexId) &&
+			this.isInArea(data.currentHexId, data.hexId);	
+}
 
 
 

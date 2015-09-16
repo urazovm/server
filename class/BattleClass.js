@@ -199,10 +199,7 @@ BattleClass.prototype.moveHero = function(data) {
 		// Проверяем на то есть ли вообще такой герой у нас И может ли он совершать действие
 		this.heroes[data.userId] && 										
 		this.heroes[data.userId].isReadyForAction({battleId: this.id}) &&
-
-		//TODO:!!!!!!!!!!!!!!!!!!!!!!! ДОДЕЛАТЬ ПЕРЕНОС ВСЕ В КЛАСС СЕТКИ!!!
-		this.grid.canHeroMoveToHex({hexId: data.hexId}) &&
-		this.hexes[this.heroes[data.userId].userData.hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) // и находится в радиусе шага
+		this.grid.canHeroMoveToHex({hexId: data.hexId, currentHexId: this.heroes[data.userId].userData.hexId})
 	) {
 		// Обновление гекса
 		this.grid.addHeroToHex({userId: data.userId, hexId: data.hexId});
@@ -240,16 +237,11 @@ BattleClass.prototype.moveHero = function(data) {
 BattleClass.prototype.heroMakeHit = function(data) {
 	var currentTime = Math.floor(+new Date() / 1000);
 	
-	// TODO: переделать проверку соседей на проверку в радиусе
-	
 	if(
 		// Проверяем на то есть ли вообще такой герой у нас И может ли он совершать действие
 		this.heroes[data.userId] && 										
 		this.heroes[data.userId].isReadyForAction({battleId: this.id}) &&
-		
-		this.hexes[data.hexId] && 											// Проверяем на то что такой гекс вообще есть!
-		this.hexes[this.heroes[data.userId].userData.hexId].isNeighbor({x: this.hexes[data.hexId].x, y: this.hexes[data.hexId].y}) && // и находится в радиусе удара
-		this.hexes[data.hexId].userId										// Проверяем на то что в этом гексе есть герой
+		this.grid.canHeroAttackHex({hexId: data.hexId, currentHexId: this.heroes[data.userId].userData.hexId})
 	) {		 
 		//Берем ид героя(противника) в гексе
 		var oponentUserId = this.grid.getUserIdInHex(data.hexId);
@@ -325,31 +317,13 @@ BattleClass.prototype.heroMakeHit = function(data) {
 	* @author pcemma
 */
 BattleClass.prototype.searchEnemyInArea = function(data) {
-	var hexId = data.hexId,
-		hexesArray = [];
-	if(hexId in this.hexes) {
-		var area = this.hexes[hexId].getHitArea();
-		// TODO: проверить, что быстрее форич или простой цикл
-		for(var hexesCount in area) {
-			var hexIdInArea = area[hexesCount].x+"."+area[hexesCount].y;
-			if(
-				this.hexes[hexIdInArea] && 											// Проверяем на то что такой гекс вообще есть!
-				this.hexes[hexIdInArea].userId										// Проверяем на то что в этом гексе есть герой
-			) {
-				//Берем ид героя(противника) в гексе
-				var oponentUserId = this.hexes[hexIdInArea].userId;
-				
-				if(
-					// Доступен ли игрок для действий
-					this.heroes[oponentUserId] && 
-					this.heroes[oponentUserId].isAvailableEnemy({battleId: this.id, teamId: this.heroes[data.userId].userData.teamId})
-				) {
-					hexesArray.push(hexIdInArea);
-				}
-			}
+	return this.grid.searchEnemyInArea({
+		hexId: data.hexId, 
+		checkHero: function(oponentUserId) {
+			return 	this.heroes[oponentUserId] && 
+					this.heroes[oponentUserId].isAvailableEnemy({battleId: this.id, teamId: this.heroes[data.userId].userData.teamId});
 		}
-	}
-	return hexesArray;
+	});
 }
 
 

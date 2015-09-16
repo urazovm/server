@@ -15,7 +15,7 @@ function HexagonClass(data) {
 	* @author pcemma
 */
 HexagonClass.prototype.__constructor = function(data) {
-	this.isFree = true;
+	this.isFreeFlag = true;
 	this.userId = false;
 	this.isObstructions = false;
 	this.x = data.x;
@@ -42,7 +42,7 @@ HexagonClass.prototype.__constructor = function(data) {
 */
 HexagonClass.prototype.makeObstraction = function() {
 	this.isObstructions = true;
-	this.isFree = false;
+	this.isFreeFlag = false;
 	// this.obstructionId = Math.floor(Math.random() * (lib.objectSize(GLOBAL.DATA.battleInfo.obstructions) - 1 + 1)) + 1;
 }
 
@@ -56,7 +56,7 @@ HexagonClass.prototype.makeObstraction = function() {
 	* @author pcemma
 */
 HexagonClass.prototype.addHero = function(data) {
-	this.isFree = false;
+	this.isFreeFlag = false;
 	this.userId = data.userId;
 }
 
@@ -71,7 +71,7 @@ HexagonClass.prototype.addHero = function(data) {
 	* @author pcemma
 */
 HexagonClass.prototype.removeHero = function() {
-	this.isFree = true;
+	this.isFreeFlag = true;
 	this.userId = false;
 }
 
@@ -133,8 +133,34 @@ HexagonClass.prototype.getUserId = function() {
 }
 
 
+/*
+	* Description:
+	*	Возвращает Координаты гекса на сетке.
+	*	
+	*
+	*	return: obj, {x: x, y: y}
+	*
+	* @since  16.09.15
+	* @author pcemma
+*/
+HexagonClass.prototype.getCoordinats = function() {
+	return {x: this.x, y: this.y};
+}
 
 
+/*
+	* Description:
+	*	Возвращает ИД гекса на сетке.
+	*	
+	*
+	*	return: str, x.y
+	*
+	* @since  16.09.15
+	* @author pcemma
+*/
+HexagonClass.prototype.getId = function() {
+	return this.x+"."+this.y;
+}
 
 
 /*
@@ -148,14 +174,18 @@ HexagonClass.prototype.getUserId = function() {
 	* @since  11.02.15
 	* @author pcemma
 */
-HexagonClass.prototype.isNeighbor = function(data) {
+HexagonClass.prototype.isInArea = function(data) {
+	// TODO: переделать проверку соседей на проверку в радиусе
 	var parity = this.y % 2;
 	for(var i in this.directions[parity]) {
-		return(
+		if(
 			data.x === this.x + this.directions[parity][i][0] && 
 			data.y === this.y + this.directions[parity][i][1]
-		);
+		) {
+			return true;
+		}
 	}
+	return false;
 }
 
 
@@ -170,7 +200,7 @@ HexagonClass.prototype.isNeighbor = function(data) {
 	* @author pcemma
 */
 HexagonClass.prototype.isFree = function() {
-	return this.isFree;
+	return this.isFreeFlag;
 }
 
 
