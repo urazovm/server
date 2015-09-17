@@ -21,7 +21,10 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		this.getTownBuildingsList.bind(this),
 		
 		this.getStats.bind(this),
+		this.getHeroClasses.bind(this),
 		
+
+
 		this.getBattleInfo.bind(this),
 		
 		// ITEMS
@@ -41,8 +44,6 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		queues,
 		function(err) {
 			// All tasks are done now
-			// console.log(this.DATA.items[1]);
-			// console.log(this.DATA.battleInfo);
 			console.log("PreloadDataClass is initialized!!!");
 			callback();
 		}.bind(this)
@@ -335,6 +336,27 @@ PreloadDataClass.prototype.getStats = function(callback) {
 	}.bind(this)});
 }
 
+
+/*
+	* Description:
+	*	Собирает список классов героя. Со стандартными параметрами.
+	*	
+	*	
+	*	
+	*
+	* @since  18.09.15
+	* @author pcemma
+*/
+PreloadDataClass.prototype.getHeroClasses = function(callback) {	
+	this.DATA.heroClasses = {};
+	
+	Mongo.find({collection: 'game_HeroClasses', callback: function(rows) {
+		for(var i in rows) {
+			this.DATA.heroClasses[rows[i]._id] = rows[i];
+		}
+		callback();
+	}.bind(this)});
+}
 
 
 

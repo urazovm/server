@@ -44,7 +44,7 @@ Npc.prototype.addDefaultUser = function(data, callback) {
 				isAliveFlag: true,
 				items:{},
 				stuff: {},
-				stats: this.addDefaultStats()
+				stats: this.getDefaultStats()
 			},
 		}, 
 		callback: function(rows) {
@@ -65,7 +65,7 @@ Npc.prototype.addDefaultUser = function(data, callback) {
 	* @since  17.08.15
 	* @author pcemma
 */
-Npc.prototype.addDefaultStats = function() {
+Npc.prototype.getDefaultStats = function() {
 	return GLOBAL.DATA.npcsInfo[this.npcId].stats;
 }
 

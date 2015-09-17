@@ -161,7 +161,7 @@ User.prototype.addDefaultUser = function(data, callback) {
 				isAliveFlag: true,
 				items:{},
 				stuff: {},
-				stats: this.addDefaultStats()
+				stats: this.getDefaultStats("55fb3de3445254e819e3ad11") // TODO: это переделать!
 			},
 		}, 
 		callback: function(rows) {
@@ -174,7 +174,9 @@ User.prototype.addDefaultUser = function(data, callback) {
 
 /*
 	* Description:
-	*	Добавляем статы новому игроку
+	*	Получает массив статов по классу
+	*	
+	*	@heroClassId: str, Id класс героя
 	*	
 	*	
 	*	return: array, массив с набором статов по умолчанию.
@@ -182,37 +184,8 @@ User.prototype.addDefaultUser = function(data, callback) {
 	* @since  10.08.15
 	* @author pcemma
 */
-User.prototype.addDefaultStats = function() {
-	// TODO: для каждого класса вынести в отдельную коллекцию.
-	return {
-		strength:			1,
-		agility:			1,
-		intuition:			1,
-		wisdom:				1,
-		intellect:			1,
-		stamina:			1,
-		luck:				1,
-		minDamage:			3,
-		maxDamage:			5,
-		dodge:				0,
-		antiDodge:			0,
-		criticalHit:		0,
-		antiCriticalHit:	0,
-		mana:				0,
-		currentMana:		0,
-		minMagicDamage:		0,
-		maxMagicDamage:		0,
-		hp: 				100,
-		currentHp:			100,
-		capacity:			0,
-		currentCapacity:	0,
-		chance:				0,
-		exp:				0,
-		currentExp:			0,
-		moveActionTime:		2,
-		hitActionTime:		2,
-		actionTime:			1
-	}
+User.prototype.getDefaultStats = function(heroClassId) {
+	return GLOBAL.DATA.heroClasses[heroClassId].stats;
 }
 
 
