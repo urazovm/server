@@ -511,6 +511,60 @@ User.prototype.setBattleData = function(data) {
 	this.userData.hexId = data.hexId;
 }
 
+/*
+	* Description:
+	*	function получаем все данные про героя, которые отправляются в бой
+	*	
+	*
+	*
+	* @since  19.09.15
+	* @author pcemma
+*/
+User.prototype.getUserDataForBattle = function() {
+	var dataArray = ['teamId', 'isAliveFlag', 'hexId', 'login', 'stats', 'stuff'],
+		info = {
+			id: this.userId,
+			npcId: this.npcId,
+			lastActionTime: this.getRemainLastActionTime()
+		};
+	dataArray.forEach(function(element) {
+		if(element in this.userData) {
+			info[element] = this.userData[element];
+		}
+	}.bind(this));
+	return info;
+}
+
+
+/*
+	* Description:
+	*	function получаем остаток времени в секундах до следующего дейсвтия
+	*	
+	*
+	*
+	* @since  19.09.15
+	* @author pcemma
+*/
+User.prototype.getRemainLastActionTime = function() {
+	var currentTime = Math.floor(+new Date() / 1000);
+	return (currentTime < this.userData.lastActionTime) ? (this.userData.lastActionTime - currentTime) : 0;
+}
+
+
+/*
+	* Description:
+	*	function Устанавливает новое время до следующего дейсвтия
+	*	
+	*	@action: str, Название дейсвтияпосле которого ставноится новое время до следующего дейсвтия
+	*
+	* @since  19.09.15
+	* @author pcemma
+*/
+User.prototype.setLastActionTime = function(action) {
+	var currentTime = Math.floor(+new Date() / 1000);
+	this.userData.lastActionTime = currentTime + this.userData.stats[action+'ActionTime'];
+}
+
 
 /*
 	* Description: Функция удаляет героя из боя.

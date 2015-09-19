@@ -193,8 +193,7 @@ BattleClass.prototype.addHero = function(data, callback) {
 */
 BattleClass.prototype.moveHero = function(data) {
 	console.log("moveHero", data.userId);
-	var currentTime = Math.floor(+new Date() / 1000);
-		
+	
 	if(
 		// Проверяем на то есть ли вообще такой герой у нас И может ли он совершать действие
 		this.heroes[data.userId] && 										
@@ -208,7 +207,7 @@ BattleClass.prototype.moveHero = function(data) {
 		
 		// Обновление героя
 		this.heroes[data.userId].userData.hexId = data.hexId;
-		this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.stats.moveActionTime;
+		this.heroes[data.userId].setLastActionTime('move');
 		
 		this.socketWrite({
 							f: "battleMoveHero", 
@@ -252,7 +251,7 @@ BattleClass.prototype.heroMakeHit = function(data) {
 			this.heroes[oponentUserId].isAvailableEnemy({battleId: this.id, teamId: this.heroes[data.userId].userData.teamId}) 	
 		) {
 			// обновляем герою который совершал удар время таймаута
-			this.heroes[data.userId].userData.lastActionTime = currentTime + this.heroes[data.userId].userData.stats.moveActionTime;
+			this.heroes[data.userId].setLastActionTime('hit');
 			
 			//TODO: считать увернулся ли противник
 		
@@ -265,6 +264,7 @@ BattleClass.prototype.heroMakeHit = function(data) {
 			
 			// Обновляем противнику его текущее значение хп
 			this.heroes[oponentUserId].userData.stats.currentHp -= damage;
+			
 			// Проверяет умер ли герой. Если да, то ставит герою соответствующие флаги
 			var isHeroAlive = this.heroes[oponentUserId].isAlive();
 			// Проверяем если герой умер то надо удалить его из гекса.
@@ -384,20 +384,7 @@ BattleClass.prototype.getBattleStatus = function() {
 	* @author pcemma
 */
 BattleClass.prototype.getHeroData = function(userId) {
-	// TODO: это ж userData надо просто ее возвращать!
-	var currentTime = Math.floor(+new Date() / 1000);
-		info = {
-					id: 			this.heroes[userId].userId,
-					npcId:			this.heroes[userId].npcId, // передаем нпц ид для определения герой это или нпц на клиенте.
-					teamId: 		this.heroes[userId].userData.teamId,
-					isAliveFlag:	this.heroes[userId].userData.isAliveFlag,
-					hexId: 			this.heroes[userId].userData.hexId,
-					login: 			this.heroes[userId].userData.login,
-					stats:			this.heroes[userId].userData.stats,
-					lastActionTime: (currentTime < this.heroes[userId].userData.lastActionTime) ? (this.heroes[userId].userData.lastActionTime - currentTime) : 0,
-					stuff: 			this.heroes[userId].userData.stuff
-				};
-	return info;
+	return this.heroes[userId].getUserDataForBattle();
 }
 
 
