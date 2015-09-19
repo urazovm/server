@@ -6,9 +6,9 @@ function Npc() {
 	
 	// USER DATA
 	this.userData = {
-						items: {}, 	// Предметы
-						stuff: {}, 	// Надетые вещи
-						stats: {} 	// Статы юзера
+						// items: {}, 	// Предметы
+						// stuff: {}, 	// Надетые вещи
+						// stats: {} 	// Статы юзера
 					};
 }				
 
@@ -220,8 +220,7 @@ Npc.prototype.findHexIdToMove = function() {
 	* @author pcemma
 */
 Npc.prototype.heroMakeHit = function() {
-	var currentTime = Math.floor(+new Date() / 1000),
-		isNpcHit = battlesManager.heroMakeHit({id: this.userData.battleId, hexId: this.userData.enemyHexId, userId: this.userId});
+	var isNpcHit = battlesManager.heroMakeHit({id: this.userData.battleId, hexId: this.userData.enemyHexId, userId: this.userId});
 	if(isNpcHit) {
 		this.battleTimer = setTimeout(this.heroMakeHit.bind(this), this.userData.stats.hitActionTime * 1000);
 	}

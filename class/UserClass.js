@@ -11,9 +11,9 @@ function User() {
 	this.autoConfigData = {};
 	
 	this.userData = {
-						items: {}, 	// Предметы
-						stuff: {}, 	// Надетые вещи
-						stats: {} 	// Статы юзера
+						// items: {}, 	// Предметы
+						// stuff: {}, 	// Надетые вещи
+						// stats: {} 	// Статы юзера
 					};
 }
 
@@ -341,7 +341,12 @@ User.prototype.getUserData = function(callback) {
 		fields: {userData: true}, 
 		callback: function(rows) {
 			if(rows.length > 0) {
+				//TODO: отдельно в метод setUserData
 				this.userData = rows[0].userData;
+
+				this.userData.stats = new StatsManagerClass(rows[0].userData.stats);
+			
+
 				var queues = [
 					// Собираем вещи юзера. Данные про вещи текущие в коллеции game_WorldItems
 					this.getItems.bind(this)
@@ -718,6 +723,8 @@ User.prototype.wearOnItem = function(data) {
 				inventorySlotsArray.push(inventorySlotId);
 				
 				//TODO: добавлять статы вещи в статы юзера, все бонусы и прочее
+				this.updateStats(GLOBAL.DATA.items[itemId].stats);
+
 				this.userData.stuff[inventorySlotId] = {
 														userItemId: 	 worldItemId,
 														itemId: 		 itemId
@@ -803,6 +810,35 @@ User.prototype.hasItem = function(worldItemId) {
 	return worldItemId in this.userData.items;
 }
 
+
+
+
+
+
+/*****************	STATS	******************/
+
+
+/*
+	* Description:
+	*	Проверяет есть ли вещь у пользователя
+	*	
+	*	@data:	array
+	*		@worldItemId:	int, id вещи из таблицы game_WorldItems
+	*
+	* @since  11.09.15
+	* @author pcemma
+*/
+User.prototype.updateStats = function(data) {
+	console.log("\n\n\n", "UPDATE STATS");
+	console.log("DATA:", data);
+	console.log("========================");
+	console.log("BEFORE:", this.userData.stats);
+	console.log("========================");
+	this.userData.stats.update(data);
+	console.log("AFTER:", this.userData.stats);
+	console.log("========================");
+	//TODO: обновление баззы данных
+}
 
 
 

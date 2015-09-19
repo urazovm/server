@@ -121,7 +121,7 @@ GridClass.prototype.searchEnemyInArea = function(data) {
 		for(var hexesCount in area) {
 			
 			var hexIdInArea = area[hexesCount].getId();
-			
+			//TODO: эти ифы тоже в отдельный метод.
 			if(
 				this.isHexExist(hexIdInArea) &&
 				this.getUserIdInHex(hexIdInArea) &&

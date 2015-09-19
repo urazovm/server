@@ -263,8 +263,8 @@ BattleClass.prototype.heroMakeHit = function(data) {
 			console.log("damage", damage, "oponentUserId", oponentUserId, "this.heroes[oponentUserId].userData.stats.currentHp", this.heroes[oponentUserId].userData.stats.currentHp);
 			
 			// Обновляем противнику его текущее значение хп
-			this.heroes[oponentUserId].userData.stats.currentHp -= damage;
-			
+			this.heroes[oponentUserId].updateStats({currentHp: -damage});
+
 			// Проверяет умер ли герой. Если да, то ставит герою соответствующие флаги
 			var isHeroAlive = this.heroes[oponentUserId].isAlive();
 			// Проверяем если герой умер то надо удалить его из гекса.
@@ -359,17 +359,30 @@ BattleClass.prototype.searchFreeHexesInArea = function(data) {
 BattleClass.prototype.getBattleStatus = function() {
 	var battleInfo = {
 		id: 				this.id,
-		heroes: 			{},
+		heroes: 			this.getHeroesData(),
 		obstructionsHexes: 	this.grid.obstructionsHexes,
 		teams:				this.teams	
 	};
 	
-	
-	for (var i in this.heroes) {
-		battleInfo.heroes[i] = this.getHeroData(i);
-	}
-	
 	return battleInfo;
+}
+
+
+/*
+	* Description:
+	*	function получаем все данные про всех героев
+	*		
+	*
+	*
+	* @since  19.09.15
+	* @author pcemma
+*/
+BattleClass.prototype.getHeroesData = function() {
+	var heroes = {};
+	for (var i in this.heroes) {
+		heroes[i] = this.getHeroData(i);
+	}
+	return heroes;
 }
 
 
