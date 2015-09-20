@@ -659,7 +659,7 @@ User.prototype.getItems = function(callback) {
 	* @author pcemma
 */
 User.prototype.addItem = function(data, callback) {
-	if(data.itemId in GLOBAL.DATA.items) {
+	if(GLOBAL.isItemExist(data.itemId)) {
 		
 		// Если предмет исчесляемый, то если он есть надо увеличить количество.
 		if(GLOBAL.DATA.items[data.itemId].countableFlag) {
@@ -699,52 +699,53 @@ User.prototype.addItem = function(data, callback) {
 	* @author pcemma
 */
 User.prototype.wearOnItem = function(data) {
-	var worldItemId = data.itemId;
+	var worldItemId = data.itemId,
+		queues = [];
 	if(
 		// TODO: Проверка на то что ее можно надеть, что она подходит по статам, и что она не надета уже!
-		this.hasItem(worldItemId) // Проверка на то что такая вещь вообще есть у пользователя
+		this.hasItem(worldItemId) && 
+		GLOBAL.isItemExist(this.userData.items[worldItemId].itemId)
 	) {
 		var itemId = this.userData.items[worldItemId].itemId;
-		// Проверка на то, что такая вещь вообще есть в базе!
-		if(itemId in GLOBAL.DATA.items) {
 			
-			// Проверка на то, то слот, в который хотим надеть вещь, свободен. Если нет, то надо снять предыдущую вещь.
-			for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots) {
-				if(inventorySlotId in this.userData.stuff) {
-					this.wearOffItem({itemId: this.userData.stuff[inventorySlotId].userItemId });
-				}
-			}
-			
-			// Надеваем вещь!
-			// Проход по всем слотам, в которые надо надеть вещь, и добавление данных о вещи.
-			var inventorySlotsArray = [];
-			for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots) {
-				
-				inventorySlotsArray.push(inventorySlotId);
-				
-				//TODO: добавлять статы вещи в статы юзера, все бонусы и прочее
-				this.updateStats(GLOBAL.DATA.items[itemId].stats);
-
-				this.userData.stuff[inventorySlotId] = {
-														userItemId: 	 worldItemId,
-														itemId: 		 itemId
-													};
-			}
-			// Обновляем слот ид в массиве свойств вещи пользователя.
-			this.userData.items[worldItemId].inventorySlotId = inventorySlotsArray;
-			
-			var insertData = {$set:{inventorySlotId: inventorySlotsArray}};
-			// TODO: Добавить асинхроность тут
-			Mongo.update({collection: 'game_WorldItems', searchData: {_id: Mongo.objectId(worldItemId)}, insertData: insertData});
-			
+		//TODO: добавлять все бонусы и прочее
+		queues = [
+			this.wearOffItems.bind(this, GLOBAL.DATA.items[itemId].inventorySlots),
+			this.updateStats.bind(this, GLOBAL.DATA.items[itemId].stats),
+			this.addItemToStuff.bind(this, {userItemId: worldItemId, itemId: itemId})
+		];
+		
+		async.waterfall(queues, function(err) {
 			this.socketWrite({
 				f: "userWearOnItem", 
-				p: {
-					itemId: worldItemId
-				}
+				p: {itemId: worldItemId}
 			});
+		}.bind(this));
+	}
+}
+
+
+/*
+	* Description:
+	*	Снимает вещи с героя обходя нужные слоты
+	*	
+	*	@inventorySlots: 	arr, массив слотов с которых нужно снять вещи.
+	*	
+	*
+	* @since  20.09.15
+	* @author pcemma
+*/
+User.prototype.wearOffItems = function(inventorySlots, callback) {
+	var queues = [];
+	for(var inventorySlotId in inventorySlots) {
+		if(inventorySlotId in this.userData.stuff) {
+			var userItemId = this.userData.stuff[inventorySlotId].userItemId;
+			queues.push(this.wearOffItem.bind(this, {itemId: userItemId}));
 		}
 	}
+	async.waterfall(queues, function(err) {
+		callback();
+	}.bind(this));
 }
 
 
@@ -760,39 +761,104 @@ User.prototype.wearOnItem = function(data) {
 	* @since  09.06.15
 	* @author pcemma
 */
-User.prototype.wearOffItem = function(data) {
-	var worldItemId = data.itemId;
+User.prototype.wearOffItem = function(data, callback) {
+	var worldItemId = data.itemId,
+		queues = [];
 	if(
-		this.hasItem(worldItemId)  // Проверка на то что такая вещь вообще есть у пользователя
+		this.hasItem(worldItemId) && 
+		GLOBAL.isItemExist(this.userData.items[worldItemId].itemId)
 	) {
 		var itemId = this.userData.items[worldItemId].itemId;
-		// Проверка на то, что такая вещь вообще есть в базе!
-		if(itemId in GLOBAL.DATA.items) {
-			// Проход по всем слотам, в которых надета вещь, и удаление данных о вещи.
-			for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots) {
-				if(
-					inventorySlotId in this.userData.stuff && // проверка на что слот такой занят
-					this.userData.stuff[inventorySlotId].userItemId === worldItemId // Проверка что это именна та вещь вслоте, которую пытаются снять
-				) {
-					//TODO: вычитать статы вещи из статов юзера, все бонусы и прочее
-					delete this.userData.stuff[inventorySlotId];
-				}
-			}
-			
-			// Обновляем слот ид в массиве свойств вещи пользователя.
-			this.userData.items[worldItemId].inventorySlotId = [];
-			var insertData = {$set:{inventorySlotId: []}};
-			// TODO: Добавить асинхроность тут
-			Mongo.update({collection: 'game_WorldItems', searchData: {_id: Mongo.objectId(worldItemId)}, insertData: insertData});
-			
+		
+		queues = [
+			this.updateStats.bind(this, this.revertStats(GLOBAL.DATA.items[itemId].stats)),
+			this.removeItemFromStuff.bind(this, {userItemId: worldItemId, itemId: itemId})
+		];
+
+		async.waterfall(queues, function(err) {
 			this.socketWrite({
 				f: "userWearOffItem", 
-				p: {
-					itemId: worldItemId
-				}
+				p: {itemId: worldItemId}
 			});
+			//TODO: проверить корректно ли так проверять callback
+			if(callback) {
+				callback();
+			}
+		}.bind(this));
+	}
+}
+
+
+/*
+	* Description:
+	*	Добавляет вещь в стафф героя
+	*	
+	*	@data: arr,
+	*		@userItemId: 	str, ид вещи из таблицы game_WorldItems
+	*		@itemId: 		str, ид вещи из таблицы game_Items
+	*	
+	*
+	* @since  20.09.15
+	* @author pcemma
+*/
+User.prototype.addItemToStuff = function(data, callback) {
+	var inventorySlotsArray = [],
+		userItemId = data.userItemId,
+		itemId = data.itemId,
+		insertData = {$set:{inventorySlotId: inventorySlotsArray}};
+	// Проход по всем слотам, в которые надо надеть вещь, и добавление данных о вещи.
+	for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots) {
+		inventorySlotsArray.push(inventorySlotId);
+		this.userData.stuff[inventorySlotId] = data;
+	}
+	// Обновляем слот ид в массиве свойств вещи пользователя.
+	this.userData.items[userItemId].inventorySlotId = inventorySlotsArray;
+	
+	//TODO: возможно в отдельный метод!
+	Mongo.update({
+		collection: 'game_WorldItems', 
+		searchData: {_id: Mongo.objectId(userItemId)}, 
+		insertData: insertData,
+		callback: function(rows) { callback(); }
+	});
+}
+
+
+/*
+	* Description:
+	*	Удаляет вещь из стаффа героя
+	*	
+	*	@data: arr,
+	*		@userItemId: 	str, ид вещи из таблицы game_WorldItems
+	*		@itemId: 		str, ид вещи из таблицы game_Items
+	*	
+	*
+	* @since  20.09.15
+	* @author pcemma
+*/
+User.prototype.removeItemFromStuff = function(data, callback) {
+	var userItemId = data.userItemId,
+		itemId = data.itemId,
+		insertData = {$set:{inventorySlotId: []}};
+	// Проход по всем слотам, в которых надета вещь, и удаление данных о вещи.
+	for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots) {
+		if(
+			inventorySlotId in this.userData.stuff && // проверка на что слот такой занят
+			this.userData.stuff[inventorySlotId].userItemId === userItemId // Проверка что это именна та вещь вслоте, которую пытаются снять
+		) {
+			delete this.userData.stuff[inventorySlotId];
 		}
 	}
+	
+	// Обновляем слот ид в массиве свойств вещи пользователя.
+	this.userData.items[userItemId].inventorySlotId = [];
+	
+	Mongo.update({
+		collection: 'game_WorldItems', 
+		searchData: {_id: Mongo.objectId(userItemId)}, 
+		insertData: insertData,
+		callback: function(rows) {callback();}
+	});
 }
 
 
@@ -807,6 +873,7 @@ User.prototype.wearOffItem = function(data) {
 	* @author pcemma
 */
 User.prototype.hasItem = function(worldItemId) {
+	//TODO: возможно тут надо проверить есть ли такая вещь в мире вообще!
 	return worldItemId in this.userData.items;
 }
 
@@ -822,22 +889,44 @@ User.prototype.hasItem = function(worldItemId) {
 	* Description:
 	*	Проверяет есть ли вещь у пользователя
 	*	
-	*	@data:	array
-	*		@worldItemId:	int, id вещи из таблицы game_WorldItems
+	*	@data:	obj, список статов ввиде {statName: value}
+	*		
 	*
-	* @since  11.09.15
+	* @since  20.09.15
 	* @author pcemma
 */
-User.prototype.updateStats = function(data) {
+User.prototype.updateStats = function(data, callback) {
 	console.log("\n\n\n", "UPDATE STATS");
 	console.log("DATA:", data);
 	console.log("========================");
 	console.log("BEFORE:", this.userData.stats);
 	console.log("========================");
+	
+
 	this.userData.stats.update(data);
+
+
+
+
 	console.log("AFTER:", this.userData.stats);
 	console.log("========================");
 	//TODO: обновление баззы данных
+
+	callback();
+}
+
+
+/*
+	* Description:
+	*	Проверяет есть ли вещь у пользователя
+	*	
+	*	@data:	obj, список статов ввиде {statName: value}
+	*
+	* @since  20.09.15
+	* @author pcemma
+*/
+User.prototype.revertStats = function(data) {
+	return this.userData.stats.revert(data);
 }
 
 

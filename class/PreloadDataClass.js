@@ -212,6 +212,19 @@ PreloadDataClass.prototype.getInventorySlotsList = function(callback) {
 }
 
 
+/*
+	* Description:
+	*	Проверяет есть ли такая вещь вообще в базе
+	*	
+	*	@itemId: str, ид вещи в таблице game_Items
+	*	
+	*
+	* @since  20.09.15
+	* @author pcemma
+*/
+PreloadDataClass.prototype.isItemExist = function(itemId) {
+	return (itemId in this.DATA.items);
+}
 
 
 

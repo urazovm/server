@@ -39,4 +39,23 @@ StatsManagerClass.prototype.update = function(data) {
 }
 
 
+/*
+	* Description:
+	*	function Преобразует значения статов в отрицательные
+	*	
+	*	@data: obj, {statName: value}
+	*
+	*
+	* @since  20.09.15
+	* @author pcemma
+*/
+StatsManagerClass.prototype.revert = function(data) {
+	var revertStats = {};
+	Object.keys(data).forEach(function(element) {
+		revertStats[element] = -1 * data[element];
+	});
+	return revertStats;
+}
+
+
 module.exports = StatsManagerClass;
