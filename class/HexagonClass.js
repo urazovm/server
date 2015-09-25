@@ -28,7 +28,7 @@ HexagonClass.prototype.__constructor = function(data) {
 	if(data.isObstruction) {
 		this.makeObstraction();
 	}
-}
+};
 
 
 /*
@@ -44,7 +44,7 @@ HexagonClass.prototype.makeObstraction = function() {
 	this.isObstructions = true;
 	this.isFreeFlag = false;
 	// this.obstructionId = Math.floor(Math.random() * (lib.objectSize(GLOBAL.DATA.battleInfo.obstructions) - 1 + 1)) + 1;
-}
+};
 
 
 /*
@@ -58,7 +58,7 @@ HexagonClass.prototype.makeObstraction = function() {
 HexagonClass.prototype.addHero = function(data) {
 	this.isFreeFlag = false;
 	this.userId = data.userId;
-}
+};
 
 
 /*
@@ -73,7 +73,7 @@ HexagonClass.prototype.addHero = function(data) {
 HexagonClass.prototype.removeHero = function() {
 	this.isFreeFlag = true;
 	this.userId = false;
-}
+};
 
 
 /*
@@ -94,7 +94,7 @@ HexagonClass.prototype.getHitArea = function() {
 		hexesArray.push({x: this.x + this.directions[parity][i][0], y: this.y + this.directions[parity][i][1]});
 	}
 	return hexesArray;
-}
+};
 
 
 /*
@@ -115,7 +115,7 @@ HexagonClass.prototype.getMoveArea = function() {
 		hexesArray.push({x: this.x + this.directions[parity][i][0], y: this.y + this.directions[parity][i][1]});
 	}
 	return hexesArray;
-}
+};
 
 
 /*
@@ -130,7 +130,7 @@ HexagonClass.prototype.getMoveArea = function() {
 */
 HexagonClass.prototype.getUserId = function() {
 	return this.userId;
-}
+};
 
 
 /*
@@ -145,7 +145,7 @@ HexagonClass.prototype.getUserId = function() {
 */
 HexagonClass.prototype.getCoordinats = function() {
 	return {x: this.x, y: this.y};
-}
+};
 
 
 /*
@@ -160,7 +160,7 @@ HexagonClass.prototype.getCoordinats = function() {
 */
 HexagonClass.prototype.getId = function() {
 	return this.x+"."+this.y;
-}
+};
 
 
 /*
@@ -186,7 +186,7 @@ HexagonClass.prototype.isInArea = function(data) {
 		}
 	}
 	return false;
-}
+};
 
 
 /*
@@ -201,7 +201,7 @@ HexagonClass.prototype.isInArea = function(data) {
 */
 HexagonClass.prototype.isFree = function() {
 	return this.isFreeFlag;
-}
+};
 
 
 

@@ -33,7 +33,7 @@ ServerClass.prototype.start = function() {
 					"client version: ", GLOBAL.globalConstants.clientVersion+" \n", 
 					"Data version: ", GLOBAL.globalConstants.globalDataVersion+" \n",
 					"-------------------------------------------------------------\n\n");
-}
+};
 
 
 /*
@@ -128,7 +128,7 @@ ServerClass.prototype.onSocketRequest = function(socket) {
 
 		// lib.close_user_socket(user_id, true,"error");
 	});	
-}
+};
 
 
 module.exports = ServerClass;

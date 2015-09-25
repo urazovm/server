@@ -19,8 +19,7 @@ GridClass.prototype.__constructor = function() {
 	this.hexesInCol = 7;
 	this.obstructionsHexes = this.createobstructionsHexes();
 	this.hexes = this.fill();
-
-}	
+};	
 
 
 /*
@@ -40,7 +39,7 @@ GridClass.prototype.createobstructionsHexes = function() {
 		tmpArray[x+"."+y] = String(Math.floor(Math.random() * (Object.keys(GLOBAL.DATA.battleInfo.obstructions).length - 1 + 1)) + 1);
 	}
 	return tmpArray;
-}
+};
 
 
 /*
@@ -68,7 +67,7 @@ GridClass.prototype.fill = function() {
 		}
 	}
 	return tmpArray;
-}
+};
 
 
 /*
@@ -97,7 +96,7 @@ GridClass.prototype.searchFreeHexesInArea = function(data) {
 		}
 	}
 	return hexesArray;
-}
+};
 
 
 /*
@@ -132,7 +131,7 @@ GridClass.prototype.searchEnemyInArea = function(data) {
 		}
 	}
 	return hexesArray;
-}
+};
 
 
 /*
@@ -148,7 +147,7 @@ GridClass.prototype.searchEnemyInArea = function(data) {
 */
 GridClass.prototype.addHeroToHex = function(data) {
 	this.hexes[data.hexId].addHero({userId: data.userId});
-}
+};
 
 
 /*
@@ -162,7 +161,7 @@ GridClass.prototype.addHeroToHex = function(data) {
 */
 GridClass.prototype.removeHeroFromHex = function(hexId) {
 	this.hexes[hexId].removeHero();
-}
+};
 
 
 /*
@@ -176,7 +175,7 @@ GridClass.prototype.removeHeroFromHex = function(hexId) {
 */
 GridClass.prototype.getUserIdInHex = function(hexId) {
 	return this.hexes[hexId].getUserId();
-}
+};
 
 
 /*
@@ -190,7 +189,7 @@ GridClass.prototype.getUserIdInHex = function(hexId) {
 */
 GridClass.prototype.isHexExist = function(hexId) {
 	return 	hexId in this.hexes;
-}
+};
 
 
 /*
@@ -204,7 +203,7 @@ GridClass.prototype.isHexExist = function(hexId) {
 */
 GridClass.prototype.isHexFree = function(hexId) {
 	return this.hexes[hexId].isFree();
-}
+};
 
 
 /*
@@ -219,7 +218,7 @@ GridClass.prototype.isHexFree = function(hexId) {
 */
 GridClass.prototype.isInArea = function(currentHexId, hexId) {
 	return this.hexes[currentHexId].isInArea(this.hexes[hexId].getCoordinats());
-}
+};
 
 
 /*
@@ -238,7 +237,7 @@ GridClass.prototype.canHeroMoveToHex = function(data) {
 	return 	this.isHexExist(data.hexId) &&
 			this.isHexFree(data.hexId) &&
 			this.isInArea(data.currentHexId, data.hexId);	
-}
+};
 
 
 /*
@@ -257,7 +256,7 @@ GridClass.prototype.canHeroAttackHex = function(data) {
 	return 	this.isHexExist(data.hexId) &&
 			this.getUserIdInHex(data.hexId) &&
 			this.isInArea(data.currentHexId, data.hexId);	
-}
+};
 
 
 

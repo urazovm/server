@@ -29,7 +29,7 @@ BattleClass.prototype.__constructor = function() {
 	// массив команда. одна команда это массив ид пользователей, нпц которые в этой команде
 	//TODO: Пересмотреть объект команд
 	this.teams = {'1': [], '2': []};
-}
+};
 
 
 /*
@@ -57,7 +57,7 @@ BattleClass.prototype.create = function(callback) {
 			callback();
 		}.bind(this)
 	}); 
-}
+};
 
 
 /*
@@ -77,7 +77,7 @@ BattleClass.prototype.check = function() {
 		return true;
 	}
 	return false;
-}
+};
 
 
 /*
@@ -112,7 +112,7 @@ BattleClass.prototype.completion = function(data) {
 	
 	//TODO: Пересмотреть механизм удаления боя
 	battlesManager.removeBattle({id: this.id});
-}
+};
 
 
 
@@ -177,7 +177,7 @@ BattleClass.prototype.addHero = function(data, callback) {
 						});
 	}
 	callback();
-}
+};
 
 
 /*
@@ -219,7 +219,7 @@ BattleClass.prototype.moveHero = function(data) {
 		return true;
 	}
 	return false;
-}
+};
 
 
 /*
@@ -293,7 +293,7 @@ BattleClass.prototype.heroMakeHit = function(data) {
 		}
 	}
 	return false;
-}
+};
 
 
 
@@ -324,7 +324,7 @@ BattleClass.prototype.searchEnemyInArea = function(data) {
 					this.heroes[oponentUserId].isAvailableEnemy({battleId: this.id, teamId: this.heroes[data.userId].userData.teamId});
 		}
 	});
-}
+};
 
 
 /*
@@ -340,7 +340,7 @@ BattleClass.prototype.searchEnemyInArea = function(data) {
 */
 BattleClass.prototype.searchFreeHexesInArea = function(data) {
 	return this.grid.searchFreeHexesInArea(data);
-}
+};
 
 
 
@@ -365,7 +365,7 @@ BattleClass.prototype.getBattleStatus = function() {
 	};
 	
 	return battleInfo;
-}
+};
 
 
 /*
@@ -383,7 +383,7 @@ BattleClass.prototype.getHeroesData = function() {
 		heroes[i] = this.getHeroData(i);
 	}
 	return heroes;
-}
+};
 
 
 /*
@@ -398,7 +398,7 @@ BattleClass.prototype.getHeroesData = function() {
 */
 BattleClass.prototype.getHeroData = function(userId) {
 	return this.heroes[userId].getUserDataForBattle();
-}
+};
 
 
 /*
@@ -418,7 +418,7 @@ BattleClass.prototype.isAliveHeroesInTeam = function(teamId) {
 		}
 	}
 	return false;
-}
+};
 
 
 
@@ -451,7 +451,7 @@ BattleClass.prototype.socketWrite = function(data) {
 		this.heroes[i].socketWrite(data);
 	}
 	// console.log("--------------- \n\n");
-}
+};
 
 
 module.exports = BattleClass;

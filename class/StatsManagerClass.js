@@ -19,7 +19,7 @@ StatsManagerClass.prototype.__constructor = function(data) {
 	Object.keys(data).forEach(function(stat) {
 		this[stat] = data[stat];
 	}.bind(this));
-}
+};
 
 
 /*
@@ -39,7 +39,7 @@ StatsManagerClass.prototype.update = function(data) {
 		this[stat] += updatedStats[stat];
 	}.bind(this));
 	return updatedStats;
-}
+};
 
 
 /*
@@ -60,7 +60,7 @@ StatsManagerClass.prototype.updateDepends = function(stats, dependedStats) {
 		stats = this.updateDepends(stats, this.convert(dependedStats[stat], GLOBAL.DATA.stats[stat].dependStats));
 	}.bind(this));
 	return stats;
-}
+};
 
 
 /*
@@ -81,7 +81,7 @@ StatsManagerClass.prototype.convert = function(koef, data) {
 		revertStats[stat] = koef * data[stat];
 	});
 	return revertStats;
-}
+};
 
 
 /*
@@ -96,6 +96,7 @@ StatsManagerClass.prototype.convert = function(koef, data) {
 */
 StatsManagerClass.prototype.revert = function(data) {
 	return this.convert(-1, data);
-}
+};
+
 
 module.exports = StatsManagerClass;

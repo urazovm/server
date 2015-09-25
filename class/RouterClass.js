@@ -31,7 +31,7 @@ Router.prototype.route = function(pathname, data) {
 		console.log("No request handler found for " + pathname);
 		this['/'](data);
 	}
-}
+};
 
 
 /*
@@ -50,7 +50,7 @@ Router.prototype['/'] = function (response, data) {
 	// response.writeHead(404, {"Content-Type": "text/plain"});
 	// response.write("404 Not found");
 	// response.end();
-}
+};
 
 
 /*
@@ -66,7 +66,7 @@ Router.prototype['/'] = function (response, data) {
 */
 Router.prototype.makeClientsErrorLogs = function (data) {
 	lib.makeClientsErrorLogs(data);
-}
+};
 
 
 /*
@@ -89,7 +89,7 @@ Router.prototype.removeUserFromServer = function (userId) {
 			// GLOBAL.removeUserFromAreasArray(areaId, userId);
 	}		
 	delete GLOBAL.USERS[userId];		
-}	
+};
 
 
 
@@ -120,7 +120,7 @@ Router.prototype.getGlobalData = function (data) {
 		var bytes_count = lib.return_bytes(string_params);
 		data.socket.write(bytes_count+string_params);
 	}
-}
+};
 
 
 /*
@@ -147,7 +147,7 @@ Router.prototype.authorization = function (data) {
 			console.log(GLOBAL.USERS);
 		}
 	)
-}	
+};	
 	
 	
 	
@@ -197,7 +197,7 @@ Router.prototype.enterBattle = function (data) {
 	if(data){
 		battlesManager.enterBattle({id: data.id, hero: GLOBAL.USERS[data.userId], battleType: data.battleType});
 	}
-}
+};
 
 
 /*
@@ -215,7 +215,7 @@ Router.prototype.battleMoveHero = function (data) {
 	if(data){
 		battlesManager.moveHero(data);
 	}
-}
+};
 
 
 /*
@@ -233,7 +233,7 @@ Router.prototype.battleHeroMakeHit = function (data) {
 	if(data){
 		battlesManager.heroMakeHit(data);
 	}
-}
+};
 	
 	
 	
@@ -257,7 +257,7 @@ Router.prototype.userWearOnItem = function (data) {
 	if(data){
 		GLOBAL.USERS[data.userId].wearOnItem(data);
 	}
-}
+};
 
 
 /*
@@ -275,7 +275,7 @@ Router.prototype.userWearOffItem = function (data) {
 	if(data){
 		GLOBAL.USERS[data.userId].wearOffItem(data);
 	}
-}
+};
 
 
 

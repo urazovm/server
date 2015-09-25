@@ -49,7 +49,7 @@ BMClass.prototype.addBattleToGlobalArray = function(battle, callback) {
 	console.log("addBattleToGlobalArray");
 	this.battles[battle.id] = battle;
 	callback();
-}
+};
 
 
 
@@ -68,7 +68,7 @@ BMClass.prototype.removeBattle = function(data) {
 	if(data && data.id) {
 		delete this.battles[data.id];
 	}
-}
+};
 
 
 /*
@@ -130,7 +130,7 @@ BMClass.prototype.enterBattle = function(data) {
 			console.log("enterBattle");
 		}
 	)
-}
+};
 
 
 /*
@@ -154,7 +154,7 @@ BMClass.prototype.moveHero = function(data) {
 	) {
 		return this.battles[data.id].moveHero(data);
 	}
-}
+};
 
 
 /*
@@ -179,7 +179,7 @@ BMClass.prototype.heroMakeHit = function(data) {
 		return this.battles[data.id].heroMakeHit(data);
 	}
 	return false;
-}
+};
 
 
 
@@ -208,7 +208,7 @@ BMClass.prototype.searchEnemyInArea = function(data) {
 		return this.battles[data.id].searchEnemyInArea(data);
 	}
 	return false;
-}
+};
 
 
 /*
@@ -233,7 +233,7 @@ BMClass.prototype.searchFreeHexesInArea = function(data) {
 		return this.battles[data.id].searchFreeHexesInArea(data);
 	}
 	return false;
-}
+};
 
 
 
@@ -249,8 +249,7 @@ BMClass.prototype.searchFreeHexesInArea = function(data) {
 BMClass.prototype.deleteAllNotEndedBattles = function() {
 	console.log("FINISH ALL OLD BATTLES!!");
 	Mongo.update({collection: 'game_Battles', insertData: {$set:{endFlag: true}}, options: {multi: true}}); 
-}
-
+};
 	
 
 

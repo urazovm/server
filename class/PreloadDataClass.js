@@ -48,7 +48,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 			callback();
 		}.bind(this)
 	)
-}
+};
 
 
 
@@ -83,7 +83,7 @@ PreloadDataClass.prototype.getTownsList = function(callback) {
 		}
 		callback();
 	}.bind(this)});
-}
+};
 
 
 /*
@@ -109,7 +109,7 @@ PreloadDataClass.prototype.getTownBuildingsTypes = function(callback) {
 		}
 		callback();
 	}.bind(this)});
-}
+};
 
 
 /*
@@ -132,7 +132,7 @@ PreloadDataClass.prototype.getTownBuildingsList = function(callback) {
 		}
 		callback();
 	}.bind(this)});	
-}
+};
 
 
 
@@ -157,7 +157,7 @@ PreloadDataClass.prototype.getItems = function(callback) {
 		}
 		callback();
 	}.bind(this)});
-}
+};
 
 
 /*
@@ -183,7 +183,7 @@ PreloadDataClass.prototype.getSpineSlots = function(callback) {
 		}
 		callback();
 	}.bind(this)});
-}
+};
 
 
 /*
@@ -209,7 +209,7 @@ PreloadDataClass.prototype.getInventorySlotsList = function(callback) {
 		}
 		callback();
 	}.bind(this)});
-}
+};
 
 
 /*
@@ -224,7 +224,7 @@ PreloadDataClass.prototype.getInventorySlotsList = function(callback) {
 */
 PreloadDataClass.prototype.isItemExist = function(itemId) {
 	return (itemId in this.DATA.items);
-}
+};
 
 
 
@@ -252,7 +252,7 @@ PreloadDataClass.prototype.getNpcsInfo = function(callback) {
 		}
 		callback();
 	}.bind(this)});
-}
+};
 
 
 /*
@@ -272,7 +272,7 @@ PreloadDataClass.prototype.fillNpcsCollectionWithData = function(callback) {
 			newNpc.createNewUser({npcId: npcId}, callback);
 		}
 	}
-}
+};
 
 
 
@@ -293,7 +293,7 @@ PreloadDataClass.prototype.addUserToGlobalUsersArray = function(user, callback) 
 	console.log("addUserToGlobalUsersArray");
 	this.USERS[user.userId] = user;
 	callback();
-}
+};
 
 
 
@@ -318,7 +318,7 @@ PreloadDataClass.prototype.getBattleInfo = function(callback) {
 		this.DATA.battleInfo = rows[0];
 		callback();
 	}.bind(this)});
-}
+};
 
 
 
@@ -347,7 +347,7 @@ PreloadDataClass.prototype.getStats = function(callback) {
 		}
 		callback();
 	}.bind(this)});
-}
+};
 
 
 /*
@@ -369,7 +369,7 @@ PreloadDataClass.prototype.getHeroClasses = function(callback) {
 		}
 		callback();
 	}.bind(this)});
-}
+};
 
 
 
@@ -404,7 +404,7 @@ PreloadDataClass.prototype.createGlobalConstants = function(callback) {
 		}
 		callback();
 	}.bind(this)});
-}
+};
 
 
 
@@ -444,7 +444,7 @@ PreloadDataClass.prototype.checkVersion = function(version, need_version) {
 		}
 	}
 	return true;
-}
+};
 
 
 

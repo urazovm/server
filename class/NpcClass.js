@@ -52,7 +52,7 @@ Npc.prototype.addDefaultUser = function(data, callback) {
 			callback();
 		}.bind(this)
 	}); 		
-}
+};
 
 
 /*
@@ -67,7 +67,7 @@ Npc.prototype.addDefaultUser = function(data, callback) {
 */
 Npc.prototype.getDefaultStats = function() {
 	return GLOBAL.DATA.npcsInfo[this.npcId].stats;
-}
+};
 
 
 /*
@@ -94,7 +94,7 @@ Npc.prototype.addDefaultItems = function(callback) {
 			inventorySlotId: inventorySlotArray
 		}, callback);
 	}	
-}
+};
 
 
 
@@ -118,7 +118,7 @@ Npc.prototype.addDefaultItems = function(callback) {
 */
 Npc.prototype.addToBattleListener = function() {
 	this.searchEnemyInArea();
-}
+};
 
 
 /*
@@ -134,7 +134,7 @@ Npc.prototype.removeFromBattleListener = function() {
 	if(this.battleTimer) {
 		clearTimeout(this.battleTimer);
 	}
-}
+};
 
 
 /*
@@ -173,7 +173,7 @@ Npc.prototype.searchEnemyInArea = function() {
 			this.battleTimer = setTimeout(this.searchEnemyInArea().bind(this), 500);
 		}
 	}
-}
+};
 
 
 /*
@@ -208,7 +208,7 @@ Npc.prototype.findHexIdToMove = function() {
 			this.battleTimer = setTimeout(this.findHexIdToMove().bind(this), 500);
 		}
 	}
-}
+};
 
 
 /*
@@ -227,7 +227,7 @@ Npc.prototype.heroMakeHit = function() {
 	else {
 		this.battleTimer = setTimeout(this.searchEnemyInArea().bind(this), this.userData.stats.hitActionTime * 1000);
 	}	
-}
+};
 
 
 

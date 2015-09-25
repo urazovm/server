@@ -15,7 +15,7 @@ MongoDBClass.prototype.connect = function(callback) {
 		console.log("MONGO START!");
 		callback();
 	}.bind(this));
-}
+};
 
 
 /*
@@ -47,7 +47,7 @@ MongoDBClass.prototype.dataConversion = function(data) {
 		data[property] = data[property] || {};
 	});
 	return data;
-}
+};
 
 
 /*
@@ -67,7 +67,7 @@ MongoDBClass.prototype.find = function(data) {
 	collection.find(data.searchData, data.fields).toArray(function(err, docs) {
 		data.callback(docs);
 	});
-}
+};
 
 
 /*
@@ -87,7 +87,7 @@ MongoDBClass.prototype.insert = function(data) {
 		if(err) { console.log(err); }
 		data.callback(result);
 	});
-}
+};
 
 
 /*
@@ -108,7 +108,7 @@ MongoDBClass.prototype.update = function(data) {
 	collection.update(data.searchData, data.insertData, data.options, function(err, result) {
 		data.callback(result);
 	});  
-}
+};
 
 
 /*
@@ -130,7 +130,7 @@ MongoDBClass.prototype.findAndModify = function(data) {
 	collection.findAndModify(data.criteria, data.sort, data.update, data.options, function(err, doc) {
 		data.callback(doc);
 	}.bind(this));	
-}
+};
 
 
 /*
@@ -149,9 +149,7 @@ MongoDBClass.prototype.remove = function(data) {
 	collection.remove(data.searchData, function(err, result) {
 		data.callback(result);
 	});
-}
-
-
+};
 
 
 module.exports = MongoDBClass;

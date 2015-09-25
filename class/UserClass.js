@@ -34,7 +34,7 @@ User.prototype.socketWrite = function (data) {
 		var bytes_count = lib.return_bytes(string_params);
 		this.socket.write(bytes_count+string_params);
 	}
-}
+};
 	
 
 /*
@@ -75,7 +75,7 @@ User.prototype.check = function(autoConfigData, callback) {
 			}.bind(this)
 		});
 	}
-}
+};
 
 
 
@@ -122,7 +122,7 @@ User.prototype.createNewUser = function(data, callback) {
 			callback();
 		}.bind(this)
 	)
-}	
+};
 	
 
 /*
@@ -169,7 +169,7 @@ User.prototype.addDefaultUser = function(data, callback) {
 			callback();
 		}.bind(this)
 	}); 		
-}
+};
 	
 
 /*
@@ -186,7 +186,7 @@ User.prototype.addDefaultUser = function(data, callback) {
 */
 User.prototype.getDefaultStats = function(heroClassId) {
 	return GLOBAL.DATA.heroClasses[heroClassId].stats;
-}
+};
 
 
 /*
@@ -216,7 +216,7 @@ User.prototype.addDefaultItems = function(callback) {
 			count: 1
 		}, callback);
 	}	
-}
+};
 
 
 /*
@@ -248,7 +248,7 @@ User.prototype.updateClientInfo = function(data, callback) {
 			ip: (data.ip) ? data.ip : ""
 		}};
 	Mongo.update({collection: 'game_Users', searchData: {_id: this.userId}, insertData: insertData, callback: function(rows) { callback(); }});
-}
+};
 
 
 
@@ -320,7 +320,7 @@ User.prototype.authorization = function(data, callback) {
 			callback();
 		}.bind(this)
 	)
-}
+};
 
 
 /*
@@ -364,7 +364,7 @@ User.prototype.getUserData = function(callback) {
 			// callback();	
 		}.bind(this)
 	});	
-}
+};
 
 
 
@@ -382,7 +382,7 @@ User.prototype.getUserData = function(callback) {
 */
 User.prototype.isInBattle = function() {
 	return this.userData.inBattleFlag;
-}
+};
 
 
 /*
@@ -397,7 +397,7 @@ User.prototype.isInBattle = function() {
 */
 User.prototype.isInCurrentBattle = function(battleId) {
 	return this.isInBattle() && this.userData.battleId === battleId;
-}
+};
 
 
 /*
@@ -413,7 +413,7 @@ User.prototype.isAlive = function() {
 		this.userData.isAliveFlag = false;
 	}
 	return this.userData.isAliveFlag;
-}
+};
 
 
 /*
@@ -428,7 +428,7 @@ User.prototype.isAlive = function() {
 */
 User.prototype.isEnemy = function(teamId) {
 	return this.userData.teamId !== teamId;
-}
+};
 
 
 /*
@@ -444,7 +444,7 @@ User.prototype.isEnemy = function(teamId) {
 */
 User.prototype.isAvailableEnemy = function(data) {
 	return this.isInCurrentBattle(data.battleId) && this.isAlive() && this.isEnemy(data.teamId);
-}
+};
 
 
 /*
@@ -459,7 +459,7 @@ User.prototype.isAvailableEnemy = function(data) {
 */
 User.prototype.isReadyForAction = function(data) {
 	return this.isInCurrentBattle(data.battleId) && this.isAlive() && this.canDoAction();
-}
+};
 
 
 /*
@@ -473,7 +473,7 @@ User.prototype.isReadyForAction = function(data) {
 User.prototype.canDoAction = function() {
 	var currentTime = Math.floor(+new Date() / 1000);
 	return this.userData.lastActionTime <= currentTime;
-}
+};
 
 
 /*
@@ -494,7 +494,7 @@ User.prototype.addToBattle = function(data) {
 	// запускаем листнер вступления в бой
 	// TODO: переделать эту проверку
 	(this.addToBattleListener) ? this.addToBattleListener() : 0;
-}
+};
 
 
 /*
@@ -514,7 +514,7 @@ User.prototype.setBattleData = function(data) {
 	this.userData.battleId = data.battleId;
 	this.userData.teamId = data.teamId;
 	this.userData.hexId = data.hexId;
-}
+};
 
 /*
 	* Description:
@@ -538,7 +538,7 @@ User.prototype.getUserDataForBattle = function() {
 		}
 	}.bind(this));
 	return info;
-}
+};
 
 
 /*
@@ -553,7 +553,7 @@ User.prototype.getUserDataForBattle = function() {
 User.prototype.getRemainLastActionTime = function() {
 	var currentTime = Math.floor(+new Date() / 1000);
 	return (currentTime < this.userData.lastActionTime) ? (this.userData.lastActionTime - currentTime) : 0;
-}
+};
 
 
 /*
@@ -568,7 +568,7 @@ User.prototype.getRemainLastActionTime = function() {
 User.prototype.setLastActionTime = function(action) {
 	var currentTime = Math.floor(+new Date() / 1000);
 	this.userData.lastActionTime = currentTime + this.userData.stats[action+'ActionTime'];
-}
+};
 
 
 /*
@@ -595,7 +595,7 @@ User.prototype.removeFromBattle = function(data) {
 	
 	// TODO: переделать эту проверку
 	(this.removeFromBattleListener) ? this.removeFromBattleListener() : 0;
-}
+};
 
 
 /*
@@ -608,8 +608,7 @@ User.prototype.removeFromBattle = function(data) {
 User.prototype.countDamage = function() {
 	var damage = Math.floor(Math.random() * (this.userData.stats.maxDamage - this.userData.stats.minDamage + 1)) + this.userData.stats.minDamage;
 	return damage;
-}
-
+};
 
 
 
@@ -647,7 +646,7 @@ User.prototype.getItems = function(callback) {
 		}
 		callback();
 	}.bind(this)});
-}
+};
 
 
 /*
@@ -683,7 +682,7 @@ User.prototype.addItem = function(data, callback) {
 			}); 
 		}
 	}
-}
+};
 
 
 /*
@@ -722,7 +721,7 @@ User.prototype.wearOnItem = function(data) {
 			});
 		}.bind(this));
 	}
-}
+};
 
 
 /*
@@ -746,7 +745,7 @@ User.prototype.wearOffItems = function(inventorySlots, callback) {
 	async.waterfall(queues, function(err) {
 		callback();
 	}.bind(this));
-}
+};
 
 
 /*
@@ -786,7 +785,7 @@ User.prototype.wearOffItem = function(data, callback) {
 			}
 		}.bind(this));
 	}
-}
+};
 
 
 /*
@@ -821,7 +820,7 @@ User.prototype.addItemToStuff = function(data, callback) {
 		insertData: insertData,
 		callback: function(rows) { callback(); }
 	});
-}
+};
 
 
 /*
@@ -859,7 +858,7 @@ User.prototype.removeItemFromStuff = function(data, callback) {
 		insertData: insertData,
 		callback: function(rows) {callback();}
 	});
-}
+};
 
 
 /*
@@ -875,7 +874,7 @@ User.prototype.removeItemFromStuff = function(data, callback) {
 User.prototype.hasItem = function(worldItemId) {
 	//TODO: возможно тут надо проверить есть ли такая вещь в мире вообще!
 	return worldItemId in this.userData.items;
-}
+};
 
 
 
@@ -903,7 +902,7 @@ User.prototype.updateStats = function(data, callback) {
 	// console.log("========================");
 	var updatedStats = this.userData.stats.update(data);
 	this.updateStatsInDb(updatedStats, callback);
-}
+};
 
 
 /*
@@ -931,7 +930,7 @@ User.prototype.updateStatsInDb = function(updatedStats, callback) {
 			callback();
 		}
 	});
-}
+};
 
 
 /*
@@ -945,7 +944,7 @@ User.prototype.updateStatsInDb = function(updatedStats, callback) {
 */
 User.prototype.revertStats = function(data) {
 	return this.userData.stats.revert(data);
-}
+};
 
 
 
