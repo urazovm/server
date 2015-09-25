@@ -896,23 +896,41 @@ User.prototype.hasItem = function(worldItemId) {
 	* @author pcemma
 */
 User.prototype.updateStats = function(data, callback) {
-	console.log("\n\n\n", "UPDATE STATS");
-	console.log("DATA:", data);
-	console.log("========================");
-	console.log("BEFORE:", this.userData.stats);
-	console.log("========================");
-	
-
-	this.userData.stats.update(data);
-
-
+	// console.log("\n\n\n", "UPDATE STATS");
+	// console.log("DATA:", data);
+	// console.log("========================");
+	// console.log("BEFORE:", this.userData.stats);
+	// console.log("========================");
+	var updatedStats = this.userData.stats.update(data);
+	this.updateStatsInDb(updatedStats, callback);
+}
 
 
-	console.log("AFTER:", this.userData.stats);
-	console.log("========================");
-	//TODO: обновление баззы данных
-
-	callback();
+/*
+	* Description:
+	*	Проверяет есть ли вещь у пользователя
+	*	
+	*	@updatedStats:	obj, список статов ввиде {statName: value}
+	*		
+	*
+	* @since  25.09.15
+	* @author pcemma
+*/
+User.prototype.updateStatsInDb = function(updatedStats, callback) {
+	var insertData = {$inc: {}};
+	Object.keys(updatedStats).forEach(function(stat) {
+		insertData['$inc']["userData.stats." + stat] = updatedStats[stat];
+	});
+	Mongo.update({
+		collection: 'game_Users',
+		searchData: {_id: this.userId},
+		insertData: insertData,
+		callback: function() {
+			// console.log("AFTER:", this.userData.stats);
+			// console.log("========================");
+			callback();
+		}
+	});
 }
 
 
