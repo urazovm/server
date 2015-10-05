@@ -927,7 +927,7 @@ User.prototype.updateStatsInDb = function(updatedStats, callback) {
 		callback: function() {
 			// console.log("AFTER:", this.userData.stats);
 			// console.log("========================");
-			callback();
+			if(callback) { callback(); }
 		}
 	});
 };
@@ -943,6 +943,7 @@ User.prototype.updateStatsInDb = function(updatedStats, callback) {
 	* @author pcemma
 */
 User.prototype.revertStats = function(data) {
+	// TODO: этот метод удалить, когда стат менеджер будет в вещах
 	return this.userData.stats.revert(data);
 };
 
