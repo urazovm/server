@@ -516,6 +516,7 @@ User.prototype.setBattleData = function(data) {
 	this.userData.hexId = data.hexId;
 };
 
+
 /*
 	* Description:
 	*	function получаем все данные про героя, которые отправляются в бой
@@ -865,8 +866,7 @@ User.prototype.removeItemFromStuff = function(data, callback) {
 	* Description:
 	*	Проверяет есть ли вещь у пользователя
 	*	
-	*	@data:	array
-	*		@worldItemId:	int, id вещи из таблицы game_WorldItems
+	*	@worldItemId:	int, id вещи из таблицы game_WorldItems
 	*
 	* @since  11.09.15
 	* @author pcemma
