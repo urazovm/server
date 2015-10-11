@@ -94,8 +94,8 @@ StatsManagerClass.prototype.convert = function(koef, data) {
 	* @since  20.09.15
 	* @author pcemma
 */
-StatsManagerClass.prototype.revert = function(data) {
-	return this.convert(-1, data);
+StatsManagerClass.prototype.revert = function() {
+	return this.convert(-1, this);
 };
 
 

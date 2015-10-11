@@ -769,7 +769,7 @@ User.prototype.wearOffItem = function(data, callback) {
 		var itemId = this.userData.items[worldItemId].itemId;
 		
 		queues = [
-			this.updateStats.bind(this, this.revertStats(GLOBAL.DATA.items[itemId].stats)),
+			this.updateStats.bind(this, this.userData.items[worldItemId].revertStats()),
 			this.removeItemFromStuff.bind(this, {userItemId: worldItemId, itemId: itemId})
 		];
 
@@ -874,11 +874,11 @@ User.prototype.hasItem = function(worldItemId) {
 	* @author pcemma
 */
 User.prototype.updateStats = function(data, callback) {
-	// console.log("\n\n\n", "UPDATE STATS");
-	// console.log("DATA:", data);
-	// console.log("========================");
-	// console.log("BEFORE:", this.userData.stats);
-	// console.log("========================");
+	console.log("\n\n\n", "UPDATE STATS");
+	console.log("DATA:", data);
+	console.log("========================");
+	console.log("BEFORE:", this.userData.stats);
+	console.log("========================");
 	var updatedStats = this.userData.stats.update(data);
 	this.updateStatsInDb(updatedStats, callback);
 };
@@ -895,37 +895,21 @@ User.prototype.updateStats = function(data, callback) {
 	* @author pcemma
 */
 User.prototype.updateStatsInDb = function(updatedStats, callback) {
-	var insertData = {$inc: {}};
+	var insertData = {};
 	Object.keys(updatedStats).forEach(function(stat) {
-		insertData['$inc']["userData.stats." + stat] = updatedStats[stat];
+		insertData["userData.stats." + stat] = updatedStats[stat];
 	});
 	Mongo.update({
 		collection: 'game_Users',
 		searchData: {_id: this.userId},
-		insertData: insertData,
+		insertData: {$inc: insertData},
 		callback: function() {
-			// console.log("AFTER:", this.userData.stats);
-			// console.log("========================");
+			console.log("AFTER:", this.userData.stats);
+			console.log("========================");
 			if(callback) { callback(); }
-		}
+		}.bind(this)
 	});
 };
-
-
-/*
-	* Description:
-	*	Проверяет есть ли вещь у пользователя
-	*	
-	*	@data:	obj, список статов ввиде {statName: value}
-	*
-	* @since  20.09.15
-	* @author pcemma
-*/
-User.prototype.revertStats = function(data) {
-	// TODO: этот метод удалить, когда стат менеджер будет в вещах
-	return this.userData.stats.revert(data);
-};
-
 
 
 

@@ -49,7 +49,17 @@ ItemClass.prototype.setToInventorySlot = function(inventorySlotsArray, callback)
 };
 
 
-
+/*
+	* Description:
+	*	Возвращает статы отрицательные.
+	*	
+	*
+	* @since  11.10.15
+	* @author pcemma
+*/
+ItemClass.prototype.revertStats = function() {
+	return this.stats.revert();
+};
 
 
 
