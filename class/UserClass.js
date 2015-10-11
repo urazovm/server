@@ -874,11 +874,11 @@ User.prototype.hasItem = function(worldItemId) {
 	* @author pcemma
 */
 User.prototype.updateStats = function(data, callback) {
-	console.log("\n\n\n", "UPDATE STATS");
-	console.log("DATA:", data);
-	console.log("========================");
-	console.log("BEFORE:", this.userData.stats);
-	console.log("========================");
+	// console.log("\n\n\n", "UPDATE STATS");
+	// console.log("DATA:", data);
+	// console.log("========================");
+	// console.log("BEFORE:", this.userData.stats);
+	// console.log("========================");
 	var updatedStats = this.userData.stats.update(data);
 	this.updateStatsInDb(updatedStats, callback);
 };
@@ -904,8 +904,8 @@ User.prototype.updateStatsInDb = function(updatedStats, callback) {
 		searchData: {_id: this.userId},
 		insertData: {$inc: insertData},
 		callback: function() {
-			console.log("AFTER:", this.userData.stats);
-			console.log("========================");
+			// console.log("AFTER:", this.userData.stats);
+			// console.log("========================");
 			if(callback) { callback(); }
 		}.bind(this)
 	});
