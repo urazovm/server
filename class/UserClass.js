@@ -67,7 +67,6 @@ User.prototype.check = function(autoConfigData, callback) {
 			fields: {_id: true},
 			callback: function (rows) {
 				console.log("CHECK USER!!!");
-				console.log(rows);
 				if(rows.length > 0) {
 					this.userId = rows[0]._id;
 				}
@@ -356,7 +355,6 @@ User.prototype.getUserData = function(callback) {
 					queues,
 					function(err) {
 						console.log("Get userData");
-						console.log(this.userData);
 						callback();
 					}.bind(this)
 				);
@@ -634,7 +632,8 @@ User.prototype.getItems = function(callback) {
 	Mongo.find({collection: 'game_WorldItems', searchData: {userId: Mongo.objectId(this.userId)}, callback: function(rows) {
 		for(var i in rows) {
 			var worldItemId = rows[i]._id.toHexString();
-			this.userData.items[worldItemId] = rows[i];
+			this.userData.items[worldItemId] = new ItemClass(rows[i]);
+			console.log(this.userData.items[worldItemId]);
 			//Собираем данные о надетых вещах. 
 			// TODO: Вынести это в отдельный метод, который собирает надетый стафф! 
 			for(var j in rows[i].inventorySlotId) {
@@ -677,7 +676,6 @@ User.prototype.addItem = function(data, callback) {
 					inventorySlotId: data.inventorySlotId || []
 				},  
 				callback: function(rows) {
-					console.log("Add item", rows.ops[0]._id);
 					callback();
 				}.bind(this)
 			}); 
@@ -804,23 +802,14 @@ User.prototype.wearOffItem = function(data, callback) {
 User.prototype.addItemToStuff = function(data, callback) {
 	var inventorySlotsArray = [],
 		userItemId = data.userItemId,
-		itemId = data.itemId,
-		insertData = {$set:{inventorySlotId: inventorySlotsArray}};
+		itemId = data.itemId;
 	// Проход по всем слотам, в которые надо надеть вещь, и добавление данных о вещи.
 	for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots) {
 		inventorySlotsArray.push(inventorySlotId);
 		this.userData.stuff[inventorySlotId] = data;
 	}
-	// Обновляем слот ид в массиве свойств вещи пользователя.
-	this.userData.items[userItemId].inventorySlotId = inventorySlotsArray;
-	
-	//TODO: возможно в отдельный метод!
-	Mongo.update({
-		collection: 'game_WorldItems', 
-		searchData: {_id: Mongo.objectId(userItemId)}, 
-		insertData: insertData,
-		callback: function(rows) { callback(); }
-	});
+
+	this.userData.items[userItemId].setToInventorySlot(inventorySlotsArray, callback);
 };
 
 
@@ -838,8 +827,7 @@ User.prototype.addItemToStuff = function(data, callback) {
 */
 User.prototype.removeItemFromStuff = function(data, callback) {
 	var userItemId = data.userItemId,
-		itemId = data.itemId,
-		insertData = {$set:{inventorySlotId: []}};
+		itemId = data.itemId;
 	// Проход по всем слотам, в которых надета вещь, и удаление данных о вещи.
 	for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots) {
 		if(
@@ -849,16 +837,7 @@ User.prototype.removeItemFromStuff = function(data, callback) {
 			delete this.userData.stuff[inventorySlotId];
 		}
 	}
-	
-	// Обновляем слот ид в массиве свойств вещи пользователя.
-	this.userData.items[userItemId].inventorySlotId = [];
-	
-	Mongo.update({
-		collection: 'game_WorldItems', 
-		searchData: {_id: Mongo.objectId(userItemId)}, 
-		insertData: insertData,
-		callback: function(rows) {callback();}
-	});
+	this.userData.items[userItemId].setToInventorySlot([], callback);
 };
 
 

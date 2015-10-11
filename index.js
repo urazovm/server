@@ -13,6 +13,7 @@ ServerClass 		= require("./class/ServerClass.js");
 MongoDBClass 		= require("./class/MongoDBClass.js");
 PreloadDataClass 	= require("./class/PreloadDataClass.js");
 StatsManagerClass	= require("./class/StatsManagerClass.js");
+ItemClass			= require("./class/ItemClass.js");
 UserClass 			= require("./class/UserClass.js");
 NpcClass 			= require("./class/NpcClass.js");
 BattleManagerClass 	= require("./class/BattleManagerClass.js");
