@@ -525,7 +525,7 @@ User.prototype.setBattleData = function(data) {
 	* @author pcemma
 */
 User.prototype.getUserDataForBattle = function() {
-	var dataArray = ['teamId', 'isAliveFlag', 'hexId', 'login', 'stats', 'stuff'],
+	var dataArray = ['battleId', 'teamId', 'isAliveFlag', 'hexId', 'login', 'stats', 'stuff'],
 		info = {
 			id: this.userId,
 			npcId: this.npcId,
@@ -606,6 +606,7 @@ User.prototype.removeFromBattle = function(data) {
 */
 User.prototype.countDamage = function() {
 	var damage = Math.floor(Math.random() * (this.userData.stats.maxDamage - this.userData.stats.minDamage + 1)) + this.userData.stats.minDamage;
+	damage = (damage < 0) ? 0 : damage;
 	return damage;
 };
 
