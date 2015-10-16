@@ -407,7 +407,9 @@ User.prototype.isInCurrentBattle = function(battleId) {
 */
 User.prototype.isAlive = function() {
 	if(this.userData.stats.currentHp <= 0 ) {
+		//TODO: set hp!
 		this.userData.stats.currentHp = 0;
+		//TODO: Обновление флага и в базе тоже! мертвые не могут делать многих вещей!
 		this.userData.isAliveFlag = false;
 	}
 	return this.userData.isAliveFlag;
@@ -584,9 +586,10 @@ User.prototype.setLastActionTime = function(action) {
 */
 User.prototype.removeFromBattle = function(data) {
 	// TODO: это временное решение для того что бы можно было сразу вступить в бой заново!
-	this.userData.stats.currentHp = this.userData.stats.hp;
+	this.userData.stats.update({currentHp: (this.userData.stats.hp - this.userData.stats.currentHp)});
 	this.userData.isAliveFlag = true;
 	
+
 	this.userData.inBattleFlag = false;
 	delete this.userData.battleId;
 	delete this.userData.teamId;
