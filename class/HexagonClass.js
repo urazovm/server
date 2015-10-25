@@ -123,7 +123,6 @@ HexagonClass.prototype.getMoveArea = function() {
 	*	Возвращает ид героя в гексе.
 	*	
 	*
-	*	return: array, массив гексов, которые находятся в области у текущего гекса
 	*
 	* @since  01.06.15
 	* @author pcemma
