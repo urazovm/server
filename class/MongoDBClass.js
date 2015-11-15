@@ -9,7 +9,7 @@ function MongoDBClass(callback) {
 
 MongoDBClass.prototype.connect = function(callback) {
 	// Initialize connection once
-	MongoClient.connect("mongodb://localhost/pcemmaDb", function(err, database) {
+	MongoClient.connect("mongodb://127.0.0.1/pcemmaDb", function(err, database) {
 		if(err) throw err;
 		this.db = database;
 		console.log("MONGO START!");
