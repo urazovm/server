@@ -344,8 +344,7 @@ User.prototype.getUserData = function(callback) {
 				this.userData = rows[0].userData;
 
 				this.userData.stats = new StatsManagerClass(rows[0].userData.stats);
-			
-
+				
 				var queues = [
 					// Собираем вещи юзера. Данные про вещи текущие в коллеции game_WorldItems
 					this.getItems.bind(this)

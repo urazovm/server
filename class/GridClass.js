@@ -210,14 +210,16 @@ GridClass.prototype.isHexFree = function(hexId) {
 	* Description:
 	*	function Находится ли гекс с ид hexId в области передвижения/удара вокруг гекса currentHexId.
 	*	
-	*	@hexId: 		str, ид гекса.
-	*	@currentHexId: 	str, ид гекса в обалсти которого ведутся поиски.
+	*	@data:
+	*		@hexId: 		str, ид гекса.
+	*		@currentHexId: 	str, ид гекса в обалсти которого ведутся поиски.
+	*		@radius: 		int, area radius
 	*
 	* @since  16.09.15
 	* @author pcemma
 */
-GridClass.prototype.isInArea = function(currentHexId, hexId) {
-	return this.hexes[currentHexId].isInArea(this.hexes[hexId].getCoordinats());
+GridClass.prototype.isInArea = function(data) {
+	return this.hexes[data.currentHexId].isInArea(this.hexes[data.hexId].getCoordinats(), data.radius);
 };
 
 
@@ -236,7 +238,7 @@ GridClass.prototype.isInArea = function(currentHexId, hexId) {
 GridClass.prototype.canHeroMoveToHex = function(data) {
 	return 	this.isHexExist(data.hexId) &&
 			this.isHexFree(data.hexId) &&
-			this.isInArea(data.currentHexId, data.hexId);	
+			this.isInArea(data);	
 };
 
 
@@ -255,7 +257,7 @@ GridClass.prototype.canHeroMoveToHex = function(data) {
 GridClass.prototype.canHeroAttackHex = function(data) {
 	return 	this.isHexExist(data.hexId) &&
 			this.getUserIdInHex(data.hexId) &&
-			this.isInArea(data.currentHexId, data.hexId);	
+			this.isInArea(data);	
 };
 
 

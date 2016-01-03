@@ -20,14 +20,53 @@ HexagonClass.prototype.__constructor = function(data) {
 	this.isObstructions = false;
 	this.x = data.x;
 	this.y = data.y;
-	this.directions = [
-		[ [1, 0], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1]],
-		[ [1, 0], [1, -1], [0, -1], [-1, 0], [0, 1], [1, 1]]
-	];
+	this.cubeCoordinats = this.calcCubeCoordinats();
+	console.log(this.cubeCoordinats);
+	// this.directions = [
+	// 	[ [1, 0], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1]],
+	// 	[ [1, 0], [1, -1], [0, -1], [-1, 0], [0, 1], [1, 1]]
+	// ];
 	
 	if(data.isObstruction) {
 		this.makeObstraction();
 	}
+};
+
+
+/*
+	* Description:
+	*	function Calculation cube coordinats of the hex
+	*	
+	*
+	*
+	* @since  04.01.16
+	* @author pcemma
+*/
+HexagonClass.prototype.calcCubeCoordinats = function() {
+	// # convert odd-r offset to cube
+	var x = this.x - (this.y - this.y & 1) / 2,
+		z = this.y,
+		y = -x - z;
+	return {x: x, z: z, y: y};
+};
+
+
+/*
+	* Description:
+	*	function convert cube coordinats to offset
+	*	
+	* 	@x: int, x coordinat
+	* 	@y: int, y coordinat
+	* 	@z: int, z coordinat
+	*
+	* @since  04.01.16
+	* @author pcemma
+*/
+HexagonClass.prototype.convertCubeToOffset = function(x, z, y) {
+	// # convert cube to odd-r offset
+	var col = x + (z - z & 1) / 2,
+		row = z;
+	return {x: col, y: row};
 };
 
 
@@ -166,22 +205,36 @@ HexagonClass.prototype.getId = function() {
 	* Description:
 	*	function проверяет является ли гекс с координатами, которые передали, соседом
 	*	
-	*	@data: array, {x, y}
+	*	@neededHex: array, {x, y}
+	*	@radius: 	int, radus in hexes
 	*
 	*	return: bool, true/false
 	*
 	* @since  11.02.15
 	* @author pcemma
 */
-HexagonClass.prototype.isInArea = function(data) {
-	// TODO: переделать проверку соседей на проверку в радиусе
-	var parity = this.y % 2;
-	for(var i in this.directions[parity]) {
-		if(
-			data.x === this.x + this.directions[parity][i][0] && 
-			data.y === this.y + this.directions[parity][i][1]
-		) {
-			return true;
+HexagonClass.prototype.isInArea = function(neededHex, radius) {
+	var minX = this.cubeCoordinats.x - radius,
+		maxX = this.cubeCoordinats.x + radius,
+		minY = this.cubeCoordinats.y - radius, 
+		maxY = this.cubeCoordinats.y + radius, 
+		minZ = this.cubeCoordinats.z - radius,
+		maxZ = this.cubeCoordinats.z + radius;
+
+	for (var x = minX; x <= maxX; x++) {
+		for (var y = minY; y <= maxY; y++) {
+			for (var z = minZ; z <= maxZ; z++) {
+				// TODO: Проверить формулу. убрать лишний 3-й цикл + проверку. http://www.redblobgames.com/grids/hexagons/#field-of-view
+				if (x + y + z === 0) {
+    				var hexCoordinats = this.convertCubeToOffset(x, z, y);
+					if(
+						neededHex.x === hexCoordinats.x && 
+						neededHex.y === hexCoordinats.y
+					) {
+						return true;
+					}
+				}
+			}
 		}
 	}
 	return false;

@@ -198,7 +198,7 @@ BattleClass.prototype.moveHero = function(data) {
 		// Проверяем на то есть ли вообще такой герой у нас И может ли он совершать действие
 		this.heroes[data.userId] && 										
 		this.heroes[data.userId].isReadyForAction({battleId: this.id}) &&
-		this.grid.canHeroMoveToHex({hexId: data.hexId, currentHexId: this.heroes[data.userId].userData.hexId})
+		this.grid.canHeroMoveToHex({hexId: data.hexId, currentHexId: this.heroes[data.userId].userData.hexId, radius: this.heroes[data.userId].userData.stats.moveRadius})
 	) {
 		// Обновление гекса
 		this.grid.addHeroToHex({userId: data.userId, hexId: data.hexId});
@@ -240,7 +240,7 @@ BattleClass.prototype.heroMakeHit = function(data) {
 		// Проверяем на то есть ли вообще такой герой у нас И может ли он совершать действие
 		this.heroes[data.userId] && 										
 		this.heroes[data.userId].isReadyForAction({battleId: this.id}) &&
-		this.grid.canHeroAttackHex({hexId: data.hexId, currentHexId: this.heroes[data.userId].userData.hexId})
+		this.grid.canHeroAttackHex({hexId: data.hexId, currentHexId: this.heroes[data.userId].userData.hexId, radius: this.heroes[data.userId].userData.stats.attackRadius})
 	) {		 
 		//Берем ид героя(противника) в гексе
 		var oponentUserId = this.grid.getUserIdInHex(data.hexId);
