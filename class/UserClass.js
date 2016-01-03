@@ -586,7 +586,8 @@ User.prototype.setLastActionTime = function(action) {
 */
 User.prototype.removeFromBattle = function(data) {
 	// TODO: это временное решение для того что бы можно было сразу вступить в бой заново!
-	this.userData.stats.update({currentHp: (this.userData.stats.hp - this.userData.stats.currentHp)});
+	console.log("REMOVE FROM BATTLE");
+	this.updateStats({currentHp: (this.userData.stats.hp - this.userData.stats.currentHp)});
 	this.userData.isAliveFlag = true;
 	
 
@@ -878,11 +879,11 @@ User.prototype.hasItem = function(worldItemId) {
 	* @author pcemma
 */
 User.prototype.updateStats = function(data, callback) {
-	// console.log("\n\n\n", "UPDATE STATS");
-	// console.log("DATA:", data);
-	// console.log("========================");
-	// console.log("BEFORE:", this.userData.stats);
-	// console.log("========================");
+	console.log("\n\n\n", "UPDATE STATS");
+	console.log("DATA:", data);
+	console.log("========================");
+	console.log("BEFORE:", this.userData.stats);
+	console.log("========================");
 	var updatedStats = this.userData.stats.update(data);
 	this.updateStatsInDb(updatedStats, callback);
 };
@@ -908,8 +909,8 @@ User.prototype.updateStatsInDb = function(updatedStats, callback) {
 		searchData: {_id: this.userId},
 		insertData: {$inc: insertData},
 		callback: function() {
-			// console.log("AFTER:", this.userData.stats);
-			// console.log("========================");
+			console.log("AFTER:", this.userData.stats);
+			console.log("========================");
 			if(callback) { callback(); }
 		}.bind(this)
 	});

@@ -34,7 +34,6 @@ StatsManagerClass.prototype.__constructor = function(data) {
 */
 StatsManagerClass.prototype.update = function(data) {
 	var updatedStats = this.updateDepends({}, data);
-	// console.log("updatedStats", updatedStats);
 	Object.keys(updatedStats).forEach(function(stat) {
 		this[stat] += updatedStats[stat];
 	}.bind(this));
