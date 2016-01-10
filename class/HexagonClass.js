@@ -21,11 +21,6 @@ HexagonClass.prototype.__constructor = function(data) {
 	this.x = data.x;
 	this.y = data.y;
 	this.cubeCoordinats = this.calcCubeCoordinats();
-	console.log(this.cubeCoordinats);
-	// this.directions = [
-	// 	[ [1, 0], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1]],
-	// 	[ [1, 0], [1, -1], [0, -1], [-1, 0], [0, 1], [1, 1]]
-	// ];
 	
 	if(data.isObstruction) {
 		this.makeObstraction();
@@ -227,6 +222,9 @@ HexagonClass.prototype.isInArea = function(neededHex, radius) {
 				// TODO: Проверить формулу. убрать лишний 3-й цикл + проверку. http://www.redblobgames.com/grids/hexagons/#field-of-view
 				if (x + y + z === 0) {
     				var hexCoordinats = this.convertCubeToOffset(x, z, y);
+					
+					console.log("\n\n x: ", neededHex.x === hexCoordinats.x, "y: ",neededHex.y === hexCoordinats.y);
+
 					if(
 						neededHex.x === hexCoordinats.x && 
 						neededHex.y === hexCoordinats.y
