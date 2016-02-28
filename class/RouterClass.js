@@ -1,5 +1,6 @@
 console.log("Router CLASS is connected");	
 
+var redisRouter = new RedisRouterClientClass();
 
 function Router() {
 
@@ -195,7 +196,7 @@ Router.prototype.battleCreate = function (data) {
 */
 Router.prototype.enterBattle = function (data) {
 	if(data){
-		battlesManager.enterBattle({id: data.id, hero: GLOBAL.USERS[data.userId], battleType: data.battleType});
+		redisRouter.sendData('enterBattle', data);
 	}
 };
 
@@ -213,7 +214,7 @@ Router.prototype.enterBattle = function (data) {
 */
 Router.prototype.battleMoveHero = function (data) {
 	if(data){
-		battlesManager.moveHero(data);
+		redisRouter.sendData('moveHero', data);
 	}
 };
 
@@ -231,7 +232,7 @@ Router.prototype.battleMoveHero = function (data) {
 */
 Router.prototype.battleHeroMakeHit = function (data) {
 	if(data){
-		battlesManager.heroMakeHit(data);
+		redisRouter.sendData('heroMakeHit', data);
 	}
 };
 	

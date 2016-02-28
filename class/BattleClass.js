@@ -1,5 +1,8 @@
 console.log("BattleClass CLASS is connected");	
 
+var redis = require('redis'),
+	redisPub = redis.createClient();
+
 function BattleClass() {
 	this.__constructor();
 }
@@ -98,7 +101,7 @@ BattleClass.prototype.completion = function(data) {
 	}
 	
 	
-	this.socketWrite({
+	this.sendDataToAll({
 						f: "battleCompletion", 
 						p: {
 							winTeamId: data.winTeamId
@@ -128,55 +131,70 @@ BattleClass.prototype.completion = function(data) {
 	* @author pcemma
 */
 BattleClass.prototype.addHero = function(data, callback) {
-	var hero = data.hero;
-	// отправляем пользователю, те данные что уже есть. положение всех воинов на поле боя
-	hero.socketWrite({
-						f: "battleCreate", 
-						p: this.getBattleStatus()
-					});
-	
-	// TODO: если такой герой есть, то скорее всего это повторное подключение. Переопределить сокет ??
-	if(!(hero.userId in this.heroes)) {
-	
-		var tempTeamId = 1,
-			hexId = "0.0";
+	// var hero = data.hero;
+	//TODO: разбить эту функцию как следует на 2 части
+	var hero = new UserClass();
+	hero.userId = data.userId;
+	var queues = [
+		hero.getUserData.bind(hero)
+	];
+	async.waterfall(
+		queues,
+		function(err) {
+			// отправляем пользователю, те данные что уже есть. положение всех воинов на поле боя
+			console.log("SEND DATA");
+			this.sendDataToOne([hero.userId], {
+								f: "battleCreate", 
+								p: this.getBattleStatus()
+							});
 			
+			// TODO: если такой герой есть, то скорее всего это повторное подключение. Переопределить сокет ??
+			if(!(hero.userId in this.heroes)) {
 			
-		this.heroes[hero.userId] = hero;
-		
-		// TODO: remove -> это времено, раскидываем по одному в команду.
-		if((this.teams['1'].length <= this.teams['2'].length && !data.teamId) || data.teamId === 1) {
-			this.teams['1'].push(hero.userId);
-			var x = 0,
-				y = Math.floor(Math.random() * (4 + 1));
-			hexId = x+"."+y;
-		}
-		else {
-			this.teams['2'].push(hero.userId);
-			tempTeamId = 2;
-			var x = 6,
-				y = Math.floor(Math.random() * (4 + 1));
-			hexId = x+"."+y;
-		}
-		
-		// Обновление гекса
-		this.grid.addHeroToHex({userId: hero.userId, hexId: hexId});
-		
-		// Тут апдейта массива юзера с данными о битве
-		this.heroes[hero.userId].addToBattle({
-												battleId: 	this.id,
-												teamId: 	tempTeamId,
-												hexId: 		hexId
-											});
-		
-		
-		// тут должна отправляться вся инфа о пользователе. ид, логин, вещи, хп, манна,на какой позиции, команда, 
-		this.socketWrite({
-							f: "battleAddHero", 
-							p: this.getHeroData(hero.userId)
-						});
-	}
-	callback();
+				var tempTeamId = 1,
+					hexId = "0.0";
+					
+					
+				this.heroes[hero.userId] = hero;
+				
+				// TODO: remove -> это времено, раскидываем по одному в команду.
+				if((this.teams['1'].length <= this.teams['2'].length && !data.teamId) || data.teamId === 1) {
+					this.teams['1'].push(hero.userId);
+					var x = 0,
+						y = Math.floor(Math.random() * (4 + 1));
+					hexId = x+"."+y;
+				}
+				else {
+					this.teams['2'].push(hero.userId);
+					tempTeamId = 2;
+					var x = 6,
+						y = Math.floor(Math.random() * (4 + 1));
+					hexId = x+"."+y;
+				}
+				
+				// Обновление гекса
+				this.grid.addHeroToHex({userId: hero.userId, hexId: hexId});
+				
+				// Тут апдейта массива юзера с данными о битве
+				this.heroes[hero.userId].addToBattle({
+														battleId: 	this.id,
+														teamId: 	tempTeamId,
+														hexId: 		hexId
+													});
+				
+				
+				// тут должна отправляться вся инфа о пользователе. ид, логин, вещи, хп, манна,на какой позиции, команда, 
+				this.sendDataToAll({
+									f: "battleAddHero", 
+									p: this.getHeroData(hero.userId)
+								});
+			}
+			callback();
+		}.bind(this)
+	);
+
+
+	
 };
 
 
@@ -209,7 +227,7 @@ BattleClass.prototype.moveHero = function(data) {
 		this.heroes[data.userId].userData.hexId = data.hexId;
 		this.heroes[data.userId].setLastActionTime('move');
 		
-		this.socketWrite({
+		this.sendDataToAll({
 							f: "battleMoveHero", 
 							p: {
 								userId: data.userId,
@@ -272,7 +290,7 @@ BattleClass.prototype.heroMakeHit = function(data) {
 				this.grid.removeHeroFromHex(this.heroes[oponentUserId].userData.hexId);
 			}
 			
-			this.socketWrite({
+			this.sendDataToAll({
 								f: "battleHeroMakeHit", 
 								p: {
 									userId: data.userId,
@@ -444,13 +462,32 @@ BattleClass.prototype.isAliveHeroesInTeam = function(teamId) {
 	* @since  31.01.15
 	* @author pcemma
 */
-BattleClass.prototype.socketWrite = function(data) {
+BattleClass.prototype.sendDataToAll = function(data) {
 	// console.log("\n\n BattleClass.prototype.socketWrite");
+	var usersIdArr = [],
+		channel = "battle_client";
 	for(var i in this.heroes) {
+		usersIdArr.push(i);
 		// console.log("heroId", i);
-		this.heroes[i].socketWrite(data);
+		// this.heroes[i].socketWrite(data);
 	}
+	console.log("usersIdArr", usersIdArr);
+	redisPub.publish(channel, JSON.stringify({f: 'sendDataToUser', p: {usersIdArr: usersIdArr, data: data}}));
 	// console.log("--------------- \n\n");
+};
+
+
+/*
+	* Description:
+	*	function делает рассылку команды всем ползователям которые находятся в том бою.
+	*	
+	*	
+	*
+	* @since  31.01.15
+	* @author pcemma
+*/
+BattleClass.prototype.sendDataToOne = function(usersIdArr, data) {
+	redisPub.publish(channel, JSON.stringify({f: 'sendDataToUser', p: {usersIdArr: usersIdArr, data: data}}));
 };
 
 
