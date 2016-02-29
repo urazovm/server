@@ -1,8 +1,11 @@
 console.log("RedisRouterClientClass CLASS is connected");	
 
-var redis = require('redis');
+var redis = require('redis'),
+	domain = require('domain');
 
 function RedisRouterClientClass() {
+	var redisDomain = domain.create().on('error', function(err) { lib.domainL(err); });
+
 	this.redisPub = redis.createClient();
 	this.redisSub = redis.createClient();
 	this.channels = ['battle_client'];
@@ -16,6 +19,9 @@ function RedisRouterClientClass() {
 	    	this[funcName](data);
 	    }		
 	}.bind(this));
+
+	redisDomain.add(this.redisPub);
+	redisDomain.add(this.redisSub);
 }
 
 

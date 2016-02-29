@@ -3,16 +3,13 @@ async = require("async");
 
 // add personal config package
 config = require("./config/personal_config.js");
-var express = require('express'),
-    http = require('http')
-var app = express();
 
 // add lib package
 lib =  require("./lib/lib.js"); 
 
 // classes	
 // RouterClass 		= require("./class/RouterClass.js");
-// ServerClass 		= require("./class/ServerClass.js");
+ServerBattleClass 		= require("./class/ServerBattleClass.js");
 RedisRouterServerClass 	= require("./class/RedisRouterServerClass.js");
 MongoDBClass 		= require("./class/MongoDBClass.js");
 PreloadDataClass 	= require("./class/PreloadDataClass.js");
@@ -33,9 +30,7 @@ Mongo = new MongoDBClass(function() {
 	GLOBAL.initialize(function() {
 		redisRouter = new RedisRouterServerClass();
 		battlesManager = new BattleManagerClass();
-		var server = http.createServer(app), 
-			io = require('socket.io').listen(server);
-
-		server.listen(21090);
+		var server = new ServerBattleClass();
+		server.start();
 	});
 });
