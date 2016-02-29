@@ -214,7 +214,7 @@ Router.prototype.enterBattle = function (data) {
 */
 Router.prototype.battleMoveHero = function (data) {
 	if(data){
-		redisRouter.sendData('moveHero', data);
+		redisRouter.sendData('battleMoveHero', data);
 	}
 };
 
@@ -232,7 +232,7 @@ Router.prototype.battleMoveHero = function (data) {
 */
 Router.prototype.battleHeroMakeHit = function (data) {
 	if(data){
-		redisRouter.sendData('heroMakeHit', data);
+		redisRouter.sendData('battleHeroMakeHit', data);
 	}
 };
 	

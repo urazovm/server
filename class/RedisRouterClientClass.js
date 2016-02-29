@@ -9,14 +9,13 @@ function RedisRouterClientClass() {
 
 	this.redisSub.subscribe('battle_client');
 	this.redisSub.on("message", function (channel, message) {
-	    console.log(channel);
-	    message = JSON.parse(message);
-	    console.log(message);
-	    // {f (funcName): str, p(params): data}
-	    if (typeof (this[message.f]) === 'function') {
-	    	this[message.f](message.p);
-	    }	
-	});
+	    var messageData = JSON.parse(message),
+	    	funcName = messageData.f,
+	    	data = messageData.p;
+	    if (typeof (this[funcName]) === 'function') {
+	    	this[funcName](data);
+	    }		
+	}.bind(this));
 }
 
 
@@ -32,26 +31,29 @@ function RedisRouterClientClass() {
 */
 RedisRouterClientClass.prototype.sendData = function(f, p) {
 	var channel = "battle_server";
-	console.log(f, p);
 	this.redisPub.publish(channel, JSON.stringify({f: f, p: p}));
 };
 
 
 /*
 	* Description:
+	*	Send data to user
+	*	@data: obj
+	*		@usersIdArr: 	arr, array of the users id.
+	*		@data: 			obj, data to send to user.
+	*
 	*
 	* @since  28.02.16
 	* @author pcemma
 */
 RedisRouterClientClass.prototype.sendDataToUser = function(data) {
 	var usersIdArr = data.usersIdArr;
-	var data = data.data;
-	for(var i in usersIdArr) {
-		var userId = usersIdArr[i];
+	var sendData = data.data;
+	usersIdArr.forEach(function(userId, index, array){
 		if(userId in GLOBAL.USERS) {
-			GLOBAL.USERS[userId].socketWrite(data);
+			GLOBAL.USERS[userId].socketWrite(sendData);
 		}
-	}
+	});
 };
 
 

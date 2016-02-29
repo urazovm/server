@@ -333,10 +333,10 @@ User.prototype.authorization = function(data, callback) {
 	* @author pcemma
 */
 User.prototype.getUserData = function(callback) {
-	console.log("this.userId", this.userId);
+	console.log("this.userId", this.userId, typeof(this.userId));
 	Mongo.find({
 		collection: 'game_Users', 
-		searchData: {_id: this.userId}, 
+		searchData: {_id: Mongo.objectId(this.userId)}, 
 		fields: {userData: true}, 
 		callback: function(rows) {
 			if(rows.length > 0) {

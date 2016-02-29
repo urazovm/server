@@ -18,9 +18,6 @@ ItemClass			= require("./class/ItemClass.js");
 UserClass 			= require("./class/UserClass.js");
 NpcClass 			= require("./class/NpcClass.js");
 
-BattleClass			= require("./class/BattleClass.js");
-GridClass			= require("./class/GridClass.js");
-HexagonClass		= require("./class/HexagonClass.js");
 
 
 

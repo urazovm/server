@@ -3,19 +3,16 @@ console.log("RedisRouterServerClass CLASS is connected");
 var redis = require('redis');
 
 function RedisRouterServerClass() {
-	// this.redisPub = redis.createClient();
 	this.redisSub = redis.createClient();
 	this.channels = ['battle_server'];
 
 	this.redisSub.subscribe('battle_server');
 	this.redisSub.on("message", function (channel, message) {
-	    console.log(channel);
-	    message = JSON.parse(message);
-	    console.log(message);
-	    // {f (funcName): str, p(params): data}
-	    if (typeof (this[message.f]) === 'function') {
-	    	console.log("sdfsdf");
-	    	this[message.f](message.p);
+	    var messageData = JSON.parse(message),
+	    	funcName = messageData.f,
+	    	data = messageData.p;
+	    if (typeof (this[funcName]) === 'function') {
+	    	this[funcName](data);
 	    }	
 	}.bind(this));
 }

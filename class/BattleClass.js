@@ -487,6 +487,7 @@ BattleClass.prototype.sendDataToAll = function(data) {
 	* @author pcemma
 */
 BattleClass.prototype.sendDataToOne = function(usersIdArr, data) {
+	var channel = "battle_client";
 	redisPub.publish(channel, JSON.stringify({f: 'sendDataToUser', p: {usersIdArr: usersIdArr, data: data}}));
 };
 
