@@ -1,5 +1,6 @@
 console.log("PreloadData CLASS is connected");	
 
+var async = require("async");
 
 function PreloadDataClass() {
 	// this.initialize();
@@ -35,8 +36,6 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		// NPC INFO
 		this.getNpcsInfo.bind(this),
 		// this.fillNpcsCollectionWithData.bind(this), // Функцию надо запустить для создания коллекции всех нпц в игровом мире
-		
-		
 		// this.createGlobalNpcs.bind(this) // create NPC array
 	];
 
@@ -44,7 +43,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		queues,
 		function(err) {
 			// All tasks are done now
-			console.log("PreloadDataClass is initialized!!!");
+			console.log("GLOBAL is initialized!!!");
 			callback();
 		}.bind(this)
 	)
@@ -265,6 +264,7 @@ PreloadDataClass.prototype.getNpcsInfo = function(callback) {
 	* @since  16.08.15
 	* @author pcemma
 */
+/*
 PreloadDataClass.prototype.fillNpcsCollectionWithData = function(callback) {
 	for(var npcId in this.DATA.npcsInfo) {
 		for(var count = 1; count <= this.DATA.npcsInfo[npcId].count; count++) {
@@ -273,6 +273,7 @@ PreloadDataClass.prototype.fillNpcsCollectionWithData = function(callback) {
 		}
 	}
 };
+*/
 
 
 

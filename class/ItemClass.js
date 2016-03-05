@@ -1,5 +1,8 @@
 console.log("ItemClass CLASS is connected");	
 
+var StatsManagerClass = require("./StatsManagerClass.js");
+
+
 function ItemClass(data) {
 	this.__constructor(data);
 }

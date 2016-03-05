@@ -1,5 +1,7 @@
 ﻿console.log("GridClass CLASS is connected");
 
+var HexagonClass = require("./HexagonClass.js");
+
 function GridClass() {
 	this.__constructor();
 }

@@ -1,6 +1,9 @@
 console.log("User CLASS is connected");	
 
-var crypto = require('crypto');
+var async = require("async"),
+	crypto = require('crypto'),
+	StatsManagerClass = require("./StatsManagerClass.js"),
+	ItemClass = require("./ItemClass.js");
 
 
 function User() {

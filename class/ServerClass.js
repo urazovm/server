@@ -1,6 +1,7 @@
 console.log("SERVER CLASS is connected");	
 var net = require('net'),
 	domain = require('domain'),
+	RouterClass = require("./RouterClass.js"),
 	router = new RouterClass();
 	
 

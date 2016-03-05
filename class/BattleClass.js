@@ -1,6 +1,10 @@
 console.log("BattleClass CLASS is connected");	
 
-var redis = require('redis'),
+var async = require("async"),
+	redis = require('redis'),
+	GridClass = require("./GridClass.js"),
+	UserClass = require("./UserClass.js"),
+	NpcClass = require("./NpcClass.js"),
 	redisPub = redis.createClient();
 
 function BattleClass() {

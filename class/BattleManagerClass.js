@@ -1,5 +1,8 @@
 console.log("BattleManagerClass CLASS is connected");	
 
+var async = require("async"),
+	BattleClass	= require("./BattleClass.js");
+
 function BMClass() {
 	this.battles = {};
 	this.deleteAllNotEndedBattles();

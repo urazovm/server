@@ -1,5 +1,7 @@
 console.log("Npc CLASS is connected");	
 
+var UserClass = require("./UserClass.js");
+
 function Npc() {
 
 	this.userId = 0;

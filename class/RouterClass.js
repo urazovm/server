@@ -1,6 +1,9 @@
 console.log("Router CLASS is connected");	
 
-var redisRouter = new RedisRouterClientClass();
+var async = require("async"),
+	UserClass = require("./UserClass.js");
+	RedisRouterClientClass = require("./RedisRouterClientClass.js"),
+	redisRouter = new RedisRouterClientClass();
 
 function Router() {
 
@@ -177,7 +180,7 @@ Router.prototype.authorization = function (data) {
 /*
 Router.prototype.battleCreate = function (data) {
 	if(data){
-		battlesManager.createBattle();
+		redisRouter.sendData("createBattle", data);
 	}
 }
 */

@@ -3,7 +3,9 @@ console.log("SERVER BATTLE CLASS is connected");
 var express = require('express'),
     http = require('http'),
     io = require('socket.io'),
-	domain = require('domain');
+	domain = require('domain'),
+	RedisRouterServerClass = require("./RedisRouterServerClass.js"),
+	redisRouter = new RedisRouterServerClass();
 
 
 function ServerBattleClass() {
