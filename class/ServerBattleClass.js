@@ -5,6 +5,8 @@ var express = require('express'),
     io = require('socket.io'),
 	domain = require('domain'),
 	RedisRouterServerClass = require("./RedisRouterServerClass.js"),
+	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
+	errorHandler = new ErrorHandlerClass(),
 	redisRouter = new RedisRouterServerClass();
 
 
@@ -32,7 +34,7 @@ ServerBattleClass.prototype.start = function() {
 	    var requestDomain = domain.create();
 	    requestDomain.add(req);
 	    requestDomain.add(res);
-	    requestDomain.on('error', function(err) { lib.domainL(err); });
+	    requestDomain.on('error', function(err) { errorHandler.logServerError(err); });
 	});
 	
 	io.listen(server).listen(21090);

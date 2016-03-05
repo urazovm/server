@@ -1,8 +1,10 @@
 console.log("Router CLASS is connected");	
 
 var async = require("async"),
-	UserClass = require("./UserClass.js");
+	UserClass = require("./UserClass.js"),
 	RedisRouterClientClass = require("./RedisRouterClientClass.js"),
+	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
+	errorHandler = new ErrorHandlerClass();
 	redisRouter = new RedisRouterClientClass();
 
 function Router() {
@@ -69,7 +71,7 @@ Router.prototype['/'] = function (response, data) {
 	* @author pcemma
 */
 Router.prototype.makeClientsErrorLogs = function (data) {
-	lib.makeClientsErrorLogs(data);
+	errorHandler.logClientError(data);
 };
 
 

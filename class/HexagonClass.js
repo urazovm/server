@@ -77,7 +77,6 @@ HexagonClass.prototype.convertCubeToOffset = function(x, z, y) {
 HexagonClass.prototype.makeObstraction = function() {
 	this.isObstructions = true;
 	this.isFreeFlag = false;
-	// this.obstructionId = Math.floor(Math.random() * (lib.objectSize(GLOBAL.DATA.battleInfo.obstructions) - 1 + 1)) + 1;
 };
 
 

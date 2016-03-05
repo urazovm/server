@@ -245,7 +245,9 @@ User.prototype.updateClientInfo = function(data, callback) {
 			device: (data.device) ? data.device : "",
 			deviceSystemVersion: (data.deviceSystemVersion) ? data.deviceSystemVersion : "",
 			deviceToken: (data.deviceToken) ? data.deviceToken : "",
-			country: (data.ip) ? lib.getCountryByIp(data.ip) : "",
+			//TODO: Add new geoip Geoip now removed from lib
+			// country: (data.ip) ? lib.getCountryByIp(data.ip) : "",
+
 			clientVersion: (data.clientVersion) ? data.clientVersion : "",
 			ip: (data.ip) ? data.ip : ""
 		}};

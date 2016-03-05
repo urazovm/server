@@ -2,6 +2,8 @@ console.log("SERVER CLASS is connected");
 var net = require('net'),
 	domain = require('domain'),
 	RouterClass = require("./RouterClass.js"),
+	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
+	errorHandler = new ErrorHandlerClass(),
 	router = new RouterClass();
 	
 
@@ -24,7 +26,7 @@ function ServerClass() {
 */
 ServerClass.prototype.start = function() {
 	var dServer = domain.create();
-	dServer.on('error', function(err) { lib.domainL(err); });
+	dServer.on('error', function(err) { errorHandler.logServerError(err); });
 	var android_server = net.createServer(this.onSocketRequest).listen(config.port_config.port_number_socket, '0.0.0.0');
 	dServer.add(android_server);
 	// var ios_server = net.createServer(onrequest).listen(config.port_config.port_number_ios, '0.0.0.0');
@@ -54,7 +56,7 @@ ServerClass.prototype.onSocketRequest = function(socket) {
 		dSocket = domain.create();
 	
 	// Вешаем обработчик ошибки,
-	dSocket.on('error', function(err) { lib.domainL(err); });
+	dSocket.on('error', function(err) { errorHandler.logServerError(err); });
 	// Добавляем наши переменные, которые тоже могут сгенерировать ошибки самостоятельно
 	dSocket.add(socket);
 	

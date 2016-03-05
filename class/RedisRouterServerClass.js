@@ -1,10 +1,12 @@
 console.log("RedisRouterServerClass CLASS is connected");	
 
 var redis = require('redis'),
-	domain = require('domain');
+	domain = require('domain'),
+	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
+	errorHandler = new ErrorHandlerClass();
 
 function RedisRouterServerClass() {
-	var redisDomain = domain.create().on('error', function(err) { lib.domainL(err); });
+	var redisDomain = domain.create().on('error', function(err) { errorHandler.logServerError(err); });
 	this.redisSub = redis.createClient();
 	this.channels = ['battle_server'];
 
