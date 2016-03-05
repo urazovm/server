@@ -418,7 +418,7 @@ PreloadDataClass.prototype.createGlobalConstants = function(callback) {
 	*	
 	*	
 	*	version: string that we must find
-	*	need_version: compare with (by default lib.current_server_version)
+	*	need_version: compare with (by default current_server_version)
 	*	
 	* @return: 
 	*

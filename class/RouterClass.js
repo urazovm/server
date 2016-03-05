@@ -4,6 +4,7 @@ var async = require("async"),
 	UserClass = require("./UserClass.js"),
 	RedisRouterClientClass = require("./RedisRouterClientClass.js"),
 	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
+	utils = require("./UtilsClass.js"),
 	errorHandler = new ErrorHandlerClass();
 	redisRouter = new RedisRouterClientClass();
 
@@ -123,7 +124,7 @@ Router.prototype.getGlobalData = function (data) {
 		data.socket.empty_connection = false;
 		clearTimeout(data.socket.timer_for_off_empty_socket);
 		var string_params = JSON.stringify({f: "getGlobalDataResponse", p: sendData});
-		var bytes_count = lib.return_bytes(string_params);
+		var bytes_count = utils.return_bytes(string_params);
 		data.socket.write(bytes_count+string_params);
 	}
 };

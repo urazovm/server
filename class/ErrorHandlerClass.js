@@ -1,6 +1,6 @@
-console.log("ErrorHadlerClass CLASS is connected");	
+console.log("ErrorHandlerClass CLASS is connected");	
 
-function ErrorHadlerClass () {
+function ErrorHandlerClass () {
 
 }
 
@@ -15,7 +15,7 @@ function ErrorHadlerClass () {
 	* @since  26.07.15
 	* @author pcemma
 */
-ErrorHadlerClass.prototype.logServerError = function(er) {
+ErrorHandlerClass.prototype.logServerError = function(er) {
 	console.log('### ERROR', er.stack);
 	
 	// Добавить новую ошибку либо обновить статус у старой
@@ -64,7 +64,7 @@ ErrorHadlerClass.prototype.logServerError = function(er) {
 	* @since  26.07.15
 	* @author pcemma
 */
-ErrorHadlerClass.prototype.logClientError = function (er) {
+ErrorHandlerClass.prototype.logClientError = function (er) {
 	console.log("er.error_message",er);
 	er.userId = er.userId;
 	if(er.userId || er.userId === 0) {
@@ -117,4 +117,4 @@ ErrorHadlerClass.prototype.logClientError = function (er) {
 	}
 }
 
-module.exports = ErrorHadlerClass;
+module.exports = ErrorHandlerClass;

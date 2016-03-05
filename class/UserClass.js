@@ -3,7 +3,8 @@ console.log("User CLASS is connected");
 var async = require("async"),
 	crypto = require('crypto'),
 	StatsManagerClass = require("./StatsManagerClass.js"),
-	ItemClass = require("./ItemClass.js");
+	ItemClass = require("./ItemClass.js"),
+	utils = require("./UtilsClass.js");
 
 
 function User() {
@@ -34,7 +35,7 @@ function User() {
 User.prototype.socketWrite = function (data) {
 	if(this.socket) {
 		var string_params = JSON.stringify(data);
-		var bytes_count = lib.return_bytes(string_params);
+		var bytes_count = utils.return_bytes(string_params);
 		this.socket.write(bytes_count+string_params);
 	}
 };
@@ -246,7 +247,7 @@ User.prototype.updateClientInfo = function(data, callback) {
 			deviceSystemVersion: (data.deviceSystemVersion) ? data.deviceSystemVersion : "",
 			deviceToken: (data.deviceToken) ? data.deviceToken : "",
 			//TODO: Add new geoip Geoip now removed from lib
-			// country: (data.ip) ? lib.getCountryByIp(data.ip) : "",
+			// country: (data.ip) ? utils.getCountryByIp(data.ip) : "",
 
 			clientVersion: (data.clientVersion) ? data.clientVersion : "",
 			ip: (data.ip) ? data.ip : ""

@@ -3,6 +3,7 @@ var net = require('net'),
 	domain = require('domain'),
 	RouterClass = require("./RouterClass.js"),
 	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
+	utils = require("./UtilsClass.js"),
 	errorHandler = new ErrorHandlerClass(),
 	router = new RouterClass();
 	
@@ -64,7 +65,7 @@ ServerClass.prototype.onSocketRequest = function(socket) {
 	socket.on('connect', function () {
 		// проверка на подключение пустого сокета. пустые сокеты которые открыли соединение но не прсилали команды авторизациинадо выкидывать
 		socket.empty_connection = true;
-		socket.timer_for_off_empty_socket = setTimeout(function() { lib.closeSocket(socket); }, 10000)
+		socket.timer_for_off_empty_socket = setTimeout(function() { utils.closeSocket(socket); }, 10000)
 
 		console.log(" -------------------------------------------------------------\n",
 					"Connection client, EMPTY SOCKET \n",
@@ -108,7 +109,7 @@ ServerClass.prototype.onSocketRequest = function(socket) {
 					"SOCKET CLOSE! \n",
 					"TIME:"+Date()+"\n",
 					"-------------------------------------------------------------\n\n");				
-		// lib.close_user_socket(user_id, false, "close");
+		// utils.close_user_socket(user_id, false, "close");
 	});
 
 
@@ -117,7 +118,7 @@ ServerClass.prototype.onSocketRequest = function(socket) {
 					"SOCKET END! \n",
 					"TIME:"+Date()+"\n",
 					"-------------------------------------------------------------\n\n");				
-		// lib.close_user_socket(user_id, false, "end");			
+		// utils.close_user_socket(user_id, false, "end");			
 	});
 
 	
@@ -129,7 +130,7 @@ ServerClass.prototype.onSocketRequest = function(socket) {
 					"TIME:"+Date()+"\n",
 					"-------------------------------------------------------------\n\n");			
 
-		// lib.close_user_socket(user_id, true,"error");
+		// utils.close_user_socket(user_id, true,"error");
 	});	
 };
 
