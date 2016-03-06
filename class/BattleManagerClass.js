@@ -1,11 +1,14 @@
 console.log("BattleManagerClass CLASS is connected");	
 
 var async = require("async"),
-	BattleClass	= require("./BattleClass.js");
+	BattleClass	= require("./BattleClass.js"),
+	eventEmitter = require("./EventEmitterClass");
 
 function BMClass() {
 	this.battles = {};
 	this.deleteAllNotEndedBattles();
+
+	eventEmitter.on("endBattle", this.endBattleListener.bind(this));
 }
 
 
@@ -52,25 +55,6 @@ BMClass.prototype.addBattleToGlobalArray = function(battle, callback) {
 	console.log("addBattleToGlobalArray");
 	this.battles[battle.id] = battle;
 	callback();
-};
-
-
-
-/*
-	* Description:
-	*	function Удаляет бой.
-	*	
-	*	@data: 		arrray,	
-	*		@id: 	int, ид боя, который надо удалить
-	*
-	*
-	* @since  07.03.15
-	* @author pcemma
-*/
-BMClass.prototype.removeBattle = function(data) {
-	if(data && data.id) {
-		delete this.battles[data.id];
-	}
 };
 
 
@@ -253,7 +237,27 @@ BMClass.prototype.deleteAllNotEndedBattles = function() {
 	console.log("FINISH ALL OLD BATTLES!!");
 	Mongo.update({collection: 'game_Battles', insertData: {$set:{endFlag: true}}, options: {multi: true}}); 
 };
-	
+
+
+
+/*********		LISTENERS	***********/
+
+/*
+	* Description:
+	*	function Удаляет бой.
+	*	
+	*	@data: 		arrray,	
+	*		@id: 	int, ид боя, который надо удалить
+	*
+	*
+	* @since  07.03.15
+	* @author pcemma
+*/
+BMClass.prototype.endBattleListener = function(data) {
+	if(data && data.id) {
+		delete this.battles[data.id];
+	}
+};	
 
 
 

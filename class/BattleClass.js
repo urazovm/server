@@ -5,6 +5,7 @@ var async = require("async"),
 	GridClass = require("./GridClass.js"),
 	UserClass = require("./UserClass.js"),
 	NpcClass = require("./NpcClass.js"),
+	eventEmitter = require("./EventEmitterClass");
 	redisPub = redis.createClient();
 
 function BattleClass() {
@@ -117,8 +118,7 @@ BattleClass.prototype.completion = function(data) {
 	// Обновление таблиц
 	Mongo.update({collection: 'game_Battles', searchData: {_id: this.id}, insertData: {$set: {endFlag: true}}});			
 	
-	//TODO: Пересмотреть механизм удаления боя
-	battlesManager.removeBattle({id: this.id});
+	eventEmitter.emit("endBattle", {id: this.id});
 };
 
 
