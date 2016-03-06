@@ -2,6 +2,8 @@ console.log("User CLASS is connected");
 
 var async = require("async"),
 	crypto = require('crypto'),
+	Mongo = require("./MongoDBClass.js"),
+	GLOBAL = require("./PreloadDataClass.js"),
 	StatsManagerClass = require("./StatsManagerClass.js"),
 	ItemClass = require("./ItemClass.js"),
 	utils = require("./UtilsClass.js");
@@ -304,7 +306,7 @@ User.prototype.authorization = function(data, callback) {
 			if(this.userId) {
 				// Get verifyHash
 				this.socket = data.socket;
-				this.verifyHash = crypto.createHash('md5').update(String(+new Date()) + config.secretHashString + this.userId).digest('hex');
+				this.verifyHash = crypto.createHash('md5').update(String(+new Date()) + secretHashString + this.userId).digest('hex');
 				// this.ping = Math.floor(+new Date() / 1000);
 				//TODO: стоит удалять this.autoConfigData, на всякий случай :)
 				sendData =  {

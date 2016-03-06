@@ -1,6 +1,7 @@
 console.log("Router CLASS is connected");	
 
 var async = require("async"),
+	GLOBAL = require("./PreloadDataClass.js"),
 	UserClass = require("./UserClass.js"),
 	RedisRouterClientClass = require("./RedisRouterClientClass.js"),
 	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
@@ -10,7 +11,7 @@ var async = require("async"),
 
 function Router() {
 
-}
+};
 
 
 
@@ -117,7 +118,7 @@ Router.prototype.getGlobalData = function (data) {
 	// SEND DATA TO CLIENT
 	var sendData =  {
 					// проверяем версию Данных
-					globalData: (Number(data.globalDataVersion) !== Number(GLOBAL.globalConstants.globalDataVersion) || config._DEBUG) ? GLOBAL.DATA : {}, 
+					globalData: (Number(data.globalDataVersion) !== Number(GLOBAL.globalConstants.globalDataVersion) || _DEBUG) ? GLOBAL.DATA : {}, 
 					globalDataVersion: GLOBAL.globalConstants.globalDataVersion
 				};
 	if(data.socket){

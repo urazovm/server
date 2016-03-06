@@ -1,6 +1,7 @@
 console.log("Npc CLASS is connected");	
 
-var UserClass = require("./UserClass.js");
+var GLOBAL = require("./PreloadDataClass.js"),
+	UserClass = require("./UserClass.js");
 
 function Npc() {
 

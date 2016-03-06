@@ -1,17 +1,42 @@
 console.log("SERVER CLASS is connected");	
 var net = require('net'),
 	domain = require('domain'),
+	async = require('async'),
+
+	// add personal config package
+	config = require("./../config/personal_config.js"),
+
+	Mongo = require("./MongoDBClass.js"),
+	GLOBAL = require("./PreloadDataClass.js"),
+	utils = require("./UtilsClass.js"),
 	RouterClass = require("./RouterClass.js"),
 	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
-	utils = require("./UtilsClass.js"),
+	
+
 	errorHandler = new ErrorHandlerClass(),
 	router = new RouterClass();
-	
+
 
 
 function ServerClass() {
-	
-}
+	this.start();
+};
+
+
+ServerClass.prototype.start = function() {
+	var queues = [
+		Mongo.connect.bind(Mongo),
+		GLOBAL.initialize.bind(GLOBAL),
+		this.startServer.bind(this)
+	];
+
+	async.waterfall(
+		queues,
+		function(err) {
+			console.log("Server is started!");
+		}
+	)
+};
 
 
 /*
@@ -25,7 +50,7 @@ function ServerClass() {
 	* @since  31.03.14
 	* @author pcemma
 */
-ServerClass.prototype.start = function() {
+ServerClass.prototype.startServer = function(callback) {
 	var dServer = domain.create();
 	dServer.on('error', function(err) { errorHandler.logServerError(err); });
 	var android_server = net.createServer(this.onSocketRequest).listen(config.port_config.port_number_socket, '0.0.0.0');
@@ -37,6 +62,7 @@ ServerClass.prototype.start = function() {
 					"client version: ", GLOBAL.globalConstants.clientVersion+" \n", 
 					"Data version: ", GLOBAL.globalConstants.globalDataVersion+" \n",
 					"-------------------------------------------------------------\n\n");
+	callback();
 };
 
 
@@ -135,4 +161,4 @@ ServerClass.prototype.onSocketRequest = function(socket) {
 };
 
 
-module.exports = ServerClass;
+module.exports = new ServerClass();

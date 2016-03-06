@@ -3,9 +3,8 @@ console.log("RedisRouterServerClass CLASS is connected");
 var redis = require('redis'),
 	domain = require('domain'),
 	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
-	BattleManagerClass = require("./BattleManagerClass.js"),
-	errorHandler = new ErrorHandlerClass(),
-	battlesManager = new BattleManagerClass();
+	battlesManager = require("./BattleManagerClass.js"),
+	errorHandler = new ErrorHandlerClass();
 
 function RedisRouterServerClass() {
 	var redisDomain = domain.create().on('error', function(err) { errorHandler.logServerError(err); });

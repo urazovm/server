@@ -2,6 +2,7 @@ console.log("RedisRouterClientClass CLASS is connected");
 
 var redis = require('redis'),
 	domain = require('domain'),
+	GLOBAL = require("./PreloadDataClass.js"),
 	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
 	errorHandler = new ErrorHandlerClass();
 	
@@ -25,7 +26,7 @@ function RedisRouterClientClass() {
 
 	redisDomain.add(this.redisPub);
 	redisDomain.add(this.redisSub);
-}
+};
 
 
 /*

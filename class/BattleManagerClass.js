@@ -1,15 +1,36 @@
 console.log("BattleManagerClass CLASS is connected");	
 
 var async = require("async"),
+	Mongo = require("./MongoDBClass.js"),
+	GLOBAL = require("./PreloadDataClass.js"),
 	BattleClass	= require("./BattleClass.js"),
 	eventEmitter = require("./EventEmitterClass");
 
 function BMClass() {
+	
+};
+
+
+/*
+	* Description:
+	*	function initialization of the battle manager
+	*	
+	*
+	*
+	* @since  06.03.16
+	* @author pcemma
+*/
+BMClass.prototype.initialize = function(callback)
+{
 	this.battles = {};
+	// TODO: Need rebuild this. It's only for test!
 	this.deleteAllNotEndedBattles();
 
 	eventEmitter.on("endBattle", this.endBattleListener.bind(this));
+	
+	callback();
 }
+
 
 
 /*
@@ -261,4 +282,4 @@ BMClass.prototype.endBattleListener = function(data) {
 
 
 
-module.exports = BMClass;
+module.exports = new BMClass();

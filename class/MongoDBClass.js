@@ -1,10 +1,10 @@
 console.log("MongoDBClass CLASS is connected");	
+
 var MongoClient = require('mongodb').MongoClient;
 
-function MongoDBClass(callback) {
-	this.connect(callback);
+function MongoDBClass() {
 	this.objectId = require('mongodb').ObjectID;
-}
+};
 
 
 MongoDBClass.prototype.connect = function(callback) {
@@ -152,4 +152,4 @@ MongoDBClass.prototype.remove = function(data) {
 };
 
 
-module.exports = MongoDBClass;
+module.exports = new MongoDBClass();

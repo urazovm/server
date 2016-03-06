@@ -2,6 +2,7 @@ console.log("BattleClass CLASS is connected");
 
 var async = require("async"),
 	redis = require('redis'),
+	Mongo = require("./MongoDBClass.js"),
 	GridClass = require("./GridClass.js"),
 	UserClass = require("./UserClass.js"),
 	NpcClass = require("./NpcClass.js"),
@@ -10,7 +11,7 @@ var async = require("async"),
 
 function BattleClass() {
 	this.__constructor();
-}
+};
 
 
 /*

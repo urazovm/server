@@ -1,14 +1,12 @@
 console.log("PreloadData CLASS is connected");	
 
-var async = require("async");
+var async = require("async"),
+	Mongo = require("./MongoDBClass.js");
 
 function PreloadDataClass() {
-	// this.initialize();
 	this.DATA = {};
 	this.USERS = {};
-	
-	return this;
-}
+};
 
 
 PreloadDataClass.prototype.initialize = function(callback) {
@@ -449,4 +447,4 @@ PreloadDataClass.prototype.checkVersion = function(version, need_version) {
 
 
 
-module.exports = PreloadDataClass;
+module.exports = new PreloadDataClass();
