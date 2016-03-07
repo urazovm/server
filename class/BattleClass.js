@@ -477,7 +477,7 @@ BattleClass.prototype.sendDataToAll = function(data) {
 		// this.heroes[i].socketWrite(data);
 	}
 	console.log("usersIdArr", usersIdArr);
-	redisPub.publish(channel, JSON.stringify({f: 'sendDataToUser', p: {usersIdArr: usersIdArr, data: data}}));
+	redisPub.publish(channel, JSON.stringify({f: 'sendDataToUsers', p: {usersIdArr: usersIdArr, data: data}}));
 	// console.log("--------------- \n\n");
 };
 
@@ -493,7 +493,7 @@ BattleClass.prototype.sendDataToAll = function(data) {
 */
 BattleClass.prototype.sendDataToOne = function(usersIdArr, data) {
 	var channel = "battle_client";
-	redisPub.publish(channel, JSON.stringify({f: 'sendDataToUser', p: {usersIdArr: usersIdArr, data: data}}));
+	redisPub.publish(channel, JSON.stringify({f: 'sendDataToUsers', p: {usersIdArr: usersIdArr, data: data}}));
 };
 
 

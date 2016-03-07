@@ -1,7 +1,8 @@
 console.log("PreloadData CLASS is connected");	
 
 var async = require("async"),
-	Mongo = require("./MongoDBClass.js");
+	Mongo = require("./MongoDBClass.js"),
+	utils = require("./UtilsClass.js");
 
 function PreloadDataClass() {
 	this.DATA = {};
@@ -48,6 +49,31 @@ PreloadDataClass.prototype.initialize = function(callback) {
 };
 
 
+/*
+	* Description:
+	*	function Check data version from user, return new data array if need
+	*	
+	*	@data: 	object, Data from client
+	*		@socket: 	socket object, client socket to send data to. 
+	*	
+	* @since  07.03.16
+	* @author pcemma
+*/
+PreloadDataClass.prototype.getGlobalData = function(data) {
+	// SEND DATA TO CLIENT
+	var sendData =  {
+		// проверяем версию Данных
+		globalData: (Number(data.globalDataVersion) !== Number(this.globalConstants.globalDataVersion) || _DEBUG) ? this.DATA : {}, 
+		globalDataVersion: this.globalConstants.globalDataVersion
+	};
+	if(data.socket){
+		data.socket.empty_connection = false;
+		clearTimeout(data.socket.timer_for_off_empty_socket);
+		var string_params = JSON.stringify({f: "getGlobalDataResponse", p: sendData});
+		var bytes_count = utils.return_bytes(string_params);
+		data.socket.write(bytes_count+string_params);
+	}
+};
 
 
 
@@ -272,29 +298,6 @@ PreloadDataClass.prototype.fillNpcsCollectionWithData = function(callback) {
 	}
 };
 */
-
-
-
-
-
-/**************** USERS ************/	
-
-/*
-	* Description:
-	*	Добавляет пользователя в глобальный массив
-	*	
-	*	@user: object, type User
-	*
-	* @since  19.08.15
-	* @author pcemma
-*/
-PreloadDataClass.prototype.addUserToGlobalUsersArray = function(user, callback) {
-	console.log("addUserToGlobalUsersArray");
-	this.USERS[user.userId] = user;
-	callback();
-};
-
-
 
 
 

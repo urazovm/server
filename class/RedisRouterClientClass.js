@@ -2,7 +2,7 @@ console.log("RedisRouterClientClass CLASS is connected");
 
 var redis = require('redis'),
 	domain = require('domain'),
-	GLOBAL = require("./PreloadDataClass.js"),
+	UsersManager = require("./UsersManagerClass.js"),
 	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
 	errorHandler = new ErrorHandlerClass();
 	
@@ -56,14 +56,8 @@ RedisRouterClientClass.prototype.sendData = function(f, p) {
 	* @since  28.02.16
 	* @author pcemma
 */
-RedisRouterClientClass.prototype.sendDataToUser = function(data) {
-	var usersIdArr = data.usersIdArr;
-	var sendData = data.data;
-	usersIdArr.forEach(function(userId, index, array){
-		if(userId in GLOBAL.USERS) {
-			GLOBAL.USERS[userId].socketWrite(sendData);
-		}
-	});
+RedisRouterClientClass.prototype.sendDataToUsers = function(data) {
+	UsersManager.sendDataToUsers(data);
 };
 
 
