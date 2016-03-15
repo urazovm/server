@@ -233,12 +233,12 @@ BattleClass.prototype.moveHero = function(data) {
 		this.heroes[data.userId].setLastActionTime('move');
 		
 		this.sendDataToAll({
-							f: "battleMoveHero", 
-							p: {
-								userId: data.userId,
-								hexId: data.hexId
-							}
-						});
+			f: "battleMoveHero", 
+			p: {
+				userId: data.userId,
+				hexId: data.hexId
+			}
+		});
 		return true;
 	}
 	return false;
@@ -468,17 +468,13 @@ BattleClass.prototype.isAliveHeroesInTeam = function(teamId) {
 	* @author pcemma
 */
 BattleClass.prototype.sendDataToAll = function(data) {
-	// console.log("\n\n BattleClass.prototype.socketWrite");
 	var usersIdArr = [],
 		channel = "battle_client";
 	for(var i in this.heroes) {
 		usersIdArr.push(i);
-		// console.log("heroId", i);
-		// this.heroes[i].socketWrite(data);
 	}
 	console.log("usersIdArr", usersIdArr);
 	redisPub.publish(channel, JSON.stringify({f: 'sendDataToUsers', p: {usersIdArr: usersIdArr, data: data}}));
-	// console.log("--------------- \n\n");
 };
 
 

@@ -26,6 +26,9 @@ BMClass.prototype.initialize = function(callback)
 	// TODO: Need rebuild this. It's only for test!
 	this.deleteAllNotEndedBattles();
 
+	eventEmitter.on("enterBattle", this.enterBattle.bind(this));
+	eventEmitter.on("battleMoveHero", this.moveHero.bind(this));
+	eventEmitter.on("battleHeroMakeHit", this.heroMakeHit.bind(this));
 	eventEmitter.on("endBattle", this.endBattleListener.bind(this));
 	
 	callback();
@@ -94,10 +97,7 @@ BMClass.prototype.addBattleToGlobalArray = function(battle, callback) {
 BMClass.prototype.enterBattle = function(data) {
 	var queues = [],
 		battle = {};
-	if(
-		data && data.id &&
-		this.battles[data.id] && this.battles[data.id].check()
-	) {
+	if(this.isBattleExist(data)) {
 		console.log("enterBattle 1");
 		battle = this.battles[data.id];
 		queues.push(battle.addHero.bind(battle, data)); // .addHero(GLOBAL.NPCS["npc"+i], 2);
@@ -156,10 +156,7 @@ BMClass.prototype.moveHero = function(data) {
 	// console.log("\n BM moveHero");
 	// console.log("data.userId", data.userId);
 	// console.log("-------------------- \n\n");
-	if(
-		data && data.id &&
-		this.battles[data.id] && this.battles[data.id].check()
-	) {
+	if(this.isBattleExist(data)) {
 		return this.battles[data.id].moveHero(data);
 	}
 };
@@ -177,17 +174,42 @@ BMClass.prototype.moveHero = function(data) {
 	* @author pcemma
 */
 BMClass.prototype.heroMakeHit = function(data) {
-	console.log("\n BM heroMakeHit");
-	console.log("data.userId", data.userId);
-	console.log("-------------------- \n\n");
-	if(
-		data && data.id &&
-		this.battles[data.id] && this.battles[data.id].check()
-	) {
+	// console.log("\n BM heroMakeHit");
+	// console.log("data.userId", data.userId);
+	// console.log("-------------------- \n\n");
+	if(this.isBattleExist(data)) {
 		return this.battles[data.id].heroMakeHit(data);
 	}
 	return false;
 };
+
+
+
+
+
+/*
+	* Description: Check if data has id for battle and check is battle still exist and not ending
+	*	@data: arr
+	*		@id: 		int, ид боя
+	*
+	*
+	* @since  15.03.16
+	* @author pcemma
+*/
+BMClass.prototype.isBattleExist = function(data) {
+	return (data && 
+			data.id &&
+			this.battles.hasOwnProperty(data.id) && 
+			this.battles[data.id].check()); 
+};
+
+
+
+
+
+
+
+
 
 
 

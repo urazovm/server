@@ -191,7 +191,7 @@ GridClass.prototype.getUserIdInHex = function(hexId) {
 	* @author pcemma
 */
 GridClass.prototype.isHexExist = function(hexId) {
-	return 	hexId in this.hexes;
+	return 	this.hexes.hasOwnProperty(hexId);
 };
 
 
@@ -239,9 +239,9 @@ GridClass.prototype.isInArea = function(data) {
 	* @author pcemma
 */
 GridClass.prototype.canHeroMoveToHex = function(data) {
-	return 	this.isHexExist(data.hexId) &&
+	return 	(this.isHexExist(data.hexId) &&
 			this.isHexFree(data.hexId) &&
-			this.isInArea(data);	
+			this.isInArea(data));	
 };
 
 
@@ -258,9 +258,9 @@ GridClass.prototype.canHeroMoveToHex = function(data) {
 	* @author pcemma
 */
 GridClass.prototype.canHeroAttackHex = function(data) {
-	return 	this.isHexExist(data.hexId) &&
+	return 	(this.isHexExist(data.hexId) &&
 			this.getUserIdInHex(data.hexId) &&
-			this.isInArea(data);	
+			this.isInArea(data));	
 };
 
 
