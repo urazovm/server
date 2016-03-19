@@ -159,9 +159,7 @@ BMClass.prototype.moveHero = function(data) {
 	if(this.isBattleExist(data)) {
 		var battle = this.battles[data.id];
 		async.waterfall(
-			[
-				battle.moveHero.bind(battle, data)
-			],
+			[battle.moveHero.bind(battle, data)],
 			function(err) {
 				console.log("Battle manager call battle method moved hero");	
 			}
@@ -186,9 +184,14 @@ BMClass.prototype.heroMakeHit = function(data) {
 	// console.log("data.userId", data.userId);
 	// console.log("-------------------- \n\n");
 	if(this.isBattleExist(data)) {
-		return this.battles[data.id].heroMakeHit(data);
+		var battle = this.battles[data.id];
+		async.waterfall(
+			[battle.heroMakeHit.bind(battle, data)],
+			function(err) {
+				console.log("Battle manager call battle method moved hero");	
+			}
+		);
 	}
-	return false;
 };
 
 

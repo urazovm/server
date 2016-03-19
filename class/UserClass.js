@@ -409,16 +409,30 @@ User.prototype.isInCurrentBattle = function(battleId) {
 	* Description: Проверка мерт ли герой. 
 	*
 	*
-	* @since  01.03.15
+	* @since  19.03.16
 	* @author pcemma
 */
-User.prototype.isAlive = function() {
-	if(this.userData.stats.currentHp <= 0 ) {
+User.prototype.checkIfHeroIsDead = function(callback) {
+	// TODO: ВОТ ТУТ ВОТ НАДО В БАЗ МЕНЯТЬ!!!!!
+	console.log("this.userData.stats.currentHp <= 0", this.userData.stats.currentHp <= 0);
+	if(this.userData.stats.currentHp <= 0) {
 		//TODO: set hp!
 		this.userData.stats.currentHp = 0;
 		//TODO: Обновление флага и в базе тоже! мертвые не могут делать многих вещей!
 		this.userData.isAliveFlag = false;
 	}
+	callback();
+};
+
+
+/*
+	* Description: Проверка мерт ли герой. 
+	*
+	*
+	* @since  01.03.15
+	* @author pcemma
+*/
+User.prototype.isAlive = function() {
 	return this.userData.isAliveFlag;
 };
 
@@ -630,6 +644,22 @@ User.prototype.countDamage = function() {
 };
 
 
+/*
+	* Description: Hero get damage
+	*
+	*
+	* @since  19.03.16
+	* @author pcemma
+*/
+User.prototype.getDamage = function(damage, callback) {
+	var queues = [
+		this.updateStats.bind(this, {currentHp: -damage}),
+		this.checkIfHeroIsDead.bind(this)
+	];
+	async.waterfall(queues, function(err) {
+		callback();
+	});
+};
 
 
 
