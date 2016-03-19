@@ -6,7 +6,6 @@ var async = require("async"),
 
 function PreloadDataClass() {
 	this.DATA = {};
-	this.USERS = {};
 };
 
 
