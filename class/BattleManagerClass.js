@@ -157,7 +157,15 @@ BMClass.prototype.moveHero = function(data) {
 	// console.log("data.userId", data.userId);
 	// console.log("-------------------- \n\n");
 	if(this.isBattleExist(data)) {
-		return this.battles[data.id].moveHero(data);
+		var battle = this.battles[data.id];
+		async.waterfall(
+			[
+				battle.moveHero.bind(battle, data)
+			],
+			function(err) {
+				console.log("Battle manager call battle method moved hero");	
+			}
+		);
 	}
 };
 

@@ -148,8 +148,9 @@ GridClass.prototype.searchEnemyInArea = function(data) {
 	* @since  16.09.15
 	* @author pcemma
 */
-GridClass.prototype.addHeroToHex = function(data) {
+GridClass.prototype.addHeroToHex = function(data, callback) {
 	this.hexes[data.hexId].addHero({userId: data.userId});
+	callback();
 };
 
 
@@ -162,8 +163,9 @@ GridClass.prototype.addHeroToHex = function(data) {
 	* @since  16.09.15
 	* @author pcemma
 */
-GridClass.prototype.removeHeroFromHex = function(hexId) {
+GridClass.prototype.removeHeroFromHex = function(hexId, callback) {
 	this.hexes[hexId].removeHero();
+	callback();
 };
 
 

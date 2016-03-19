@@ -495,32 +495,40 @@ User.prototype.canDoAction = function() {
 	* @since  06.03.15
 	* @author pcemma
 */
-User.prototype.addToBattle = function(data) {
+User.prototype.addToBattle = function(data, callback) {
 	// ставим данные о бое
-	this.setBattleData(data);
+	var queues = [
+		this.setBattleData.bind(this, data)
+	];
+	
+	async.waterfall(queues, function(err) {
+		callback();
+	});
 	// запускаем листнер вступления в бой
 	// TODO: переделать эту проверку
-	(this.addToBattleListener) ? this.addToBattleListener() : 0;
+	// (this.addToBattleListener) ? this.addToBattleListener() : 0;
 };
 
 
 /*
-	* Description: Функция обновляет данные о бое в инфе героя.
+	* Description: Update
 	*
-	*	@data:	arr,
-	*		battleId: 	int, ид боя
-	*		teamId: 	int, ид команды
-	*		hexId: 		int, ид гекса 
+	*	@battleData:	arr,
 	*
 	*
 	* @since  12.05.15
 	* @author pcemma
 */
-User.prototype.setBattleData = function(data) {
-	this.userData.inBattleFlag = true;
-	this.userData.battleId = data.battleId;
-	this.userData.teamId = data.teamId;
-	this.userData.hexId = data.hexId;
+User.prototype.setBattleData = function(battleData, callback) {
+	// TODO: возможно некоторые надо обновлять в базе например inBattleFlag
+	Object.keys(battleData).forEach(function(stat) {
+		if(stat === "action") {
+			this.setLastActionTime(battleData[stat]);
+		} else {
+			this.userData[stat] = battleData[stat];
+		}
+	}.bind(this));
+	callback();
 };
 
 

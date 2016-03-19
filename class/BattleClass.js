@@ -136,70 +136,91 @@ BattleClass.prototype.completion = function(data) {
 	* @author pcemma
 */
 BattleClass.prototype.addHero = function(data, callback) {
-	// var hero = data.hero;
-	//TODO: разбить эту функцию как следует на 2 части
-	var hero = new UserClass();
-	hero.userId = data.userId;
-	var queues = [
-		hero.getUserData.bind(hero)
-	];
+	var heroId = data.userId,
+		queues = [];
+
+	console.log("SEND DATA");
+	// отправляем пользователю, те данные что уже есть. положение всех воинов на поле боя
+	//TODO: возможноне стоит сразу слать а как то проверить userId
+	this.sendDataToOne([heroId], {
+		f: "battleCreate", 
+		p: this.getBattleStatus()
+	});
+
+	if(!this.isHeroExistInBattle(heroId)) {
+		var hero = new UserClass(),
+			tempTeamId = this.addHeroToTeamArray({teamId: data.teamId, heroId: heroId}),
+			hexId = this.getStartedCoordinats(tempTeamId);
+		
+		hero.userId = heroId;
+		this.heroes[hero.userId] = hero;
+
+		queues.push(hero.getUserData.bind(hero)); 
+		
+		// Обновление гекса
+		queues.push(this.grid.addHeroToHex.bind(this.grid, {userId: heroId, hexId: hexId})); 
+		
+		// Тут апдейта массива юзера с данными о битве
+		queues.push(hero.addToBattle.bind(hero, {
+			inBattleFlag: true,
+			battleId: 	this.id,
+			teamId: 	tempTeamId,
+			hexId: 		hexId
+		})); 
+	}
+
 	async.waterfall(
 		queues,
 		function(err) {
-			// отправляем пользователю, те данные что уже есть. положение всех воинов на поле боя
-			console.log("SEND DATA");
-			this.sendDataToOne([hero.userId], {
-								f: "battleCreate", 
-								p: this.getBattleStatus()
-							});
-			
-			// TODO: если такой герой есть, то скорее всего это повторное подключение. Переопределить сокет ??
-			if(!(hero.userId in this.heroes)) {
-			
-				var tempTeamId = 1,
-					hexId = "0.0";
-					
-					
-				this.heroes[hero.userId] = hero;
-				
-				// TODO: remove -> это времено, раскидываем по одному в команду.
-				if((this.teams['1'].length <= this.teams['2'].length && !data.teamId) || data.teamId === 1) {
-					this.teams['1'].push(hero.userId);
-					var x = 0,
-						y = Math.floor(Math.random() * (4 + 1));
-					hexId = x+"."+y;
-				}
-				else {
-					this.teams['2'].push(hero.userId);
-					tempTeamId = 2;
-					var x = 6,
-						y = Math.floor(Math.random() * (4 + 1));
-					hexId = x+"."+y;
-				}
-				
-				// Обновление гекса
-				this.grid.addHeroToHex({userId: hero.userId, hexId: hexId});
-				
-				// Тут апдейта массива юзера с данными о битве
-				this.heroes[hero.userId].addToBattle({
-														battleId: 	this.id,
-														teamId: 	tempTeamId,
-														hexId: 		hexId
-													});
-				
-				
-				// тут должна отправляться вся инфа о пользователе. ид, логин, вещи, хп, манна,на какой позиции, команда, 
-				this.sendDataToAll({
-									f: "battleAddHero", 
-									p: this.getHeroData(hero.userId)
-								});
-			}
+			console.log("CALL BACK ADD HERO!!!!!");
+			// тут должна отправляться вся инфа о пользователе. ид, логин, вещи, хп, манна,на какой позиции, команда, 
+			this.sendDataToAll({
+				f: "battleAddHero", 
+				p: this.getHeroData(heroId)
+			});
 			callback();
 		}.bind(this)
 	);
+};
 
 
-	
+
+/*
+	* Description: add hero to to team array.
+	*	@data: arr
+	*		@heroId: str, id of the heroe
+	*		@teamId: str, id of the team
+	*
+	* @since  19.03.16
+	* @author pcemma
+*/
+BattleClass.prototype.addHeroToTeamArray = function(data) {
+	var heroId = data.heroId,
+		teamId = data.teamId, 
+		newTeamId = '2';
+
+	// TODO: remove -> это времено, раскидываем по одному в команду.
+	if((this.teams['1'].length <= this.teams['2'].length && !teamId) || teamId === 1) {
+		newTeamId = '1';
+	}
+	this.teams[newTeamId].push(heroId);
+	return parseInt(newTeamId);
+};
+
+
+/*
+	* Description: get started cooridnats.
+	*		@teamId: str, id of the team
+	*
+	* @since  19.03.16
+	* @author pcemma
+*/
+BattleClass.prototype.getStartedCoordinats = function(teamId) {
+	var x = (teamId === 1) ? 0 : 6, 
+		y = Math.floor(Math.random() * (4 + 1)),
+		hexId = x+"."+y;
+	// TODO: add check for obstructions hexes
+	return hexId;
 };
 
 
@@ -214,34 +235,44 @@ BattleClass.prototype.addHero = function(data, callback) {
 	* @since  06.02.15
 	* @author pcemma
 */
-BattleClass.prototype.moveHero = function(data) {
-	console.log("moveHero", data.userId);
-	
+BattleClass.prototype.moveHero = function(data, callback) {
+	var heroId = data.userId,
+		hexId = data.hexId,
+		queues = [];
+	console.log("moveHero", heroId);
+
 	if(
 		// Проверяем на то есть ли вообще такой герой у нас И может ли он совершать действие
-		this.heroes[data.userId] && 										
-		this.heroes[data.userId].isReadyForAction({battleId: this.id}) &&
-		this.grid.canHeroMoveToHex({hexId: data.hexId, currentHexId: this.heroes[data.userId].userData.hexId, radius: this.heroes[data.userId].userData.stats.moveRadius})
+		this.heroes[heroId] && 										
+		this.heroes[heroId].isReadyForAction({battleId: this.id}) &&
+		this.grid.canHeroMoveToHex({hexId: hexId, currentHexId: this.heroes[heroId].userData.hexId, radius: this.heroes[heroId].userData.stats.moveRadius})
 	) {
+		
+		var grid = this.grid,
+			hero = this.heroes[heroId];
+		
 		// Обновление гекса
-		this.grid.addHeroToHex({userId: data.userId, hexId: data.hexId});
-		this.grid.removeHeroFromHex(this.heroes[data.userId].userData.hexId);
-		
-		
+		queues.push(grid.addHeroToHex.bind(grid, {userId: heroId, hexId: hexId})); 
+		queues.push(grid.removeHeroFromHex.bind(grid, hero.userData.hexId)); 
+
 		// Обновление героя
-		this.heroes[data.userId].userData.hexId = data.hexId;
-		this.heroes[data.userId].setLastActionTime('move');
-		
-		this.sendDataToAll({
-			f: "battleMoveHero", 
-			p: {
-				userId: data.userId,
-				hexId: data.hexId
-			}
-		});
-		return true;
+		queues.push(hero.setBattleData.bind(hero, {hexId: hexId, action: "move"}));
+	
+		async.waterfall(
+			queues,
+			function(err) {
+				console.log("CALL BACK MOVE HERO!!!!!");
+				this.sendDataToAll({
+					f: "battleMoveHero", 
+					p: {
+						userId: heroId,
+						hexId: hexId
+					}
+				});
+				callback();
+			}.bind(this)
+		);
 	}
-	return false;
 };
 
 
@@ -317,6 +348,23 @@ BattleClass.prototype.heroMakeHit = function(data) {
 	}
 	return false;
 };
+
+
+
+/*
+	* Description: is user exist in current battle
+	*		@heroId: 	str, id hero to check
+	*
+	*
+	* @since  19.03.16
+	* @author pcemma
+*/
+BattleClass.prototype.isHeroExistInBattle = function(heroId) {
+	console.log("\n\n\n\n HERO EXIST: ", heroId, this.heroes.hasOwnProperty(heroId), "\n\n\n\n");
+	return this.heroes.hasOwnProperty(heroId);
+};
+
+
 
 
 
