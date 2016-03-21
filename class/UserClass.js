@@ -11,7 +11,7 @@ var async = require("async"),
 
 function User() {
 
-	// this.userId = 0;
+	this.dbName = 'game_Users';
 	
 	// USER DATA
 	this.autoConfigData = {};
@@ -65,7 +65,7 @@ User.prototype.check = function(autoConfigData, callback) {
 	) {
 		// console.log(autoConfigData.email.toLowerCase(), crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex'));
 		Mongo.find({
-			collection: 'game_Users', 
+			collection: this.dbName, 
 			searchData: {
 				email: autoConfigData.email.toLowerCase(), 
 				password: crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex')
@@ -154,7 +154,7 @@ User.prototype.addDefaultUser = function(data, callback) {
 	};
 	
 	Mongo.insert({
-		collection: "game_Users", 
+		collection: this.dbName, 
 		insertData: {
 			email: this.autoConfigData.email,
 			password: crypto.createHash('md5').update(String(this.autoConfigData.password)).digest('hex'),
@@ -254,7 +254,7 @@ User.prototype.updateClientInfo = function(data, callback) {
 			clientVersion: (data.clientVersion) ? data.clientVersion : "",
 			ip: (data.ip) ? data.ip : ""
 		}};
-	Mongo.update({collection: 'game_Users', searchData: {_id: this.userId}, insertData: insertData, callback: function(rows) { callback(); }});
+	Mongo.update({collection: this.dbName, searchData: {_id: this.userId}, insertData: insertData, callback: function(rows) { callback(); }});
 };
 
 
@@ -343,7 +343,7 @@ User.prototype.authorization = function(data, callback) {
 User.prototype.getUserData = function(callback) {
 	console.log("this.userId", this.userId, typeof(this.userId));
 	Mongo.find({
-		collection: 'game_Users', 
+		collection: this.dbName, 
 		searchData: {_id: Mongo.objectId(this.userId)}, 
 		fields: {userData: true}, 
 		callback: function(rows) {
@@ -950,7 +950,7 @@ User.prototype.updateStatsInDb = function(updatedStats, callback) {
 		insertData["userData.stats." + stat] = updatedStats[stat];
 	});
 	Mongo.update({
-		collection: 'game_Users',
+		collection: this.dbName,
 		searchData: {_id: this.userId},
 		insertData: {$inc: insertData},
 		callback: function() {

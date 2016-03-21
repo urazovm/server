@@ -160,8 +160,9 @@ BattleClass.prototype.completion = function(data) {
 */
 BattleClass.prototype.addHero = function(data, callback) {
 	var heroId = data.userId,
-		queues = [];
-
+		heroType = data.heroType,
+		queues = [heroType];
+	console.log("heroType", heroType);
 	console.log("SEND DATA");
 	// отправляем пользователю, те данные что уже есть. положение всех воинов на поле боя
 	//TODO: возможноне стоит сразу слать а как то проверить userId
@@ -171,7 +172,7 @@ BattleClass.prototype.addHero = function(data, callback) {
 	});
 
 	if(!this.isHeroExistInBattle(heroId)) {
-		var hero = new UserClass(),
+		var hero = (heroType && heroType === 2) ? new NpcClass() : new UserClass(),
 			tempTeamId = this.addHeroToTeamArray({teamId: data.teamId, heroId: heroId}),
 			hexId = this.getStartedCoordinats(tempTeamId);
 		

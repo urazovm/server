@@ -100,7 +100,7 @@ BMClass.prototype.enterBattle = function(data) {
 	if(this.isBattleExist(data)) {
 		console.log("enterBattle 1");
 		battle = this.battles[data.id];
-		queues.push(battle.addHero.bind(battle, data)); // .addHero(GLOBAL.NPCS["npc"+i], 2);
+		queues.push(battle.addHero.bind(battle, data));
 	}
 	else if(Object.keys(this.battles).length === 0) {
 		console.log("enterBattle 2");
@@ -112,13 +112,13 @@ BMClass.prototype.enterBattle = function(data) {
 		//TODO: временно добавляем нпц в бой сразу за героем. Для тестов и показа издателю.
 		// добавляем первого нпц тупо.
 		if(data.battleType === "npc") {
-			npcCount = 0;
-			for(var npcId in GLOBAL.NPCS) {
-				queues.push(battle.addHero.bind(battle, {hero: GLOBAL.NPCS[npcId], teamId: '2'}));
-				npcCount++;
-				if(npcCount === 3)
-					break;
-			}
+			var npcsIdArray = ["55d20675e8e93ce757cc5688", "55d20675e8e93ce757cc5689", "55d20675e8e93ce757cc568a"];
+
+			npcsIdArray.forEach(function(npcId) {
+				//TODO: type of hero from db get and set to separate collection
+				console.log("npcId", npcId);
+				queues.push(battle.addHero.bind(battle, {heroType: 2, userId: npcId, teamId: '2'}));
+			});
 		}
 	}
 	else {

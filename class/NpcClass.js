@@ -5,14 +5,18 @@ var GLOBAL = require("./PreloadDataClass.js"),
 
 function Npc() {
 
-	this.userId = 0;
+	this.dbName = 'game_Npcs';
+
+	// this.userId = 0;
+
+
 	
 	// USER DATA
 	this.userData = {
-						// items: {}, 	// Предметы
-						// stuff: {}, 	// Надетые вещи
-						// stats: {} 	// Статы юзера
-					};
+		// items: {}, 	// Предметы
+		// stuff: {}, 	// Надетые вещи
+		// stats: {} 	// Статы юзера
+	};
 }				
 
 Npc.prototype = Object.create(UserClass.prototype);

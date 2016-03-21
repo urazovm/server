@@ -35,7 +35,7 @@ ServerClass.prototype.start = function() {
 		function(err) {
 			console.log("Server is started!");
 		}
-	)
+	);
 };
 
 
