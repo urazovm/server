@@ -161,7 +161,8 @@ BattleClass.prototype.completion = function(data) {
 BattleClass.prototype.addHero = function(data, callback) {
 	var heroId = data.userId,
 		heroType = data.heroType,
-		queues = [heroType];
+		queues = [],
+		heroExistFlag = this.isHeroExistInBattle(heroId);
 	console.log("heroType", heroType);
 	console.log("SEND DATA");
 	// отправляем пользователю, те данные что уже есть. положение всех воинов на поле боя
@@ -171,7 +172,7 @@ BattleClass.prototype.addHero = function(data, callback) {
 		p: this.getBattleStatus()
 	});
 
-	if(!this.isHeroExistInBattle(heroId)) {
+	if(!heroExistFlag) {
 		var hero = (heroType && heroType === 2) ? new NpcClass() : new UserClass(),
 			tempTeamId = this.addHeroToTeamArray({teamId: data.teamId, heroId: heroId}),
 			hexId = this.getStartedCoordinats(tempTeamId);
@@ -198,10 +199,16 @@ BattleClass.prototype.addHero = function(data, callback) {
 		function(err) {
 			console.log("CALL BACK ADD HERO!!!!!");
 			// тут должна отправляться вся инфа о пользователе. ид, логин, вещи, хп, манна,на какой позиции, команда, 
-			this.sendData(this.getAllHeroesId(), {
-				f: "battleAddHero", 
-				p: this.getHeroData(heroId)
-			});
+			
+
+			//TODO: Переделать на asyn метод для отправки! 
+
+			if(!heroExistFlag) {
+				this.sendData(this.getAllHeroesId(), {
+					f: "battleAddHero", 
+					p: this.getHeroData(heroId)
+				});
+			}
 			callback();
 		}.bind(this)
 	);

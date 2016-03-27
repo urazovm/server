@@ -114,11 +114,12 @@ BMClass.prototype.enterBattle = function(data) {
 		if(data.battleType === "npc") {
 			var npcsIdArray = ["55d20675e8e93ce757cc5688", "55d20675e8e93ce757cc5689", "55d20675e8e93ce757cc568a"];
 
-			npcsIdArray.forEach(function(npcId) {
-				//TODO: type of hero from db get and set to separate collection
-				console.log("npcId", npcId);
-				queues.push(battle.addHero.bind(battle, {heroType: 2, userId: npcId, teamId: '2'}));
-			});
+			// npcsIdArray.forEach(function(npcId) {
+			// 	//TODO: type of hero from db get and set to separate collection
+			// 	console.log("npcId", npcId);
+			// 	queues.push(battle.addHero.bind(battle, {heroType: 2, userId: npcId, teamId: '2'}));
+			// });
+
 		}
 	}
 	else {

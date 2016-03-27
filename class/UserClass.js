@@ -559,7 +559,7 @@ User.prototype.getUserDataForBattle = function() {
 	var dataArray = ['battleId', 'teamId', 'isAliveFlag', 'hexId', 'login', 'stats', 'stuff'],
 		info = {
 			id: this.userId,
-			npcId: this.npcId,
+			npcId: this.userData.npcId,
 			lastActionTime: this.getRemainLastActionTime()
 		};
 	dataArray.forEach(function(element) {
