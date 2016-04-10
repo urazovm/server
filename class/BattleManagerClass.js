@@ -29,7 +29,10 @@ BMClass.prototype.initialize = function(callback)
 	eventEmitter.on("enterBattle", this.enterBattle.bind(this));
 	eventEmitter.on("battleMoveHero", this.moveHero.bind(this));
 	eventEmitter.on("battleHeroMakeHit", this.heroMakeHit.bind(this));
+	
 	eventEmitter.on("endBattle", this.endBattleListener.bind(this));
+	eventEmitter.on("battleSearchFreeHexesInArea", this.searchFreeHexesInAreaListener.bind(this));
+	eventEmitter.on("battleSearchEnemyInArea", this.searchEnemyInAreaListener.bind(this));
 	
 	callback();
 }
@@ -113,12 +116,13 @@ BMClass.prototype.enterBattle = function(data) {
 		// добавляем первого нпц тупо.
 		if(data.battleType === "npc") {
 			var npcsIdArray = ["55d20675e8e93ce757cc5688", "55d20675e8e93ce757cc5689", "55d20675e8e93ce757cc568a"];
+			// var npcsIdArray = ["55d20675e8e93ce757cc5688"];
 
-			// npcsIdArray.forEach(function(npcId) {
-			// 	//TODO: type of hero from db get and set to separate collection
-			// 	console.log("npcId", npcId);
-			// 	queues.push(battle.addHero.bind(battle, {heroType: 2, userId: npcId, teamId: '2'}));
-			// });
+			npcsIdArray.forEach(function(npcId) {
+				//TODO: type of hero from db get and set to separate collection
+				console.log("npcId", npcId);
+				queues.push(battle.addHero.bind(battle, {heroType: 2, userId: npcId, teamId: '2'}));
+			});
 
 		}
 	}
@@ -154,16 +158,11 @@ BMClass.prototype.enterBattle = function(data) {
 	* @author pcemma
 */
 BMClass.prototype.moveHero = function(data) {
-	// console.log("\n BM moveHero");
-	// console.log("data.userId", data.userId);
-	// console.log("-------------------- \n\n");
 	if(this.isBattleExist(data)) {
 		var battle = this.battles[data.id];
 		async.waterfall(
 			[battle.moveHero.bind(battle, data)],
-			function(err) {
-				console.log("Battle manager call battle method moved hero");	
-			}
+			function(err) {}
 		);
 	}
 };
@@ -181,16 +180,11 @@ BMClass.prototype.moveHero = function(data) {
 	* @author pcemma
 */
 BMClass.prototype.heroMakeHit = function(data) {
-	// console.log("\n BM heroMakeHit");
-	// console.log("data.userId", data.userId);
-	// console.log("-------------------- \n\n");
 	if(this.isBattleExist(data)) {
 		var battle = this.battles[data.id];
 		async.waterfall(
 			[battle.heroMakeHit.bind(battle, data)],
-			function(err) {
-				console.log("Battle manager call battle method moved hero");	
-			}
+			function(err) {}
 		);
 	}
 };
@@ -214,69 +208,6 @@ BMClass.prototype.isBattleExist = function(data) {
 			this.battles.hasOwnProperty(data.id) && 
 			this.battles[data.id].check()); 
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-	* Description: Поиск врагов в области.
-	*	@data: arr
-	*		@id: 		int, ид боя
-	*		@hexId: 	str, вида x.y
-	*		@userId: 	str, ид героя, который запрашивает инфу про область
-	*
-	*
-	* @since  16.05.15
-	* @author pcemma
-*/
-BMClass.prototype.searchEnemyInArea = function(data) {
-	console.log("\n BM searchEnemyInArea");
-	console.log("data.userId", data.userId);
-	console.log("-------------------- \n\n");
-	if(
-		data && data.id &&
-		this.battles[data.id] && this.battles[data.id].check()
-	) {
-		return this.battles[data.id].searchEnemyInArea(data);
-	}
-	return false;
-};
-
-
-/*
-	* Description: Поиск свободных гексов в области передвижения.
-	*	@data: arr
-	*		@id: 		int, ид боя
-	*		@hexId: 	str, вида x.y
-	*		@userId: 	str, ид героя, который запрашивает инфу про область
-	*
-	*
-	* @since  01.06.15
-	* @author pcemma
-*/
-BMClass.prototype.searchFreeHexesInArea = function(data) {
-	console.log("\n BM searchFreeHexesInArea");
-	console.log("data.userId", data.userId);
-	console.log("-------------------- \n\n");
-	if(
-		data && data.id &&
-		this.battles[data.id] && this.battles[data.id].check()
-	) {
-		return this.battles[data.id].searchFreeHexesInArea(data);
-	}
-	return false;
-};
-
 
 
 
@@ -314,6 +245,45 @@ BMClass.prototype.endBattleListener = function(data) {
 	}
 };	
 
+
+/*
+	* Description: Поиск врагов в области.
+	*	@data: arr
+	*		@id: 		int, ид боя
+	*		@hexId: 	str, вида x.y
+	*		@userId: 	str, ид героя, который запрашивает инфу про область
+	*
+	*
+	* @since  16.05.15
+	* @author pcemma
+*/
+BMClass.prototype.searchEnemyInAreaListener = function(data, callback) {
+	if(this.isBattleExist(data)) {
+		var battle = this.battles[data.id],
+			hexesArray = battle.searchEnemyInArea(data);
+		callback(hexesArray);
+	}
+};
+
+
+/*
+	* Description: Поиск свободных гексов в области передвижения.
+	*	@data: arr
+	*		@id: 		int, ид боя
+	*		@hexId: 	str, вида x.y
+	*		@userId: 	str, ид героя, который запрашивает инфу про область
+	*	@callback: function, call back function
+	*
+	* @since  01.06.15
+	* @author pcemma
+*/
+BMClass.prototype.searchFreeHexesInAreaListener = function(data, callback) {
+	if(this.isBattleExist(data)) {
+		var battle = this.battles[data.id],
+			hexesArray = battle.searchFreeHexesInArea(data);
+		callback(hexesArray);
+	}
+};
 
 
 module.exports = new BMClass();

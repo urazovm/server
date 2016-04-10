@@ -2,6 +2,7 @@ console.log("User CLASS is connected");
 
 var async = require("async"),
 	crypto = require('crypto'),
+	eventemitter2 = require("eventemitter2"),
 	Mongo = require("./MongoDBClass.js"),
 	GLOBAL = require("./PreloadDataClass.js"),
 	StatsManagerClass = require("./StatsManagerClass.js"),
@@ -22,6 +23,7 @@ function User() {
 						// stats: {} 	// Статы юзера
 					};
 }
+User.prototype = Object.create(eventemitter2.prototype);
 
 
 /*
@@ -516,11 +518,10 @@ User.prototype.addToBattle = function(data, callback) {
 	];
 	
 	async.waterfall(queues, function(err) {
+		// Start listner for add to battle
+		this.emit('addToBattleListener');
 		callback();
-	});
-	// запускаем листнер вступления в бой
-	// TODO: переделать эту проверку
-	// (this.addToBattleListener) ? this.addToBattleListener() : 0;
+	}.bind(this));
 };
 
 

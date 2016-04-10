@@ -22,6 +22,7 @@ HexagonClass.prototype.__constructor = function(data) {
 	this.y = data.y;
 	this.cubeCoordinats = this.calcCubeCoordinats();
 	
+	//TODO: это переделать. такого не должно быть!
 	if(data.isObstruction) {
 		this.makeObstraction();
 	}
@@ -111,27 +112,6 @@ HexagonClass.prototype.removeHero = function() {
 
 /*
 	* Description:
-	*	Ищет все гексы в обалсти удара.
-	*	
-	*
-	*	return: array, массив гексов, которые находятся в области у текущего гекса
-	*
-	* @since  16.05.15
-	* @author pcemma
-*/
-HexagonClass.prototype.getHitArea = function() {
-	var parity = this.y % 2,
-		hexesArray = [];
-		
-	for(var i in this.directions[parity]) {
-		hexesArray.push({x: this.x + this.directions[parity][i][0], y: this.y + this.directions[parity][i][1]});
-	}
-	return hexesArray;
-};
-
-
-/*
-	* Description:
 	*	Ищет все гексы в обалсти хотьбы.
 	*	
 	*
@@ -140,12 +120,26 @@ HexagonClass.prototype.getHitArea = function() {
 	* @since  01.06.15
 	* @author pcemma
 */
-HexagonClass.prototype.getMoveArea = function() {
-	var parity = this.y % 2,
-		hexesArray = [];
-		
-	for(var i in this.directions[parity]) {
-		hexesArray.push({x: this.x + this.directions[parity][i][0], y: this.y + this.directions[parity][i][1]});
+HexagonClass.prototype.getHexArea = function(radius) {
+	var hexesArray = [],
+		radius = (radius || 1),
+		minX = this.cubeCoordinats.x - radius,
+		maxX = this.cubeCoordinats.x + radius,
+		minY = this.cubeCoordinats.y - radius, 
+		maxY = this.cubeCoordinats.y + radius, 
+		minZ = this.cubeCoordinats.z - radius,
+		maxZ = this.cubeCoordinats.z + radius;
+	for (var x = minX; x <= maxX; x++) {
+		for (var y = minY; y <= maxY; y++) {
+			for (var z = minZ; z <= maxZ; z++) {
+				// TODO: Проверить формулу. убрать лишний 3-й цикл + проверку. http://www.redblobgames.com/grids/hexagons/#field-of-view
+				if (x + y + z === 0) {
+					var hexCoordinats = this.convertCubeToOffset(x, z, y);
+					hexesArray.push(hexCoordinats.x+"."+hexCoordinats.y);
+					// {x: hexCoordinats.x, y: hexCoordinats.y}
+				}
+			}
+		}
 	}
 	return hexesArray;
 };
@@ -214,16 +208,12 @@ HexagonClass.prototype.isInArea = function(neededHex, radius) {
 		maxY = this.cubeCoordinats.y + radius, 
 		minZ = this.cubeCoordinats.z - radius,
 		maxZ = this.cubeCoordinats.z + radius;
-
 	for (var x = minX; x <= maxX; x++) {
 		for (var y = minY; y <= maxY; y++) {
 			for (var z = minZ; z <= maxZ; z++) {
 				// TODO: Проверить формулу. убрать лишний 3-й цикл + проверку. http://www.redblobgames.com/grids/hexagons/#field-of-view
 				if (x + y + z === 0) {
     				var hexCoordinats = this.convertCubeToOffset(x, z, y);
-					
-					console.log("\n\n x: ", neededHex.x === hexCoordinats.x, "y: ",neededHex.y === hexCoordinats.y);
-
 					if(
 						neededHex.x === hexCoordinats.x && 
 						neededHex.y === hexCoordinats.y

@@ -61,7 +61,6 @@ BattleClass.prototype.create = function(callback) {
 			teams: this.teams
 		}, 
 		callback: function(rows) {
-			console.log(rows);
 			this.id = rows.ops[0]._id;
 			callback();
 		}.bind(this)
@@ -101,10 +100,10 @@ BattleClass.prototype.check = function() {
 BattleClass.prototype.checkEndOfBattle = function() {
 	console.log("CHECK IF HEROES ARE DAED!");
 	if(!this.isAliveHeroesInTeam(1)) {
-		console.log("DONT OPEN!! DEAD INSIDE!!!");
+		console.log("DONT OPEN!! DEAD INSIDE!!! TEAM 2");
 		this.completion({winTeamId: 2});	
 	} else if(!this.isAliveHeroesInTeam(2)) {
-		console.log("DONT OPEN!! DEAD INSIDE!!!");
+		console.log("DONT OPEN!! DEAD INSIDE!!!  TEAM 1");
 		this.completion({winTeamId: 1});	
 	}
 };
@@ -163,8 +162,6 @@ BattleClass.prototype.addHero = function(data, callback) {
 		heroType = data.heroType,
 		queues = [],
 		heroExistFlag = this.isHeroExistInBattle(heroId);
-	console.log("heroType", heroType);
-	console.log("SEND DATA");
 	// отправляем пользователю, те данные что уже есть. положение всех воинов на поле боя
 	//TODO: возможноне стоит сразу слать а как то проверить userId
 	this.sendData([heroId], {
@@ -176,7 +173,7 @@ BattleClass.prototype.addHero = function(data, callback) {
 		var hero = (heroType && heroType === 2) ? new NpcClass() : new UserClass(),
 			tempTeamId = this.addHeroToTeamArray({teamId: data.teamId, heroId: heroId}),
 			hexId = this.getStartedCoordinats(tempTeamId);
-		
+	
 		hero.userId = heroId;
 		this.heroes[hero.userId] = hero;
 
@@ -197,12 +194,7 @@ BattleClass.prototype.addHero = function(data, callback) {
 	async.waterfall(
 		queues,
 		function(err) {
-			console.log("CALL BACK ADD HERO!!!!!");
 			// тут должна отправляться вся инфа о пользователе. ид, логин, вещи, хп, манна,на какой позиции, команда, 
-			
-
-			//TODO: Переделать на asyn метод для отправки! 
-
 			if(!heroExistFlag) {
 				this.sendData(this.getAllHeroesId(), {
 					f: "battleAddHero", 
@@ -269,8 +261,6 @@ BattleClass.prototype.moveHero = function(data, callback) {
 	var heroId = data.userId,
 		hexId = data.hexId,
 		queues = [];
-	console.log("moveHero", heroId);
-
 	if(
 		// Проверяем на то есть ли вообще такой герой у нас И может ли он совершать действие
 		this.heroes[heroId] && 										
@@ -290,7 +280,6 @@ BattleClass.prototype.moveHero = function(data, callback) {
 		async.waterfall(
 			queues,
 			function(err) {
-				console.log("CALL BACK MOVE HERO!!!!!");
 				this.sendData(this.getAllHeroesId(), {
 					f: "battleMoveHero", 
 					p: {
@@ -320,58 +309,62 @@ BattleClass.prototype.heroMakeHit = function(data, callback) {
 	var heroId = data.userId,
 		queues = [];
 
-	if(
-		// Проверяем на то есть ли вообще такой герой у нас И может ли он совершать действие
-		this.isHeroExistInBattle(heroId) && 										
-		this.heroes[heroId].isReadyForAction({battleId: this.id}) &&
-		this.grid.canHeroAttackHex({hexId: data.hexId, currentHexId: this.heroes[heroId].userData.hexId, radius: this.heroes[heroId].userData.stats.attackRadius})
-	) {		 
-		//Берем ид героя(противника) в гексе
-		var oponentHeroId = this.grid.getUserIdInHex(data.hexId);
-		
+	if(this.isHeroExistInBattle(heroId)) {
+		var hero = this.heroes[heroId];
 		if(
-			// Доступен ли игрок для действий
-			this.isHeroExistInBattle(oponentHeroId) && 
-			this.heroes[oponentHeroId].isAvailableEnemy({battleId: this.id, teamId: this.heroes[heroId].userData.teamId}) 	
-		) {
-			var hero = this.heroes[heroId],
-				oponentHero = this.heroes[oponentHeroId],
-				// TODO: make async!!! Считаем урон противнику.
-				damage = hero.countDamage();
+			// Проверяем на то есть ли вообще такой герой у нас И может ли он совершать действие
+			hero.isReadyForAction({battleId: this.id}) &&
+			this.grid.canHeroAttackHex({hexId: data.hexId, currentHexId: hero.userData.hexId, radius: hero.userData.stats.attackRadius})
+		) {		 
+			//Берем ид героя(противника) в гексе
+			var oponentHeroId = this.grid.getUserIdInHex(data.hexId);
 			
-			// обновляем герою который совершал удар время таймаута
-			queues.push(hero.setBattleData.bind(hero, {action: 'hit'}));
-			
-			//TODO: считать увернулся ли противник
-			
-			//TODO: посчитать броню противника
+			if(
+				// Доступен ли игрок для действий
+				this.isHeroExistInBattle(oponentHeroId) && 
+				this.heroes[oponentHeroId].isAvailableEnemy({battleId: this.id, teamId: this.heroes[heroId].userData.teamId}) 	
+			) {
+				var oponentHero = this.heroes[oponentHeroId],
+					// TODO: make async!!! Считаем урон противнику.
+					damage = hero.countDamage();
+				
+				// обновляем герою который совершал удар время таймаута
+				queues.push(hero.setBattleData.bind(hero, {action: 'hit'}));
+				
+				//TODO: считать увернулся ли противник
+				
+				//TODO: посчитать броню противника
 
-			// Обновляем противнику его текущее значение хп
-			queues.push(oponentHero.getDamage.bind(oponentHero, damage));
+				// Обновляем противнику его текущее значение хп
+				queues.push(oponentHero.getDamage.bind(oponentHero, damage));
 
-			queues.push(this.checkHeroDead.bind(this, oponentHeroId));
+				queues.push(this.checkHeroDead.bind(this, oponentHeroId));
 
-			async.waterfall(
-				queues,
-				function(err) {
-					this.sendData(this.getAllHeroesId(), {
-						f: "battleHeroMakeHit", 
-						p: {
-							userId: heroId,
-							oponentUserId: oponentHeroId,
-							damage: damage
+				async.waterfall(
+					queues,
+					function(err) {
+						this.sendData(this.getAllHeroesId(), {
+							f: "battleHeroMakeHit", 
+							p: {
+								userId: heroId,
+								oponentUserId: oponentHeroId,
+								damage: damage
+							}
+						});
+
+						// Check if someone was killed 
+						hero.emit("repeatMakeHitListener");
+
+						if(!oponentHero.isAlive()) {
+							this.checkEndOfBattle();
 						}
-					});
-
-					// Check if someone was killed 
-					console.log("oponentHero.isAlive()", oponentHero.isAlive());
-					if(!oponentHero.isAlive()) {
-						this.checkEndOfBattle();
-					}
-					callback();
-				}.bind(this)
-			);
+						callback();
+					}.bind(this)
+				);
+				return;
+			}
 		}
+		hero.emit("repeatSearchEnemyListener");
 	}
 };
 
@@ -389,7 +382,6 @@ BattleClass.prototype.heroMakeHit = function(data, callback) {
 	* @author pcemma
 */
 BattleClass.prototype.isHeroExistInBattle = function(heroId) {
-	console.log("\n\n\n\n HERO EXIST: ", heroId, this.heroes.hasOwnProperty(heroId), "\n\n\n\n");
 	return this.heroes.hasOwnProperty(heroId);
 };
 
@@ -495,6 +487,21 @@ BattleClass.prototype.isAliveHeroesInTeam = function(teamId) {
 };
 
 
+/*
+	* Description: Check is enemy available
+	*
+	*	@oponentUserId: str, id of the enemy hero
+	*	@teamId: int, id of the team in what enemyhero should be
+	*
+	*	@return:	true - if enemy is available for action / false - not ready
+	*
+	* @since  09.04.16
+	* @author pcemma
+*/
+BattleClass.prototype.isAvailableEnemy = function(oponentUserId, teamid) {
+	var enemyHero = this.heroes[oponentUserId];
+	return (enemyHero && enemyHero.isAvailableEnemy({battleId: this.id, teamId: teamid}));
+}
 
 
 
@@ -512,12 +519,11 @@ BattleClass.prototype.isAliveHeroesInTeam = function(teamId) {
 	* @author pcemma
 */
 BattleClass.prototype.searchEnemyInArea = function(data) {
+	var hero = this.heroes[data.userId];
 	return this.grid.searchEnemyInArea({
-		hexId: data.hexId, 
-		checkHero: function(oponentUserId) {
-			return 	this.heroes[oponentUserId] && 
-					this.heroes[oponentUserId].isAvailableEnemy({battleId: this.id, teamId: this.heroes[data.userId].userData.teamId});
-		}
+		hexId: data.hexId,
+		teamId: hero.userData.teamId,
+		checkHero: this.isAvailableEnemy.bind(this)
 	});
 };
 

@@ -85,11 +85,12 @@ GridClass.prototype.fill = function() {
 */
 GridClass.prototype.searchFreeHexesInArea = function(data) {
 	var hexId = data.hexId,
+		radius = data.radius || 1,
 		hexesArray = [];
 	if(this.isHexExist(hexId)) {
-		var area = this.hexes[hexId].getMoveArea();
-		for(var hexesCount in area) {
-			var hexIdInArea = area[hexesCount].getId();
+		var area = this.hexes[hexId].getHexArea(radius);
+		for(var i in area) {
+			var hexIdInArea = area[i];
 			if(
 				this.isHexExist(hexIdInArea) &&
 				this.isHexFree(hexIdInArea)
@@ -117,17 +118,17 @@ GridClass.prototype.searchFreeHexesInArea = function(data) {
 */
 GridClass.prototype.searchEnemyInArea = function(data) {
 	var hexId = data.hexId,
+		radius = data.radius || 1,
+		teamId = data.teamId,
 		hexesArray = [];
 	if(this.isHexExist(hexId)) {
-		var area = this.hexes[hexId].getHitArea();
-		for(var hexesCount in area) {
-			
-			var hexIdInArea = area[hexesCount].getId();
-			//TODO: эти ифы тоже в отдельный метод.
+		var area = this.hexes[hexId].getHexArea(radius);
+		for(var i in area) {
+			var hexIdInArea = area[i];
 			if(
 				this.isHexExist(hexIdInArea) &&
 				this.getUserIdInHex(hexIdInArea) &&
-				data.checkHero(this.getUserIdInHex(hexIdInArea))
+				data.checkHero(this.getUserIdInHex(hexIdInArea), teamId)
 			) {
 				hexesArray.push(hexIdInArea);
 			}
