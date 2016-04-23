@@ -40,7 +40,7 @@ HexagonClass.prototype.__constructor = function(data) {
 */
 HexagonClass.prototype.calcCubeCoordinats = function() {
 	// # convert odd-r offset to cube
-	var x = this.x - (this.y - this.y & 1) / 2,
+	var x = this.x - (this.y - (this.y & 1)) / 2,
 		z = this.y,
 		y = -x - z;
 	return {x: x, z: z, y: y};
@@ -60,10 +60,11 @@ HexagonClass.prototype.calcCubeCoordinats = function() {
 */
 HexagonClass.prototype.convertCubeToOffset = function(x, z, y) {
 	// # convert cube to odd-r offset
-	var col = x + (z - z & 1) / 2,
+	var col = x + (z - (z & 1)) / 2,
 		row = z;
 	return {x: col, y: row};
 };
+
 
 
 /*
@@ -122,23 +123,12 @@ HexagonClass.prototype.removeHero = function() {
 */
 HexagonClass.prototype.getHexArea = function(radius) {
 	var hexesArray = [],
-		radius = (radius || 1),
-		minX = this.cubeCoordinats.x - radius,
-		maxX = this.cubeCoordinats.x + radius,
-		minY = this.cubeCoordinats.y - radius, 
-		maxY = this.cubeCoordinats.y + radius, 
-		minZ = this.cubeCoordinats.z - radius,
-		maxZ = this.cubeCoordinats.z + radius;
-	for (var x = minX; x <= maxX; x++) {
-		for (var y = minY; y <= maxY; y++) {
-			for (var z = minZ; z <= maxZ; z++) {
-				// TODO: Проверить формулу. убрать лишний 3-й цикл + проверку. http://www.redblobgames.com/grids/hexagons/#field-of-view
-				if (x + y + z === 0) {
-					var hexCoordinats = this.convertCubeToOffset(x, z, y);
-					hexesArray.push(hexCoordinats.x+"."+hexCoordinats.y);
-					// {x: hexCoordinats.x, y: hexCoordinats.y}
-				}
-			}
+		radius = radius || 1;
+	for (var dx = -radius; dx <= radius; dx++){
+		for (var dy = Math.max(-radius, -dx - radius); dy <= Math.min(radius, -dx + radius); dy++){
+			var dz = -dx-dy
+			var hexCoordinats = this.convertCubeToOffset(this.cubeCoordinats.x + dx, this.cubeCoordinats.z + dz, this.cubeCoordinats.y + dy);
+			hexesArray.push(hexCoordinats.x+"."+hexCoordinats.y);
 		}
 	}
 	return hexesArray;
@@ -202,25 +192,15 @@ HexagonClass.prototype.getId = function() {
 	* @author pcemma
 */
 HexagonClass.prototype.isInArea = function(neededHex, radius) {
-	var minX = this.cubeCoordinats.x - radius,
-		maxX = this.cubeCoordinats.x + radius,
-		minY = this.cubeCoordinats.y - radius, 
-		maxY = this.cubeCoordinats.y + radius, 
-		minZ = this.cubeCoordinats.z - radius,
-		maxZ = this.cubeCoordinats.z + radius;
-	for (var x = minX; x <= maxX; x++) {
-		for (var y = minY; y <= maxY; y++) {
-			for (var z = minZ; z <= maxZ; z++) {
-				// TODO: Проверить формулу. убрать лишний 3-й цикл + проверку. http://www.redblobgames.com/grids/hexagons/#field-of-view
-				if (x + y + z === 0) {
-    				var hexCoordinats = this.convertCubeToOffset(x, z, y);
-					if(
-						neededHex.x === hexCoordinats.x && 
-						neededHex.y === hexCoordinats.y
-					) {
-						return true;
-					}
-				}
+	for (var dx = -radius; dx <= radius; dx++){
+		for (var dy = Math.max(-radius, -dx - radius); dy <= Math.min(radius, -dx + radius); dy++){
+			var dz = -dx-dy
+			var hexCoordinats = this.convertCubeToOffset(this.cubeCoordinats.x + dx, this.cubeCoordinats.z + dz, this.cubeCoordinats.y + dy);
+			if(
+				neededHex.x === hexCoordinats.x && 
+				neededHex.y === hexCoordinats.y
+			) {
+				return true;
 			}
 		}
 	}

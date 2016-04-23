@@ -61,10 +61,12 @@ GridClass.prototype.fill = function() {
 			var x = i - 1,
 				y = j - 1;
 				dy = Math.fmod(y, 2),
-				isObstruction = (this.obstructionsHexes[x+"."+y]) ? true : false; // Флаг определяет будет ли на эом гексе препятствие
+				isObstruction = this.obstructionsHexes.hasOwnProperty(x+"."+y); // Флаг определяет будет ли на этом гексе препятствие
 			
 			if(!(dy === 1 && i === this.hexesInRow)) { // не рисуем в четных рядах последний гекс для красивого отображения сетки
-				var newHex = new HexagonClass({x: x, y: y, isObstruction: isObstruction})
+				
+				var newHex = new HexagonClass({x: x, y: y, isObstruction: isObstruction});
+				console.log("x.y", x,y, newHex.cubeCoordinats);
 				tmpArray[newHex.getId()] = newHex;
 			}
 		}

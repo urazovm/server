@@ -356,6 +356,7 @@ BattleClass.prototype.heroMakeHit = function(data, callback) {
 						hero.emit("repeatMakeHitListener");
 
 						if(!oponentHero.isAlive()) {
+							console.log("OPONENT DEAD!");
 							this.checkEndOfBattle();
 						}
 						callback();
@@ -478,12 +479,13 @@ BattleClass.prototype.checkHeroDead = function(heroId, callback) {
 	* @author pcemma
 */
 BattleClass.prototype.isAliveHeroesInTeam = function(teamId) {
+	var checkFlag = false;
 	this.teams[teamId].forEach(function(heroId) {
 		if(this.heroes[heroId].isAlive()) {
-			return true;
+			checkFlag = true;
 		}
 	}.bind(this));
-	return false;
+	return checkFlag;
 };
 
 
@@ -523,7 +525,8 @@ BattleClass.prototype.searchEnemyInArea = function(data) {
 	return this.grid.searchEnemyInArea({
 		hexId: data.hexId,
 		teamId: hero.userData.teamId,
-		checkHero: this.isAvailableEnemy.bind(this)
+		checkHero: this.isAvailableEnemy.bind(this),
+		radius: data.radius
 	});
 };
 
