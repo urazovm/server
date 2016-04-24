@@ -126,7 +126,7 @@ HexagonClass.prototype.getHexArea = function(radius) {
 		radius = radius || 1;
 	for (var dx = -radius; dx <= radius; dx++){
 		for (var dy = Math.max(-radius, -dx - radius); dy <= Math.min(radius, -dx + radius); dy++){
-			var dz = -dx-dy
+			var dz = -dx - dy;
 			var hexCoordinats = this.convertCubeToOffset(this.cubeCoordinats.x + dx, this.cubeCoordinats.z + dz, this.cubeCoordinats.y + dy);
 			hexesArray.push(hexCoordinats.x+"."+hexCoordinats.y);
 		}
@@ -194,7 +194,7 @@ HexagonClass.prototype.getId = function() {
 HexagonClass.prototype.isInArea = function(neededHex, radius) {
 	for (var dx = -radius; dx <= radius; dx++){
 		for (var dy = Math.max(-radius, -dx - radius); dy <= Math.min(radius, -dx + radius); dy++){
-			var dz = -dx-dy
+			var dz = -dx - dy;
 			var hexCoordinats = this.convertCubeToOffset(this.cubeCoordinats.x + dx, this.cubeCoordinats.z + dz, this.cubeCoordinats.y + dy);
 			if(
 				neededHex.x === hexCoordinats.x && 
