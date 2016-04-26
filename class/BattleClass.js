@@ -121,7 +121,7 @@ BattleClass.prototype.checkEndOfBattle = function() {
 	* @author pcemma
 */
 BattleClass.prototype.completion = function(data) {	
-	//TODO: Надо переделать async плюс ответы каждому о его статах и данныхпосле боя
+	//TODO: Надо переделать async плюс ответы каждому о его статах и данных после боя
 
 	// 1. Пройтись по всем юзерам и поставить что они не в бою. 
 	for (var heroId in this.heroes) {
@@ -503,7 +503,7 @@ BattleClass.prototype.isAliveHeroesInTeam = function(teamId) {
 BattleClass.prototype.isAvailableEnemy = function(oponentUserId, teamid) {
 	var enemyHero = this.heroes[oponentUserId];
 	return (enemyHero && enemyHero.isAvailableEnemy({battleId: this.id, teamId: teamid}));
-}
+};
 
 
 

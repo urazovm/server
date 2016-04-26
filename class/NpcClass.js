@@ -10,11 +10,9 @@ function Npc() {
 	this.userData = {};
 
 	this.on('addToBattleListener', this.addToBattleListener.bind(this));
+	this.on('removeFromBattleListener', this.removeFromBattleListener.bind(this));
 	this.on('repeatMakeHitListener', this.repeatMakeHitListener.bind(this));
 	this.on('repeatSearchEnemyListener', this.repeatSearchEnemyListener.bind(this));
-
-
-
 }				
 
 Npc.prototype = Object.create(UserClass.prototype);
@@ -128,8 +126,8 @@ Npc.prototype.addToBattleListener = function() {
 
 /*
 	* Description:
-	*	Листнер окончания боя для нпц. 
-	*		1. Останавливает таймеры
+	*	Listener to remove npc from battle
+	*		1. stop battle timer
 	*	
 	*
 	* @since  01.06.15
@@ -217,7 +215,7 @@ Npc.prototype.moveNpc = function(hexesArray) {
 		// Используем moveActionTime, потому что дейсвтие должно быть сделано по таймеру движения. 
 		this.battleTimer = setTimeout(this.searchEnemyInArea().bind(this), this.userData.stats.hitActionTime * 1000);
 	}
-}
+};
 
 
 /*
@@ -245,7 +243,7 @@ Npc.prototype.tryToHitNpc = function(hexesArray) {
 			this.findHexIdToMove();
 		}
 	}
-}
+};
 
 
 /*

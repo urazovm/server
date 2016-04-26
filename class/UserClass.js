@@ -619,15 +619,13 @@ User.prototype.removeFromBattle = function(data) {
 	console.log("REMOVE FROM BATTLE");
 	this.updateStats({currentHp: (this.userData.stats.hp - this.userData.stats.currentHp)});
 	this.userData.isAliveFlag = true;
-	
 
 	this.userData.inBattleFlag = false;
 	delete this.userData.battleId;
 	delete this.userData.teamId;
 	delete this.userData.hexId;
 	
-	// TODO: переделать эту проверку
-	(this.removeFromBattleListener) ? this.removeFromBattleListener() : 0;
+	this.emit('removeFromBattleListener');
 };
 
 

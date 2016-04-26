@@ -35,7 +35,7 @@ BMClass.prototype.initialize = function(callback)
 	eventEmitter.on("battleSearchEnemyInArea", this.searchEnemyInAreaListener.bind(this));
 	
 	callback();
-}
+};
 
 
 
