@@ -661,6 +661,41 @@ User.prototype.getDamage = function(damage, callback) {
 };
 
 
+/*
+	* Description: Calulate completion data
+	*
+	*
+	* @since  27.04.16
+	* @author pcemma
+*/
+User.prototype.calculateCompletionData = function(data) {
+	var winFlag = (this.userData.teamId === data.winTeamId);
+	this.userData.winBattleFlag = winFlag;
+
+	this.calculateCompletionExp();
+
+};
+
+
+/*
+	* Description: Calulate exp for hero after battle
+	*
+	*
+	*
+	* @since  27.04.16
+	* @author pcemma
+*/
+User.prototype.calculateCompletionExp = function() {
+	var expCount = 5;
+	if(this.userData.winBattleFlag) {
+		expCount = 10;
+	}
+
+	
+
+};
+
+
 
 
 

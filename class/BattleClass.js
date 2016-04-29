@@ -99,6 +99,9 @@ BattleClass.prototype.check = function() {
 */
 BattleClass.prototype.checkEndOfBattle = function() {
 	console.log("CHECK IF HEROES ARE DAED!");
+		
+	//TODO: возмжно надо проставить всем героям выиграл он бой или нет. будет удобно
+
 	if(!this.isAliveHeroesInTeam(1)) {
 		console.log("DONT OPEN!! DEAD INSIDE!!! TEAM 2");
 		this.completion({winTeamId: 2});	
@@ -114,35 +117,81 @@ BattleClass.prototype.checkEndOfBattle = function() {
 	*	function Заканчивает бой
 	*	
 	*	@data: array
-	*		@winTeamId: int, ид команды,которая выиграла бой
+	*		@winTeamId: int, id of the team which won the battle
 	*
 	*
 	* @since  06.03.15
 	* @author pcemma
 */
 BattleClass.prototype.completion = function(data) {	
-	//TODO: Надо переделать async плюс ответы каждому о его статах и данных после боя
+	var queues = [];
+	
+	queues.push(this.emitEndBattleOnClients.bind(this, data));
+	
+	queues.push(this.removeAllHeroes.bind(this, data));
 
-	// 1. Пройтись по всем юзерам и поставить что они не в бою. 
-	for (var heroId in this.heroes) {
+	// TODO: Статистика
+
+	async.waterfall(queues,
+		function(err) { 
+			Mongo.update({
+				collection: 'game_Battles', 
+				searchData: {_id: this.id}, 
+				insertData: {$set: {endFlag: true}},
+				callback: function() {
+					eventEmitter.emit("endBattle", {id: this.id}); 
+				}.bind(this)
+			});			
+		}.bind(this)
+	);
+};
+
+
+/*
+	* Description:
+	*	function Remove all heroes from battle
+	*	
+	*	@data: array
+	*		@winTeamId: int, id of the team which won the battle
+	*
+	* @since  26.04.16
+	* @author pcemma
+*/
+BattleClass.prototype.removeAllHeroes = function(data, callback) {	
+	for(var heroId in this.heroes) {
+		this.heroes[heroId].calculateCompletionData(data);
 		this.heroes[heroId].removeFromBattle();
 	}
-	
-	
+	callback();
+};
+
+
+/*
+	* Description:
+	*	function Send to all users that battle was finished
+	*	
+	*	@data: array
+	*		@winTeamId: int, id of the team which won the battle
+	*
+	*
+	* @since  26.04.16
+	* @author pcemma
+*/
+BattleClass.prototype.emitEndBattleOnClients = function(data, callback) {	
 	this.sendData(this.getAllHeroesId(), {
 		f: "battleCompletion", 
 		p: {
 			winTeamId: data.winTeamId
 		}
 	});
-	
-	// TODO: Статистика
-	
-	// Обновление таблиц
-	Mongo.update({collection: 'game_Battles', searchData: {_id: this.id}, insertData: {$set: {endFlag: true}}});			
-	
-	eventEmitter.emit("endBattle", {id: this.id});
+	callback();
 };
+
+
+
+
+
+
 
 
 
