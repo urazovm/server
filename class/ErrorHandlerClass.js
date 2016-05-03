@@ -40,7 +40,7 @@ ErrorHandlerClass.prototype.logServerError = function(er) {
 			var insertData = {$set:{state: ((doc.value.state > 0) ? 2 : 0)}};
 			Mongo.update({
 				collection: 'game_ErrorsServerList', 
-				searchData: {_id: doc.value._id}, 
+				searchData: {_id: Mongo.objectId(doc.value._id)}, 
 				insertData: insertData
 			});
 			
@@ -102,7 +102,7 @@ ErrorHandlerClass.prototype.logClientError = function (er) {
 				}
 				Mongo.update({
 					collection: 'game_ErrorsClientList', 
-					searchData: {_id: doc.value._id}, 
+					searchData: {_id: Mongo.objectId(doc.value._id)}, 
 					insertData: insertData
 				});
 				

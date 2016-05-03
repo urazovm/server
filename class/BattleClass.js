@@ -125,9 +125,9 @@ BattleClass.prototype.checkEndOfBattle = function() {
 */
 BattleClass.prototype.completion = function(data) {	
 	var queues = [];
-	
 	queues.push(this.emitEndBattleOnClients.bind(this, data));
-	
+	queues.push(this.calculateHeroesCompletionData.bind(this, data));
+	queues.push(this.sendCompletitionDataToClients.bind(this));
 	queues.push(this.removeAllHeroes.bind(this, data));
 
 	// TODO: Статистика
@@ -136,7 +136,7 @@ BattleClass.prototype.completion = function(data) {
 		function(err) { 
 			Mongo.update({
 				collection: 'game_Battles', 
-				searchData: {_id: this.id}, 
+				searchData: {_id: Mongo.objectId(this.id)}, 
 				insertData: {$set: {endFlag: true}},
 				callback: function() {
 					eventEmitter.emit("endBattle", {id: this.id}); 
@@ -144,25 +144,6 @@ BattleClass.prototype.completion = function(data) {
 			});			
 		}.bind(this)
 	);
-};
-
-
-/*
-	* Description:
-	*	function Remove all heroes from battle
-	*	
-	*	@data: array
-	*		@winTeamId: int, id of the team which won the battle
-	*
-	* @since  26.04.16
-	* @author pcemma
-*/
-BattleClass.prototype.removeAllHeroes = function(data, callback) {	
-	for(var heroId in this.heroes) {
-		this.heroes[heroId].calculateCompletionData(data);
-		this.heroes[heroId].removeFromBattle();
-	}
-	callback();
 };
 
 
@@ -187,6 +168,81 @@ BattleClass.prototype.emitEndBattleOnClients = function(data, callback) {
 	callback();
 };
 
+
+/*
+	* Description:
+	*	function Calculate all heroes after battle data
+	*	
+	*	@data: array
+	*		@winTeamId: int, id of the team which won the battle
+	*
+	* @since  03.05.16
+	* @author pcemma
+*/
+BattleClass.prototype.calculateHeroesCompletionData = function(data, callback) {	
+	var queues = [];
+	for(var heroId in this.heroes) {
+		var hero = this.heroes[heroId];
+		queues.push(hero.calculateCompletionData.bind(hero, data));
+	}
+	async.waterfall(queues,
+		function(err) { 
+			callback();
+		}
+	);
+};
+
+
+/*
+	* Description:
+	*	function Send to all users that battle was finished
+	*	
+	*	@data: array
+	*		@winTeamId: int, id of the team which won the battle
+	*
+	*
+	* @since  26.04.16
+	* @author pcemma
+*/
+BattleClass.prototype.sendCompletitionDataToClients = function(callback) {	
+	var sendData = {};
+	for(var heroId in this.heroes) {
+		sendData[heroId] = this.heroes[heroId].battleData;
+	}
+	
+	this.sendData(this.getAllHeroesId(), {
+		f: "getCompletionHeroesData", 
+		p: sendData
+	});
+	callback();
+};
+
+
+/*
+	* Description:
+	*	function Remove all heroes from battle
+	*	
+	*	@data: array
+	*		@winTeamId: int, id of the team which won the battle
+	*
+	* @since  26.04.16
+	* @author pcemma
+*/
+BattleClass.prototype.removeAllHeroes = function(data, callback) {	
+	var queues = [];
+
+	for(var heroId in this.heroes) {
+		var hero = this.heroes[heroId];
+		// TODO: вот тут таки разбить на 2 метода. а межд ними отправка юзеру объекта с данными про окончание боя
+		queues.push(hero.clearBattleData.bind(hero));
+	}
+
+	async.waterfall(queues,
+		function(err) { 
+			callback();
+		}
+	);
+};
 
 
 
@@ -383,6 +439,8 @@ BattleClass.prototype.heroMakeHit = function(data, callback) {
 				//TODO: считать увернулся ли противник
 				
 				//TODO: посчитать броню противника
+
+				//TODO: добавить нанесеный урон в battleData
 
 				// Обновляем противнику его текущее значение хп
 				queues.push(oponentHero.getDamage.bind(oponentHero, damage));

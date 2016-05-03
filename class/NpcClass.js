@@ -6,6 +6,7 @@ var GLOBAL = require("./PreloadDataClass.js"),
 
 function Npc() {
 	this.dbName = 'game_Npcs';
+	this.isUser = false;
 	// USER DATA
 	this.userData = {};
 
@@ -42,6 +43,7 @@ Npc.prototype.addDefaultUser = function(data, callback) {
 			userData: {
 				npcId: data.npcId,
 				login: GLOBAL.DATA.npcsInfo[data.npcId].name,
+				level: GLOBAL.DATA.npcsInfo[data.npcId].level,
 				lastActionTime: 0,
 				inBattleFlag: false,
 				isAliveFlag: true,

@@ -19,11 +19,12 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		this.getTownBuildingsTypes.bind(this),
 		this.getTownBuildingsList.bind(this),
 		
+		//OTHERS
 		this.getStats.bind(this),
 		this.getHeroClasses.bind(this),
-		
+		this.getHeroLevels.bind(this),
 
-
+		//BATTLE
 		this.getBattleInfo.bind(this),
 		
 		// ITEMS
@@ -372,6 +373,26 @@ PreloadDataClass.prototype.getHeroClasses = function(callback) {
 	}.bind(this)});
 };
 
+
+/*
+	* Description:
+	*	Get list of levels
+	*	
+	*
+	* @since  30.04.16
+	* @author pcemma
+*/
+PreloadDataClass.prototype.getHeroLevels = function(callback) {	
+	this.DATA.heroLevels = {};
+	
+	Mongo.find({collection: 'game_HeroLevels', callback: function(rows) {
+		for(var i in rows) {
+			var levelId = rows[i].id.toString();
+			this.DATA.heroLevels[levelId] = rows[i];
+		}
+		callback();
+	}.bind(this)});
+};
 
 
 

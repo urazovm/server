@@ -66,7 +66,6 @@ GridClass.prototype.fill = function() {
 			if(!(dy === 1 && i === this.hexesInRow)) { // не рисуем в четных рядах последний гекс для красивого отображения сетки
 				
 				var newHex = new HexagonClass({x: x, y: y, isObstruction: isObstruction});
-				console.log("x.y", x,y, newHex.cubeCoordinats);
 				tmpArray[newHex.getId()] = newHex;
 			}
 		}

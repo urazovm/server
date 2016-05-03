@@ -6,6 +6,7 @@ var async = require("async"),
 	Mongo = require("./MongoDBClass.js"),
 	GLOBAL = require("./PreloadDataClass.js"),
 	StatsManagerClass = require("./StatsManagerClass.js"),
+	LevelsManagerClass = require("./LevelsManagerClass.js"),
 	ItemClass = require("./ItemClass.js"),
 	utils = require("./UtilsClass.js");
 
@@ -13,7 +14,9 @@ var async = require("async"),
 function User() {
 
 	this.dbName = 'game_Users';
-	
+	this.isUser = true;
+
+
 	// USER DATA
 	this.autoConfigData = {};
 	
@@ -22,8 +25,14 @@ function User() {
 						// stuff: {}, 	// Надетые вещи
 						// stats: {} 	// Статы юзера
 					};
+
+	// this.on("test", this.test.bind(this));
 }
+
+
 User.prototype = Object.create(eventemitter2.prototype);
+
+
 
 
 /*
@@ -166,9 +175,11 @@ User.prototype.addDefaultUser = function(data, callback) {
 				lastActionTime: 0,
 				inBattleFlag: false,
 				isAliveFlag: true,
+				level: 1,
 				items:{},
 				stuff: {},
-				stats: this.getDefaultStats("55fb3de3445254e819e3ad11") // TODO: это переделать!
+				// TODO: это переделать!
+				stats: this.getDefaultStats("55fb3de3445254e819e3ad11") 
 			},
 		}, 
 		callback: function(rows) {
@@ -256,7 +267,7 @@ User.prototype.updateClientInfo = function(data, callback) {
 			clientVersion: (data.clientVersion) ? data.clientVersion : "",
 			ip: (data.ip) ? data.ip : ""
 		}};
-	Mongo.update({collection: this.dbName, searchData: {_id: this.userId}, insertData: insertData, callback: function(rows) { callback(); }});
+	Mongo.update({collection: this.dbName, searchData: {_id: Mongo.objectId(this.userId)}, insertData: insertData, callback: function(rows) { callback(); }});
 };
 
 
@@ -355,6 +366,8 @@ User.prototype.getUserData = function(callback) {
 
 				this.userData.stats = new StatsManagerClass(rows[0].userData.stats);
 				
+				this.userData.levels = new LevelsManagerClass(rows[0].userData.levels);
+
 				var queues = [
 					// Собираем вещи юзера. Данные про вещи текущие в коллеции game_WorldItems
 					this.getItems.bind(this)
@@ -368,7 +381,6 @@ User.prototype.getUserData = function(callback) {
 					}.bind(this)
 				);
 			}
-			// callback();	
 		}.bind(this)
 	});	
 };
@@ -543,6 +555,12 @@ User.prototype.setBattleData = function(battleData, callback) {
 			this.userData[stat] = battleData[stat];
 		}
 	}.bind(this));
+
+	this.battleData = {
+		damageDone: 0,
+		damageGet: 0
+	};
+
 	callback();
 };
 
@@ -603,33 +621,6 @@ User.prototype.setLastActionTime = function(action) {
 
 
 /*
-	* Description: Функция удаляет героя из боя.
-	*
-	*	@data:	arr,
-	*		battleId: 	int, ид боя
-	*		teamId: 	int, ид команды
-	*		hexId: 		int, ид гекса 
-	*
-	*
-	* @since  06.03.15
-	* @author pcemma
-*/
-User.prototype.removeFromBattle = function(data) {
-	// TODO: это временное решение для того что бы можно было сразу вступить в бой заново!
-	console.log("REMOVE FROM BATTLE");
-	this.updateStats({currentHp: (this.userData.stats.hp - this.userData.stats.currentHp)});
-	this.userData.isAliveFlag = true;
-
-	this.userData.inBattleFlag = false;
-	delete this.userData.battleId;
-	delete this.userData.teamId;
-	delete this.userData.hexId;
-	
-	this.emit('removeFromBattleListener');
-};
-
-
-/*
 	* Description: Функция считает удар, который герой может нанести
 	*
 	*
@@ -662,18 +653,61 @@ User.prototype.getDamage = function(damage, callback) {
 
 
 /*
+	* Description: Clear data after battle
+	*
+	*
+	*
+	* @since  03.05.16
+	* @author pcemma
+*/
+User.prototype.clearBattleData = function(callback) {
+	// TODO: это временное решение для того что бы можно было сразу вступить в бой заново!
+	this.updateStats({currentHp: (this.userData.stats.hp - this.userData.stats.currentHp)});
+	this.userData.isAliveFlag = true;
+
+	this.userData.inBattleFlag = false;
+	delete this.userData.battleId;
+	delete this.userData.teamId;
+	delete this.userData.hexId;
+	
+	// Start listner for removing from battle
+	this.emit('removeFromBattleListener');
+
+	callback();
+};
+
+
+/*
+	* Description: set battle win flag. 
+	*
+	*	@winTeamId: int, id of the team wich won the battle
+	*
+	*
+	* @since  30.04.16
+	* @author pcemma
+*/
+User.prototype.setBattleWinFlag = function(winTeamId) {
+	this.userData.winBattleFlag = (this.userData.teamId === winTeamId);
+};
+
+
+/*
 	* Description: Calulate completion data
 	*
+	*	@winTeamId: int, id of the team wich won the battle
 	*
 	* @since  27.04.16
 	* @author pcemma
 */
-User.prototype.calculateCompletionData = function(data) {
-	var winFlag = (this.userData.teamId === data.winTeamId);
-	this.userData.winBattleFlag = winFlag;
+User.prototype.calculateCompletionData = function(data, callback) {
+	var queues = [];
+	this.setBattleWinFlag(data.winTeamId);
+	
+	queues.push(this.calculateCompletionHeroExp.bind(this));
 
-	this.calculateCompletionExp();
-
+	async.waterfall(queues, function(err) {
+		callback();	
+	}.bind(this));
 };
 
 
@@ -685,14 +719,16 @@ User.prototype.calculateCompletionData = function(data) {
 	* @since  27.04.16
 	* @author pcemma
 */
-User.prototype.calculateCompletionExp = function() {
+User.prototype.calculateCompletionHeroExp = function(callback) {
 	var expCount = 5;
 	if(this.userData.winBattleFlag) {
 		expCount = 10;
 	}
 
-	
+	this.battleData.heroExp = expCount;
 
+
+	this.updateExp(expCount, "heroLevel", callback);
 };
 
 
@@ -949,7 +985,7 @@ User.prototype.hasItem = function(worldItemId) {
 
 /*
 	* Description:
-	*	Проверяет есть ли вещь у пользователя
+	*	Update stats
 	*	
 	*	@data:	obj, список статов ввиде {statName: value}
 	*		
@@ -970,7 +1006,7 @@ User.prototype.updateStats = function(data, callback) {
 
 /*
 	* Description:
-	*	Проверяет есть ли вещь у пользователя
+	*	Update stats in db for user
 	*	
 	*	@updatedStats:	obj, список статов ввиде {statName: value}
 	*		
@@ -985,7 +1021,7 @@ User.prototype.updateStatsInDb = function(updatedStats, callback) {
 	});
 	Mongo.update({
 		collection: this.dbName,
-		searchData: {_id: this.userId},
+		searchData: {_id: Mongo.objectId(this.userId)},
 		insertData: {$inc: insertData},
 		callback: function() {
 			// console.log("AFTER:", this.userData.stats);
@@ -997,5 +1033,52 @@ User.prototype.updateStatsInDb = function(updatedStats, callback) {
 
 
 
+
+/*****************	Levels	******************/
+
+/*
+	* Description:
+	*	Update level for user
+	*	
+	*	@exp: 			int, added experience value
+	*	@levelName: str, the name of the level which need to update
+	*	@callback: 	func, callback function
+	*
+	* @since  02.05.16
+	* @author pcemma
+*/
+User.prototype.updateExp = function(exp, levelName, callback) {
+	if(this.isUser) {
+		this.userData.levels.updateExp(exp, levelName);
+		console.log("\n\n updateExp");
+		this.updateExpInDb(levelName, callback);
+	} else {
+		callback();
+	}
+}
+
+
+/*
+	* Description:
+	*	Update level in db for user
+	*	
+	*
+	*		
+	*
+	* @since  02.05.16
+	* @author pcemma
+*/
+User.prototype.updateExpInDb = function(levelName, callback) {
+	var insertData = {};
+	insertData["userData.levels." + levelName] = this.userData.levels[levelName];
+	Mongo.update({
+		collection: this.dbName,
+		searchData: {_id: Mongo.objectId(this.userId)},
+		insertData: {$set: insertData},
+		callback: function() {
+			if(callback) { callback(); }
+		}.bind(this)
+	});
+};
 
 module.exports = User;
