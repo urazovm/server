@@ -5,10 +5,13 @@ var GLOBAL = require("./PreloadDataClass.js"),
 	UserClass = require("./UserClass.js");
 
 function Npc() {
+	UserClass.call(this);
+
 	this.dbName = 'game_Npcs';
 	this.isUser = false;
+
 	// USER DATA
-	this.userData = {};
+	// this.userData = {};
 
 	this.on('addToBattleListener', this.addToBattleListener.bind(this));
 	this.on('removeFromBattleListener', this.removeFromBattleListener.bind(this));
