@@ -26,6 +26,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 
 		//BATTLE
 		this.getBattleInfo.bind(this),
+		this.getShotsInfo.bind(this),
 		
 		// ITEMS
 		this.getInventorySlotsList.bind(this),
@@ -318,6 +319,27 @@ PreloadDataClass.prototype.getBattleInfo = function(callback) {
 	this.DATA.battleInfo = {};
 	Mongo.find({collection: 'game_BattleInfo', callback: function(rows) {
 		this.DATA.battleInfo = rows[0];
+		callback();
+	}.bind(this)});
+};
+
+
+/*
+	* Description:
+	*	Shots info
+	*	
+	*	
+	*
+	* @since  30.05.16
+	* @author pcemma
+*/
+PreloadDataClass.prototype.getShotsInfo = function(callback) {
+	this.DATA.shotsInfo = {};
+	Mongo.find({collection: 'game_ShotsInfo', callback: function(rows) {
+		for(var i in rows) { 
+			var shotId = String(rows[i]._id);
+			this.DATA.shotsInfo[shotId] = rows[i];
+		}
 		callback();
 	}.bind(this)});
 };
