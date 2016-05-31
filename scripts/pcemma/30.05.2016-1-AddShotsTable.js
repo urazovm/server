@@ -18,7 +18,10 @@ function runScript() {
 
 
 function addTable(callback) {
-	var insertData = [{imageId: "1"}];
+	var insertData = [{
+		imageId: "1",
+		speed: 0.48
+	}];
 
 	Mongo.insert({
     collection: "game_ShotsInfo", 
