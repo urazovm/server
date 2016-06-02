@@ -20,7 +20,9 @@ function runScript() {
 function addTable(callback) {
 	var insertData = [{
 		imageId: "1",
-		speed: 0.48
+		speed: 2,
+		w: 178,
+		h: 112
 	}];
 
 	Mongo.insert({
