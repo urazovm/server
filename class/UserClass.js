@@ -307,6 +307,15 @@ User.prototype.authorization = function(data, callback) {
 	// Обновление инфы об пользователе. Uid, ip etc.
 	queues.push(this.updateClientInfo.bind(this, data));
 	
+
+
+	// queues.push(this.addItem.bind(this, {
+	// 	stats: GLOBAL.DATA.items["57518878bcc3a5b02294650f"].stats,
+	// 	itemId: "57518878bcc3a5b02294650f",
+	// 	count: 1
+	// }));
+	
+
 	// Сбор данных о юзере.
 	queues.push(this.getUserData.bind(this));
 	
