@@ -1,14 +1,15 @@
 console.log("User CLASS is connected");	
 
-var async = require("async"),
-	crypto = require('crypto'),
-	eventemitter2 = require("eventemitter2"),
-	Mongo = require("./MongoDBClass.js"),
-	GLOBAL = require("./PreloadDataClass.js"),
-	StatsManagerClass = require("./StatsManagerClass.js"),
-	LevelsManagerClass = require("./LevelsManagerClass.js"),
-	ItemClass = require("./ItemClass.js"),
-	utils = require("./UtilsClass.js");
+var async 								= require("async"),
+	crypto 									= require('crypto'),
+	eventemitter2 					= require("eventemitter2"),
+	Mongo 									= require("./MongoDBClass.js"),
+	GLOBAL 									= require("./PreloadDataClass.js"),
+	StatsManagerClass 			= require("./StatsManagerClass.js"),
+	LevelsManagerClass 			= require("./LevelsManagerClass.js"),
+	StuffItemsManagerClass 	= require("./StuffItemsManagerClass.js"),
+	ItemClass 							= require("./ItemClass.js"),
+	utils 									= require("./UtilsClass.js");
 
 
 function User() {
@@ -759,18 +760,21 @@ User.prototype.calculateCompletionHeroExp = function(callback) {
 User.prototype.getItems = function(callback) {
 	console.log("GET ITEMS!!!");
 	Mongo.find({collection: 'game_WorldItems', searchData: {userId: Mongo.objectId(this.userId)}, callback: function(rows) {
+		this.userData.items = {};
+		this.userData.stuff = new StuffItemsManagerClass();
+
 		for(var i in rows) {
 			var worldItemId = rows[i]._id.toHexString();
 			this.userData.items[worldItemId] = new ItemClass(rows[i]);
-			console.log(this.userData.items[worldItemId]);
-			//Собираем данные о надетых вещах. 
-			// TODO: Вынести это в отдельный метод, который собирает надетый стафф! 
+			
 			for(var j in rows[i].inventorySlotId) {
-				var invetnorySlotId = String(rows[i].inventorySlotId[j]);
-				this.userData.stuff[invetnorySlotId] = {
-														userItemId: worldItemId,
-														itemId: 	rows[i].itemId
-													};
+				var inventorySlotId = String(rows[i].inventorySlotId[j]);
+				var stuffItem = {
+					userItemId: worldItemId,
+					itemId: 		rows[i].itemId,
+					inventorySlotId: inventorySlotId
+				};
+				this.userData.stuff.addItem(stuffItem);
 			}
 		}
 		callback();
@@ -865,8 +869,8 @@ User.prototype.wearOnItem = function(data) {
 User.prototype.wearOffItems = function(inventorySlots, callback) {
 	var queues = [];
 	for(var inventorySlotId in inventorySlots) {
-		if(inventorySlotId in this.userData.stuff) {
-			var userItemId = this.userData.stuff[inventorySlotId].userItemId;
+		if(this.userData.stuff.isInventorySlotFree(inventorySlotId)) {
+			var userItemId = this.userData.stuff.getUserItemId(inventorySlotId);
 			queues.push(this.wearOffItem.bind(this, {itemId: userItemId}));
 		}
 	}
@@ -929,13 +933,15 @@ User.prototype.wearOffItem = function(data, callback) {
 	* @author pcemma
 */
 User.prototype.addItemToStuff = function(data, callback) {
+	console.log("data", data);
 	var inventorySlotsArray = [],
 		userItemId = data.userItemId,
 		itemId = data.itemId;
 	// Проход по всем слотам, в которые надо надеть вещь, и добавление данных о вещи.
 	for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots) {
+		data.inventorySlotId = inventorySlotId;
 		inventorySlotsArray.push(inventorySlotId);
-		this.userData.stuff[inventorySlotId] = data;
+		this.userData.stuff.addItem(data);
 	}
 
 	this.userData.items[userItemId].setToInventorySlot(inventorySlotsArray, callback);
@@ -959,12 +965,7 @@ User.prototype.removeItemFromStuff = function(data, callback) {
 		itemId = data.itemId;
 	// Проход по всем слотам, в которых надета вещь, и удаление данных о вещи.
 	for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots) {
-		if(
-			inventorySlotId in this.userData.stuff && // проверка на что слот такой занят
-			this.userData.stuff[inventorySlotId].userItemId === userItemId // Проверка что это именна та вещь вслоте, которую пытаются снять
-		) {
-			delete this.userData.stuff[inventorySlotId];
-		}
+		this.userData.stuff.removeItem(inventorySlotId, userItemId);
 	}
 	this.userData.items[userItemId].setToInventorySlot([], callback);
 };
