@@ -311,8 +311,8 @@ User.prototype.authorization = function(data, callback) {
 
 
 	// queues.push(this.addItem.bind(this, {
-	// 	stats: GLOBAL.DATA.items["57518878bcc3a5b02294650f"].stats,
-	// 	itemId: "57518878bcc3a5b02294650f",
+	// 	stats: GLOBAL.DATA.items["57529dcd89b8546c31c2e79e"].stats,
+	// 	itemId: "57529dcd89b8546c31c2e79e",
 	// 	count: 1
 	// }));
 	
@@ -585,7 +585,7 @@ User.prototype.setBattleData = function(battleData, callback) {
 	* @author pcemma
 */
 User.prototype.getUserDataForBattle = function() {
-	var dataArray = ['battleId', 'teamId', 'isAliveFlag', 'hexId', 'login', 'stats', 'stuff'],
+	var dataArray = ['battleId', 'teamId', 'isAliveFlag', 'hexId', 'login', 'stats', 'stuff', 'shotId'],
 		info = {
 			id: this.userId,
 			npcId: this.userData.npcId,
@@ -596,6 +596,8 @@ User.prototype.getUserDataForBattle = function() {
 			info[element] = this.userData[element];
 		}
 	}.bind(this));
+
+	console.log("info.stuff");
 	return info;
 };
 
@@ -869,7 +871,7 @@ User.prototype.wearOnItem = function(data) {
 User.prototype.wearOffItems = function(inventorySlots, callback) {
 	var queues = [];
 	for(var inventorySlotId in inventorySlots) {
-		if(this.userData.stuff.isInventorySlotFree(inventorySlotId)) {
+		if(this.userData.stuff.isInventorySlotFull(inventorySlotId)) {
 			var userItemId = this.userData.stuff.getUserItemId(inventorySlotId);
 			queues.push(this.wearOffItem.bind(this, {itemId: userItemId}));
 		}
@@ -933,7 +935,6 @@ User.prototype.wearOffItem = function(data, callback) {
 	* @author pcemma
 */
 User.prototype.addItemToStuff = function(data, callback) {
-	console.log("data", data);
 	var inventorySlotsArray = [],
 		userItemId = data.userItemId,
 		itemId = data.itemId;

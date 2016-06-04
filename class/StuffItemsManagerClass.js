@@ -39,7 +39,7 @@ StuffItemsManagerClass.prototype.addItem = function(item) {
 */
 StuffItemsManagerClass.prototype.removeItem = function(inventorySlotId, userItemId) {
 	if(
-			this.isInventorySlotFree(inventorySlotId) && // Check is slot free
+			this.isInventorySlotFull(inventorySlotId) && // Check is slot free
 			this.getUserItemId(inventorySlotId) === userItemId // Check is the same item we want to wear off
 		) {
 			delete this[inventorySlotId];
@@ -73,7 +73,7 @@ StuffItemsManagerClass.prototype.getUserItemId = function(inventorySlotId) {
 	* @since  03.06.16
 	* @author pcemma
 */
-StuffItemsManagerClass.prototype.isInventorySlotFree = function(inventorySlotId) {
+StuffItemsManagerClass.prototype.isInventorySlotFull = function(inventorySlotId) {
 	return (inventorySlotId in this);
 };
 
