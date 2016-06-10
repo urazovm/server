@@ -176,9 +176,14 @@ User.prototype.addDefaultUser = function(data, callback) {
 				lastActionTime: 0,
 				inBattleFlag: false,
 				isAliveFlag: true,
-				level: 1,
 				items:{},
 				stuff: {},
+				levels: {
+					heroLevel: {
+						exp: 0, 
+						level: 1
+					}
+				},
 				// TODO: это переделать!
 				stats: this.getDefaultStats("55fb3de3445254e819e3ad11") 
 			},
@@ -596,8 +601,6 @@ User.prototype.getUserDataForBattle = function() {
 			info[element] = this.userData[element];
 		}
 	}.bind(this));
-
-	console.log("info.stuff");
 	return info;
 };
 
