@@ -2,6 +2,8 @@ console.log("SERVER CLASS is connected");
 var net = require('net'),
 	domain = require('domain'),
 	async = require('async'),
+	mongoose = require("mongoose"),
+
 
 	// add personal config package
 	config = require("./../config/personal_config.js"),
@@ -24,6 +26,11 @@ function ServerClass() {
 
 
 ServerClass.prototype.start = function() {
+	
+	mongoose.connect("mongodb://127.0.0.1/pcemmaDb");
+
+	
+
 	var queues = [
 		Mongo.connect.bind(Mongo),
 		GLOBAL.initialize.bind(GLOBAL),

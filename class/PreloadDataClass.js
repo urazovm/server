@@ -1,6 +1,12 @@
 console.log("PreloadData CLASS is connected");	
 
+require("../models/TownsModel");
+
 var async = require("async"),
+	mongoose = require("mongoose"),
+
+	
+
 	Mongo = require("./MongoDBClass.js"),
 	utils = require("./UtilsClass.js");
 
@@ -96,6 +102,11 @@ PreloadDataClass.prototype.getGlobalData = function(data) {
 */
 PreloadDataClass.prototype.getTownsList = function(callback) {
 	this.DATA.towns = {};
+
+	mongoose.model('game_towns').find(function(err, towns) {
+		console.log("TOWNS:", towns);
+	});
+
 	Mongo.find({collection: 'game_Towns', callback: function(rows) {
 		for(var i in rows) {
 			rows[i].id = String(rows[i].id);
