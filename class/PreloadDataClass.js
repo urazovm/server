@@ -1,6 +1,8 @@
 console.log("PreloadData CLASS is connected");	
 
 require("../models/TownsModel");
+require("../models/TownsBuildingsModel");
+require("../models/TownsBuildingsTypesModel");
 
 var async = require("async"),
 	mongoose = require("mongoose"),
@@ -23,7 +25,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		// TOWNS 
 		this.getTownsList.bind(this),
 		this.getTownBuildingsTypes.bind(this),
-		this.getTownBuildingsList.bind(this),
+		// this.getTownBuildingsList.bind(this),
 		
 		//OTHERS
 		this.getStats.bind(this),
@@ -100,24 +102,19 @@ PreloadDataClass.prototype.getGlobalData = function(data) {
 	* @since  21.07.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getTownsList = function(callback) {
+PreloadDataClass.prototype.getTownsList = function (callback) {
 	this.DATA.towns = {};
 
-	mongoose.model('game_towns').find(function(err, towns) {
-		console.log("TOWNS:", towns);
-	});
-
-	Mongo.find({collection: 'game_Towns', callback: function(rows) {
+	mongoose.model('game_towns').find().populate('buildings').exec(function (err, rows) {
 		for(var i in rows) {
-			rows[i].id = String(rows[i].id);
-			this.DATA.towns[rows[i].id] = {
-				id: rows[i].id,
-				ruName: rows[i].ruName,
-				enName: rows[i].enName
+			rows[i]._id = String(rows[i]._id);
+			this.DATA.towns[rows[i]._id] = {
+				name: rows[i].name,
+				buildings: this.getTownBuildingsList(rows[i].buildings)
 			};
 		}
 		callback();
-	}.bind(this)});
+	}.bind(this));
 };
 
 
@@ -134,16 +131,13 @@ PreloadDataClass.prototype.getTownsList = function(callback) {
 */
 PreloadDataClass.prototype.getTownBuildingsTypes = function(callback) {
 	this.DATA.buildingsTypes = {};
-	Mongo.find({collection: 'game_TownsBuildingsTypes', callback: function(rows) {
+	mongoose.model('game_townsBuildingsTypes').find(function (err, rows) {
 		for(var i in rows) {
-			rows[i].id = String(rows[i].id);
-			this.DATA.buildingsTypes[rows[i].id] = {
-				id: rows[i].id,
-				name: rows[i].name
-			};
+			rows[i]._id = String(rows[i]._id);
+			this.DATA.buildingsTypes[rows[i]._id] = rows[i];
 		}
 		callback();
-	}.bind(this)});
+	}.bind(this));
 };
 
 
@@ -157,16 +151,14 @@ PreloadDataClass.prototype.getTownBuildingsTypes = function(callback) {
 	* @since  14.06.15
 	* @author pcemma
 */
-PreloadDataClass.prototype.getTownBuildingsList = function(callback) {
-	this.DATA.buildings = {};
-	Mongo.find({collection: 'game_TownsBuildings', callback: function(rows) {
-		for(var i in rows) {
-			rows[i].id = String(rows[i].id);
-			rows[i].townId = String(rows[i].townId);
-			this.DATA.buildings[rows[i].id] = rows[i];
-		}
-		callback();
-	}.bind(this)});	
+PreloadDataClass.prototype.getTownBuildingsList = function(buildingArray) {
+	var buildings = {};
+	buildingArray.forEach(function (element, index, array) {
+		element._id = String(element._id);
+		element.townId = String(element.townId);
+		buildings[element._id] = element;
+	});
+	return buildings;
 };
 
 

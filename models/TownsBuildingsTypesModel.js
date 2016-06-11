@@ -3,16 +3,15 @@ var mongoose = require("mongoose"),
 	config = require("../config/personal_config.js"),
 	Schema = mongoose.Schema,
 	connection = mongoose.createConnection(config.dbConfig.name);
-	townsSchema = new Schema({
-    name: String,
-    buildings: [{ type: Number, ref: 'game_townsBuildings' }]
+	townsBuildingsTypesSchema = new Schema({
+    name : String
 });
 
 autoIncrement.initialize(connection);
 
-townsSchema.plugin(autoIncrement.plugin, {
-	model: 'game_towns', 
+townsBuildingsTypesSchema.plugin(autoIncrement.plugin, {
+	model: 'game_townsBuildingsTypes', 
 	startAt: 1
 });
 
-mongoose.model('game_towns', townsSchema);
+mongoose.model('game_townsBuildingsTypes', townsBuildingsTypesSchema);
