@@ -25,7 +25,6 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		// TOWNS 
 		this.getTownsList.bind(this),
 		this.getTownBuildingsTypes.bind(this),
-		// this.getTownBuildingsList.bind(this),
 		
 		//OTHERS
 		this.getStats.bind(this),
@@ -52,6 +51,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		function(err) {
 			// All tasks are done now
 			console.log("GLOBAL is initialized!!!");
+			// console.log(this.DATA.buildingsTypes);
 			callback();
 		}.bind(this)
 	)
@@ -94,25 +94,17 @@ PreloadDataClass.prototype.getGlobalData = function(data) {
 
 /*
 	* Description:
-	*	Собирает список городов
+	*	Get all towns
 	*	
-	*	
-	*	
+	*	@callback: func, call back function
 	*
 	* @since  21.07.15
 	* @author pcemma
 */
 PreloadDataClass.prototype.getTownsList = function (callback) {
 	this.DATA.towns = {};
-
-	mongoose.model('game_towns').find().populate('buildings').exec(function (err, rows) {
-		for(var i in rows) {
-			rows[i]._id = String(rows[i]._id);
-			this.DATA.towns[rows[i]._id] = {
-				name: rows[i].name,
-				buildings: this.getTownBuildingsList(rows[i].buildings)
-			};
-		}
+	mongoose.model('game_towns').getAllTowns(function(towns) {
+		this.DATA.towns = towns;
 		callback();
 	}.bind(this));
 };
@@ -120,46 +112,23 @@ PreloadDataClass.prototype.getTownsList = function (callback) {
 
 /*
 	* Description:
-	*	Собирает список типов зданий вгороде
+	*	Get all town buildings types
 	*	
-	*	
-	*	
-	*	
+	*	@callback: func, call back function
 	*
 	* @since  17.06.15
 	* @author pcemma
 */
 PreloadDataClass.prototype.getTownBuildingsTypes = function(callback) {
 	this.DATA.buildingsTypes = {};
-	mongoose.model('game_townsBuildingsTypes').find(function (err, rows) {
-		for(var i in rows) {
-			rows[i]._id = String(rows[i]._id);
-			this.DATA.buildingsTypes[rows[i]._id] = rows[i];
-		}
+	mongoose.model('game_townsBuildingsTypes').getAllTownBuildingsTypes(function(types) {
+		this.DATA.buildingsTypes = types;
 		callback();
 	}.bind(this));
 };
 
 
-/*
-	* Description:
-	*	Собирает список зданийв городах
-	*	
-	*	
-	*	
-	*
-	* @since  14.06.15
-	* @author pcemma
-*/
-PreloadDataClass.prototype.getTownBuildingsList = function(buildingArray) {
-	var buildings = {};
-	buildingArray.forEach(function (element, index, array) {
-		element._id = String(element._id);
-		element.townId = String(element.townId);
-		buildings[element._id] = element;
-	});
-	return buildings;
-};
+
 
 
 
