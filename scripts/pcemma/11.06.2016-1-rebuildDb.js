@@ -2,6 +2,8 @@ require("../../models/TownsModel");
 require("../../models/TownsBuildingsModel");
 require("../../models/TownsBuildingsTypesModel");
 
+require("../../models/StatsModel");
+
 
 
 var async = require("async"),
@@ -18,7 +20,8 @@ function runScript() {
   var queues = [
     // addTowns,
     // addTownsBuildings,
-    // addTownsBuildingsTypes
+    // addTownsBuildingsTypes,
+    addStats
   ];
   async.waterfall(
     queues,
@@ -191,9 +194,9 @@ function addTownsBuildingsTypes (callback) {
   arr.forEach(function (element, index, array) {
     queues.push(function (cb) {
       mongoose.model('game_townsBuildingsTypes').create(element, function (err, rows) {
-      console.log(rows);
-      cb();
-    });
+        console.log(rows);
+        cb();
+      });
     });
   });
 
@@ -201,6 +204,207 @@ function addTownsBuildingsTypes (callback) {
     queues,
     function(err) {
       console.log("Towns buildings types were added.");
+      callback();
+    }
+  )
+}
+
+
+
+function addStats (callback) {
+  var queues = [];
+
+  var arr = [
+    {
+      "name" : "strength",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "agility",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "intuition",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "wisdom",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "intellect",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "stamina",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "luck",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "minDamage",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "maxDamage",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "dodge",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "antiDodge",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "criticalHit",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "antiCriticalHit",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "mana",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "minMagicDamage",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "maxMagicDamage",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "hp",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "capacity",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "chance",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "exp",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "currentHp",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "currentExp",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "currentMana",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "currentCapacity",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "moveActionTime",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "hitActionTime",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "actionTime",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "moveRadius",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    },
+    {
+      "name" : "attackRadius",
+      "group" : 0,
+      "order" : 0,
+      "dependStats" : {}
+    }
+  ];
+
+
+  arr.forEach(function (element, index, array) {
+    queues.push(function (cb) {
+      mongoose.model('game_stats').create(element, function (err, rows) {
+        console.log(rows);
+        cb();
+      });
+    });
+  });
+
+  async.waterfall(
+    queues,
+    function(err) {
+      console.log("Stats types were added.");
       callback();
     }
   )
