@@ -27,7 +27,7 @@ townsSchema.plugin(autoIncrement.plugin, {
 	* @since  14.06.16
 	* @author pcemma
 */
-townsSchema.statics.getAllTowns = function(callback) {
+townsSchema.statics.getAll = function(callback) {
 	var townsObject = {};
 	this.find().populate('buildings').exec(function (err, rows) {
 		rows.forEach(function (element, index, array) {

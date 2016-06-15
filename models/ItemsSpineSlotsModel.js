@@ -3,41 +3,42 @@ var mongoose = require("mongoose"),
 	config = require("../config/personal_config.js"),
 	Schema = mongoose.Schema,
 	connection = mongoose.createConnection(config.dbConfig.name);
-	townsBuildingsTypesSchema = new Schema({
-    name : String
-});
+	itemsSpineSlotsSchema = new Schema({
+    name: 		String
+	});
 
 autoIncrement.initialize(connection);
 
-townsBuildingsTypesSchema.plugin(autoIncrement.plugin, {
-	model: 'game_townsBuildingsTypes', 
+itemsSpineSlotsSchema.plugin(autoIncrement.plugin, {
+	model: 'game_itemsSpineSlots', 
 	startAt: 1
 });
 
 
 /*
 	* Description:
-	*	Get all towns buildings types from db
+	*	Get all items spine slots from db
 	*	
 	*	@callback: func, call back function
 	*	
-	* @since  14.06.16
+	*	
+	*	
+	* @since  15.06.16
 	* @author pcemma
 */
-townsBuildingsTypesSchema.statics.getAll = function(callback) {
-	var types = {};
+itemsSpineSlotsSchema.statics.getAll = function(callback) {
+	var spineSlotsObject = {};
 	this.find(function (err, rows) {
 		rows.forEach(function (element, index, array) {
 			element._id = String(element._id);
-			types[element._id] = {
-				_id: element.id,
+			spineSlotsObject[element._id] = {
+				_id: element._id,
 				name: element.name
 			};
-		});
-		callback(types);
-	});
+		}.bind(this));
+		callback(spineSlotsObject);
+	}.bind(this));
 }
 
 
-
-mongoose.model('game_townsBuildingsTypes', townsBuildingsTypesSchema);
+mongoose.model('game_itemsSpineSlots', itemsSpineSlotsSchema);

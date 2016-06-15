@@ -4,6 +4,12 @@ require("../models/TownsModel");
 require("../models/TownsBuildingsModel");
 require("../models/TownsBuildingsTypesModel");
 
+require("../models/StatsModel");
+require("../models/HeroLevelsModel");
+require("../models/InventorySlotsListModel");
+require("../models/ItemsSpineSlotsModel");
+
+
 var async = require("async"),
 	mongoose = require("mongoose"),
 
@@ -51,7 +57,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		function(err) {
 			// All tasks are done now
 			console.log("GLOBAL is initialized!!!");
-			// console.log(this.DATA.buildingsTypes);
+			// console.log(this.DATA.spineSlots);
 			callback();
 		}.bind(this)
 	)
@@ -103,7 +109,7 @@ PreloadDataClass.prototype.getGlobalData = function(data) {
 */
 PreloadDataClass.prototype.getTownsList = function (callback) {
 	this.DATA.towns = {};
-	mongoose.model('game_towns').getAllTowns(function(towns) {
+	mongoose.model('game_towns').getAll(function(towns) {
 		this.DATA.towns = towns;
 		callback();
 	}.bind(this));
@@ -121,7 +127,7 @@ PreloadDataClass.prototype.getTownsList = function (callback) {
 */
 PreloadDataClass.prototype.getTownBuildingsTypes = function(callback) {
 	this.DATA.buildingsTypes = {};
-	mongoose.model('game_townsBuildingsTypes').getAllTownBuildingsTypes(function(types) {
+	mongoose.model('game_townsBuildingsTypes').getAll(function(types) {
 		this.DATA.buildingsTypes = types;
 		callback();
 	}.bind(this));
@@ -168,17 +174,10 @@ PreloadDataClass.prototype.getItems = function(callback) {
 */
 PreloadDataClass.prototype.getSpineSlots = function(callback) {
 	this.DATA.spineSlots = {};
-	
-	Mongo.find({collection: 'game_ItemsSpineSlots', callback: function(rows) {
-		for(var i in rows) {
-			rows[i].id = String(rows[i].id);
-			this.DATA.spineSlots[rows[i].id] = {
-													id: rows[i].id,
-													name: rows[i].name
-												};
-		}
+	mongoose.model('game_itemsSpineSlots').getAll(function(spineSlots) {
+		this.DATA.spineSlots = spineSlots;
 		callback();
-	}.bind(this)});
+	}.bind(this));
 };
 
 
@@ -194,17 +193,10 @@ PreloadDataClass.prototype.getSpineSlots = function(callback) {
 */
 PreloadDataClass.prototype.getInventorySlotsList = function(callback) {
 	this.DATA.inventorySlotsList = {};
-	Mongo.find({collection: 'game_ItemsInventorySlotsList', callback: function(rows) {
-		for(var i in rows) {
-			rows[i].id = String(rows[i].id);
-			this.DATA.inventorySlotsList[rows[i].id] = {
-															id: rows[i].id,
-															imageId: String(rows[i].imageId),
-															order: String(rows[i].order)
-														};
-		}
+	mongoose.model('game_inventorySlotsList').getAll(function(inventorySlotsList) {
+		this.DATA.inventorySlotsList = inventorySlotsList;
 		callback();
-	}.bind(this)});
+	}.bind(this));
 };
 
 
@@ -335,14 +327,10 @@ PreloadDataClass.prototype.getShotsInfo = function(callback) {
 */
 PreloadDataClass.prototype.getStats = function(callback) {	
 	this.DATA.stats = {};
-	
-	Mongo.find({collection: 'game_Stats', callback: function(rows) {
-		for(var i in rows) {
-			rows[i].id = String(rows[i].id);
-			this.DATA.stats[rows[i].name] = rows[i];
-		}
+	mongoose.model('game_stats').getAll(function(stats) {
+		this.DATA.stats = stats;
 		callback();
-	}.bind(this)});
+	}.bind(this));
 };
 
 
@@ -378,14 +366,10 @@ PreloadDataClass.prototype.getHeroClasses = function(callback) {
 */
 PreloadDataClass.prototype.getHeroLevels = function(callback) {	
 	this.DATA.heroLevels = {};
-	
-	Mongo.find({collection: 'game_HeroLevels', callback: function(rows) {
-		for(var i in rows) {
-			var levelId = rows[i].id.toString();
-			this.DATA.heroLevels[levelId] = rows[i];
-		}
+	mongoose.model('game_heroLevels').getAll(function(heroLevels) {
+		this.DATA.heroLevels = heroLevels;
 		callback();
-	}.bind(this)});
+	}.bind(this));
 };
 
 

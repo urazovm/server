@@ -847,7 +847,7 @@ User.prototype.wearOnItem = function(data) {
 		//TODO: добавлять все бонусы и прочее
 		queues = [
 			this.wearOffItems.bind(this, GLOBAL.DATA.items[itemId].inventorySlots),
-			this.updateStats.bind(this, GLOBAL.DATA.items[itemId].stats),
+			this.updateStats.bind(this, this.userData.items[worldItemId].stats), //GLOBAL.DATA.items[itemId].stats
 			this.addItemToStuff.bind(this, {userItemId: worldItemId, itemId: itemId})
 		];
 		
@@ -1010,9 +1010,10 @@ User.prototype.hasItem = function(worldItemId) {
 User.prototype.updateStats = function(data, callback) {
 	// console.log("\n\n\n", "UPDATE STATS");
 	// console.log("DATA:", data);
-	// console.log("========================");
-	// console.log("BEFORE:", this.userData.stats);
-	// console.log("========================");
+	console.log("========================");
+	console.log("BEFORE:", this.userData.stats);
+	console.log("========================");
+	console.log("data", data);
 	var updatedStats = this.userData.stats.update(data);
 	this.updateStatsInDb(updatedStats, callback);
 };
@@ -1038,8 +1039,8 @@ User.prototype.updateStatsInDb = function(updatedStats, callback) {
 		searchData: {_id: Mongo.objectId(this.userId)},
 		insertData: {$inc: insertData},
 		callback: function() {
-			// console.log("AFTER:", this.userData.stats);
-			// console.log("========================");
+			console.log("AFTER:", this.userData.stats);
+			console.log("========================");
 			if(callback) { callback(); }
 		}.bind(this)
 	});

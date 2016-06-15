@@ -3,6 +3,9 @@ require("../../models/TownsBuildingsModel");
 require("../../models/TownsBuildingsTypesModel");
 
 require("../../models/StatsModel");
+require("../../models/HeroLevelsModel");
+require("../../models/InventorySlotsListModel");
+require("../../models/ItemsSpineSlotsModel");
 
 
 
@@ -18,10 +21,14 @@ runScript();
 
 function runScript() {
   var queues = [
-    // addTowns,
     // addTownsBuildings,
+    // addTowns,
     // addTownsBuildingsTypes,
-    addStats
+    
+    // addStats,
+    // addHeroLevels,
+    // addInventorySlots,
+    // addItemsSpineSlots,
   ];
   async.waterfall(
     queues,
@@ -32,7 +39,7 @@ function runScript() {
 }
 
 function addTowns (callback) {
-  mongoose.model('game_towns').create({ name: 'humanGrad'}, function (err, town) {
+  mongoose.model('game_towns').create({ name: 'humanGrad', buildings: [1,2,3,4,5,6,7,8,9,10]}, function (err, town) {
     console.log("Towns were added.");
     callback();
   });
@@ -210,7 +217,6 @@ function addTownsBuildingsTypes (callback) {
 }
 
 
-
 function addStats (callback) {
   var queues = [];
 
@@ -219,7 +225,10 @@ function addStats (callback) {
       "name" : "strength",
       "group" : 0,
       "order" : 0,
-      "dependStats" : {}
+      "dependStats" : {
+        "minDamage": 1,
+        "maxDamage": 1,
+      }
     },
     {
       "name" : "agility",
@@ -395,7 +404,6 @@ function addStats (callback) {
   arr.forEach(function (element, index, array) {
     queues.push(function (cb) {
       mongoose.model('game_stats').create(element, function (err, rows) {
-        console.log(rows);
         cb();
       });
     });
@@ -405,6 +413,147 @@ function addStats (callback) {
     queues,
     function(err) {
       console.log("Stats types were added.");
+      callback();
+    }
+  )
+}
+
+
+
+function addHeroLevels (callback) {
+  var queues = [];
+  var arr = [];
+
+  for (i=0; i<=50; i++){
+    arr.push({maxExp: i * 50});
+  }
+  
+  arr.forEach(function (element, index, array) {
+    queues.push(function (cb) {
+      mongoose.model('game_heroLevels').create(element, function (err, rows) {
+        console.log(rows);
+        cb();
+      });
+    });
+  });
+
+  async.waterfall(
+    queues,
+    function(err) {
+      console.log("Hero levels were added.");
+      callback();
+    }
+  )
+}
+
+
+
+
+function addInventorySlots (callback) {
+  var queues = [];
+  var arr = [
+    {
+      "name" : "Шлем",
+      "imageId" : 1,
+      "order" : 1
+    },
+    {
+      "name" : "Броня",
+      "imageId" : 2,
+      "order" : 2
+    },
+    {
+      "name" : "Наручи",
+      "imageId" : 3,
+      "order" : 6
+    },
+    {
+      "name" : "Перчатки",
+      "imageId" : 4,
+      "order" : 7
+    },
+    {
+      "name" : "Штаны",
+      "imageId" : 5,
+      "order" : 4
+    },
+    {
+      "name" : "Сапоги",
+      "imageId" : 6,
+      "order" : 5
+    },
+    {
+      "name" : "Кольцо 1",
+      "imageId" : 7,
+      "order" : 10
+    },
+    {
+      "name" : "Амулет",
+      "imageId" : 8,
+      "order" : 9
+    },
+    {
+      "name" : "Правое оружие",
+      "imageId" : 9,
+      "order" : 3
+    },
+    {
+      "name" : "Левое оружие",
+      "imageId" : 10,
+      "order" : 8
+    }
+  ];
+
+  arr.forEach(function (element, index, array) {
+    queues.push(function (cb) {
+      mongoose.model('game_inventorySlotsList').create(element, function (err, rows) {
+        console.log(rows);
+        cb();
+      });
+    });
+  });
+
+  async.waterfall(
+    queues,
+    function(err) {
+      console.log("Inventory slots were added.");
+      callback();
+    }
+  )
+}
+
+
+
+function addItemsSpineSlots (callback) {
+  var queues = [];
+  var arr = [
+    {
+      "name" : "rightHandItem"
+    },
+    {
+      "name" : "leftHandItem"
+    },
+    {
+      "name" : "rightFoot"
+    },
+    {
+      "name" : "leftFoot"
+    }
+  ];
+
+  arr.forEach(function (element, index, array) {
+    queues.push(function (cb) {
+      mongoose.model('game_itemsSpineSlots').create(element, function (err, rows) {
+        console.log(rows);
+        cb();
+      });
+    });
+  });
+
+  async.waterfall(
+    queues,
+    function(err) {
+      console.log("Items Spine Slots were added.");
       callback();
     }
   )
