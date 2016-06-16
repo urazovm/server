@@ -9,6 +9,10 @@ require("../../models/ItemsSpineSlotsModel");
 
 
 
+require("../../models/ItemsModel");
+
+
+
 var async = require("async"),
   mongoose = require("mongoose"),
   config = require("../../config/personal_config.js");
@@ -29,6 +33,8 @@ function runScript() {
     // addHeroLevels,
     // addInventorySlots,
     // addItemsSpineSlots,
+
+    addItems
   ];
   async.waterfall(
     queues,
@@ -554,6 +560,189 @@ function addItemsSpineSlots (callback) {
     queues,
     function(err) {
       console.log("Items Spine Slots were added.");
+      callback();
+    }
+  )
+}
+
+
+
+
+function addItems (callback) {
+  var queues = [];
+  var arr = [
+    {
+      "name" : "sword",
+      "imageId" : "1",
+      "rarity" : "1",
+      "countableFlag" : false,
+      "categories" : [ 
+        "1"
+      ],
+      "stats" : {
+        "minDamage" : 10,
+        "maxDamage" : 30
+      },
+      "attachments" : {
+        "1" : 1
+      },
+      "inventorySlots" : {
+        "9" : "9"
+      }
+    },
+    {
+      "name" : "redSword",
+      "imageId" : "2",
+      "rarity" : "2",
+      "countableFlag" : false,
+      "categories" : [ 
+        "2"
+      ],
+      "stats" : {
+        "minDamage" : 25,
+        "maxDamage" : 60
+      },
+      "attachments" : {
+        "1" : 1
+      },
+      "inventorySlots" : {
+        "9" : "9"
+      }
+    },
+    {
+      "name" : "coal",
+      "imageId" : "50",
+      "rarity" : "1",
+      "countableFlag" : true,
+      "categories" : [ 
+        "3"
+      ],
+      "stats" : {},
+      "attachments" : {},
+      "inventorySlots" : {}
+    },
+    {
+      "name" : "redBoots",
+      "imageId" : "5",
+      "rarity" : "4",
+      "countableFlag" : false,
+      "categories" : [ 
+        "4"
+      ],
+      "stats" : {},
+      "attachments" : {
+        "3" : 2,
+        "4" : 1
+      },
+      "inventorySlots" : {
+        "6" : "6"
+      }
+    },
+    {
+      "name" : "oldSword",
+      "imageId" : "3",
+      "rarity" : "1",
+      "countableFlag" : false,
+      "categories" : [ 
+        "1"
+      ],
+      "stats" : {
+        "minDamage" : 100,
+        "maxDamage" : 300
+      },
+      "attachments" : {
+        "1" : 1
+      },
+      "inventorySlots" : {
+        "9" : "9"
+      }
+    },
+    {
+      "name" : "epicWoodSword",
+      "imageId" : "4",
+      "rarity" : "4",
+      "countableFlag" : false,
+      "categories" : [ 
+        "2"
+      ],
+      "stats" : {},
+      "attachments" : {
+        "1" : 1
+      },
+      "inventorySlots" : {
+        "9" : "9",
+        "10" : "10"
+      }
+    },
+    {
+      "name" : "magicSword",
+      "imageId" : "6",
+      "rarity" : "6",
+      "countableFlag" : false,
+      "categories" : [ 
+        "2"
+      ],
+      "stats" : {},
+      "attachments" : {
+        "1" : 1
+      },
+      "inventorySlots" : {
+        "9" : "9"
+      }
+    },
+    {
+      "name" : "blueBoots",
+      "imageId" : "7",
+      "rarity" : "2",
+      "countableFlag" : false,
+      "categories" : [ 
+        "4"
+      ],
+      "stats" : {},
+      "attachments" : {
+        "3" : 2,
+        "4" : 1
+      },
+      "inventorySlots" : {
+        "6" : "6"
+      }
+    },
+    {
+      "name" : "frozenStuff",
+      "imageId" : "8",
+      "rarity" : "6",
+      "countableFlag" : false,
+      "shotId" : 1,
+      "categories" : [ 
+        "1"
+      ],
+      "stats" : {
+        "wisdom" : 500,
+        "minDamage" : 5,
+        "maxDamage" : 25
+      },
+      "attachments" : {
+        "1" : 1
+      },
+      "inventorySlots" : {
+        "9" : "9"
+      },
+    }
+  ];
+
+  arr.forEach(function (element, index, array) {
+    queues.push(function (cb) {
+      mongoose.model('game_items').create(element, function (err, rows) {
+        console.log(rows);
+        cb();
+      });
+    });
+  });
+
+  async.waterfall(
+    queues,
+    function(err) {
+      console.log("Items were added.");
       callback();
     }
   )

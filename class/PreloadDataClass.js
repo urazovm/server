@@ -10,6 +10,13 @@ require("../models/InventorySlotsListModel");
 require("../models/ItemsSpineSlotsModel");
 
 
+
+require("../models/ItemsModel");
+
+
+
+
+
 var async = require("async"),
 	mongoose = require("mongoose"),
 
@@ -57,7 +64,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		function(err) {
 			// All tasks are done now
 			console.log("GLOBAL is initialized!!!");
-			// console.log(this.DATA.spineSlots);
+			console.log(this.DATA.items);
 			callback();
 		}.bind(this)
 	)
@@ -152,13 +159,10 @@ PreloadDataClass.prototype.getTownBuildingsTypes = function(callback) {
 */
 PreloadDataClass.prototype.getItems = function(callback) {
 	this.DATA.items = {};
-	Mongo.find({collection: 'game_Items', callback: function(rows) {
-		for(var i in rows) {
-			rows[i]._id = rows[i]._id.toHexString();
-			this.DATA.items[rows[i]._id] = rows[i];
-		}
+	mongoose.model('game_items').getAll(function(items) {
+		this.DATA.items = items;
 		callback();
-	}.bind(this)});
+	}.bind(this));
 };
 
 
