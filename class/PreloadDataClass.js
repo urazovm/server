@@ -9,9 +9,11 @@ require("../models/HeroLevelsModel");
 require("../models/InventorySlotsListModel");
 require("../models/ItemsSpineSlotsModel");
 
-
-
 require("../models/ItemsModel");
+
+
+require("../models/HeroClassesModel");
+require("../models/UsersModel");
 
 
 
@@ -64,7 +66,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		function(err) {
 			// All tasks are done now
 			console.log("GLOBAL is initialized!!!");
-			console.log(this.DATA.items);
+			console.log(this.DATA.heroClasses);
 			callback();
 		}.bind(this)
 	)
@@ -350,13 +352,10 @@ PreloadDataClass.prototype.getStats = function(callback) {
 */
 PreloadDataClass.prototype.getHeroClasses = function(callback) {	
 	this.DATA.heroClasses = {};
-	
-	Mongo.find({collection: 'game_HeroClasses', callback: function(rows) {
-		for(var i in rows) {
-			this.DATA.heroClasses[rows[i]._id] = rows[i];
-		}
+	mongoose.model('game_heroClasses').getAll(function(heroClasses) {
+		this.DATA.heroClasses = heroClasses;
 		callback();
-	}.bind(this)});
+	}.bind(this));
 };
 
 

@@ -7,9 +7,10 @@ require("../../models/HeroLevelsModel");
 require("../../models/InventorySlotsListModel");
 require("../../models/ItemsSpineSlotsModel");
 
-
-
 require("../../models/ItemsModel");
+
+
+require("../../models/HeroClassesModel");
 
 
 
@@ -34,7 +35,10 @@ function runScript() {
     // addInventorySlots,
     // addItemsSpineSlots,
 
-    addItems
+    // addItems,
+
+
+    addHeroClasses
   ];
   async.waterfall(
     queues,
@@ -425,7 +429,6 @@ function addStats (callback) {
 }
 
 
-
 function addHeroLevels (callback) {
   var queues = [];
   var arr = [];
@@ -451,8 +454,6 @@ function addHeroLevels (callback) {
     }
   )
 }
-
-
 
 
 function addInventorySlots (callback) {
@@ -564,8 +565,6 @@ function addItemsSpineSlots (callback) {
     }
   )
 }
-
-
 
 
 function addItems (callback) {
@@ -743,6 +742,62 @@ function addItems (callback) {
     queues,
     function(err) {
       console.log("Items were added.");
+      callback();
+    }
+  )
+}
+
+
+function addHeroClasses (callback) {
+  var queues = [];
+  var arr = [
+    {
+      "name" : "warrior",
+      "stats" : {
+        "strength" : 1,
+        "agility" : 1,
+        "intuition" : 1,
+        "wisdom" : 1,
+        "intellect" : 1,
+        "stamina" : 1,
+        "luck" : 1,
+        "minDamage" : 3,
+        "maxDamage" : 5,
+        "dodge" : 0,
+        "antiDodge" : 0,
+        "criticalHit" : 0,
+        "antiCriticalHit" : 0,
+        "mana" : 0,
+        "currentMana" : 0,
+        "minMagicDamage" : 0,
+        "maxMagicDamage" : 0,
+        "hp" : 100,
+        "currentHp" : 100,
+        "capacity" : 0,
+        "currentCapacity" : 0,
+        "chance" : 0,
+        "moveActionTime" : 2,
+        "hitActionTime" : 2,
+        "actionTime" : 1,
+        "moveRadius" : 1,
+        "attackRadius" : 1
+      }
+    }
+  ];
+
+  arr.forEach(function (element, index, array) {
+    queues.push(function (cb) {
+      mongoose.model('game_heroClasses').create(element, function (err, rows) {
+        console.log(rows);
+        cb();
+      });
+    });
+  });
+
+  async.waterfall(
+    queues,
+    function(err) {
+      console.log("Hero classes were added.");
       callback();
     }
   )

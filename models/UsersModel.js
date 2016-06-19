@@ -1,41 +1,65 @@
 var mongoose = require("mongoose"),
-	Schema = mongoose.Schema;
+  autoIncrement = require('mongoose-auto-increment'),
+  config = require("../config/personal_config.js"),
+  Schema = mongoose.Schema,
+  connection = mongoose.createConnection(config.dbConfig.name);
+  usersSchema = new Schema({
+    email : String,
+    password : String,
+    registrationDate : String,
+    userData : {
+      login : String,
+      lastActionTime : Number,
+      inBattleFlag : Boolean,
+      isAliveFlag : Boolean,
+      items : Schema.Types.Mixed,
+      stuff : Schema.Types.Mixed,
+      levels : Schema.Types.Mixed,
+      stats : Schema.Types.Mixed
+    },
+    uid : String,
+    langLocale : String,
+    device : String,
+    deviceSystemVersion : String,
+    deviceToken : String,
+    clientVersion : String,
+    ip : String
+  });
 
-var usersSchema = new Schema({
-    userData: {
-    	stats:{
-        "strength" : Number,
-        "agility" : 1,
-        "intuition" : 1,
-        "wisdom" : 1,
-        "intellect" : 1,
-        "stamina" : 1,
-        "luck" : 1,
-        "minDamage" : 13,
-        "maxDamage" : 35,
-        "dodge" : 0,
-        "antiDodge" : 0,
-        "criticalHit" : 0,
-        "antiCriticalHit" : 0,
-        "mana" : 0,
-        "currentMana" : 0,
-        "minMagicDamage" : 0,
-        "maxMagicDamage" : 0,
-        "hp" : 100,
-        "currentHp" : 100,
-        "capacity" : 0,
-        "currentCapacity" : 0,
-        "chance" : 0,
-        "exp" : 0,
-        "currentExp" : 0,
-        "moveActionTime" : 2,
-        "hitActionTime" : 2,
-        "actionTime" : 1,
-        "moveRadius" : 1,
-        "attackRadius" : 1
-      }
-    }
+autoIncrement.initialize(connection);
+
+usersSchema.plugin(autoIncrement.plugin, {
+  model: 'game_users', 
+  startAt: 1
 });
+
+
+/*
+  * Description:
+  *   Get all hero classes from db
+  *   
+  *   @callback: func, call back function
+  *   
+  *   
+  *   
+  * @since  18.06.16
+  * @author pcemma
+*/
+usersSchema.statics.updateClientInfo = function(_id, insertData, callback) {
+  console.log("SCHEMA updateClientInfo");
+  console.log(typeof(callback), " !!!!!!! ");
+  this.findByIdAndUpdate(Number(_id), { $set: insertData}, [], callback);
+}  
+
+
+usersSchema.statics.getUserData = function(_id, callback) {
+  console.log("SCHEMA getUserData");
+  this.findById(Number(_id), 'userData', function (err, userData) {
+    console.log("SCHEMA getUserData response", userData);
+    callback(userData);
+  });
+} 
+
 
 
 mongoose.model('game_users', usersSchema);

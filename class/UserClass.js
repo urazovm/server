@@ -3,6 +3,7 @@ console.log("User CLASS is connected");
 var async 								= require("async"),
 	crypto 									= require('crypto'),
 	eventemitter2 					= require("eventemitter2"),
+	mongoose 								= require("mongoose"),
 	Mongo 									= require("./MongoDBClass.js"),
 	GLOBAL 									= require("./PreloadDataClass.js"),
 	StatsManagerClass 			= require("./StatsManagerClass.js"),
@@ -14,7 +15,7 @@ var async 								= require("async"),
 
 function User() {
 
-	this.dbName = 'game_Users';
+	this.dbName = 'game_users';
 	this.isUser = true;
 
 
@@ -129,13 +130,12 @@ User.prototype.createNewUser = function(data, callback) {
 	console.log("ADD NEW USER!!!");
 	var queues = [
 		this.addDefaultUser.bind(this, data),
-		this.addDefaultItems.bind(this)
+		this.addDefaultItems.bind(this),
 	];
 	
 	async.waterfall(
 		queues,
 		function(err) {
-			console.log("User createNewUser");
 			callback();
 		}.bind(this)
 	)
@@ -165,34 +165,32 @@ User.prototype.addDefaultUser = function(data, callback) {
 		email:	login+"@bew.net"
 	};
 	
-	Mongo.insert({
-		collection: this.dbName, 
-		insertData: {
-			email: this.autoConfigData.email,
-			password: crypto.createHash('md5').update(String(this.autoConfigData.password)).digest('hex'),
-			registrationDate: currentTime,
-			userData: {
-				login: this.autoConfigData.login,
-				lastActionTime: 0,
-				inBattleFlag: false,
-				isAliveFlag: true,
-				items:{},
-				stuff: {},
-				levels: {
-					heroLevel: {
-						exp: 0, 
-						level: 1
-					}
-				},
-				// TODO: это переделать!
-				stats: this.getDefaultStats("55fb3de3445254e819e3ad11") 
+	var insertData = {
+		email: this.autoConfigData.email,
+		password: crypto.createHash('md5').update(String(this.autoConfigData.password)).digest('hex'),
+		registrationDate: currentTime,
+		userData: {
+			login: this.autoConfigData.login,
+			lastActionTime: 0,
+			inBattleFlag: false,
+			isAliveFlag: true,
+			items:{},
+			stuff: {},
+			levels: {
+				heroLevel: {
+					exp: 0, 
+					level: 1
+				}
 			},
-		}, 
-		callback: function(rows) {
-			this.userId = rows.ops[0]._id;
-			callback();
-		}.bind(this)
-	}); 		
+			// TODO: это переделать!
+			stats: this.getDefaultStats("1") 
+		}
+	};
+
+	mongoose.model(this.dbName).create(insertData, function (err, rows) {
+    this.userId = String(rows._id);
+		callback();
+  }.bind(this)); 		
 };
 	
 
@@ -224,22 +222,23 @@ User.prototype.getDefaultStats = function(heroClassId) {
 */
 User.prototype.addDefaultItems = function(callback) {
 	// TODO: добавить стандартный массив вещей, который дается сразу юзеру при старте. 
-	var defaultItemsArray = [
-			"55ba5662d95a08c8513f668b",
-			"55ba5662d95a08c8513f668d",
-			"55ba5662d95a08c8513f668e",
-			"55ba5662d95a08c8513f6690",
-			"55ba5662d95a08c8513f6691"
-		];
-	
-	for(var i in defaultItemsArray) {
-		var itemId = defaultItemsArray[i];
-		this.addItem({
+	var defaultItemsArray = ["1", "2", "4", "5", "6", "7", "8", "9"];
+	var queues = [];
+	defaultItemsArray.forEach(function (itemId, index, array) {
+		var itemData = {
 			stats: GLOBAL.DATA.items[itemId].stats,
 			itemId: itemId,
 			count: 1
-		}, callback);
-	}	
+		};
+		queues.push(this.addItem.bind(this, itemData));
+	}.bind(this));
+
+	async.waterfall(
+		queues,
+		function(err) {
+			callback();
+		}
+	)
 };
 
 
@@ -261,19 +260,26 @@ User.prototype.addDefaultItems = function(callback) {
 	* @author pcemma
 */
 User.prototype.updateClientInfo = function(data, callback) {
-	var insertData = {$set:{
-			uid: (data.uid) ? data.uid : "",
-			langLocale: (data.langLocale) ? data.langLocale : "",
-			device: (data.device) ? data.device : "",
-			deviceSystemVersion: (data.deviceSystemVersion) ? data.deviceSystemVersion : "",
-			deviceToken: (data.deviceToken) ? data.deviceToken : "",
-			//TODO: Add new geoip Geoip now removed from lib
-			// country: (data.ip) ? utils.getCountryByIp(data.ip) : "",
+	var insertData = {
+		uid: (data.uid) ? data.uid : "",
+		langLocale: (data.langLocale) ? data.langLocale : "",
+		device: (data.device) ? data.device : "",
+		deviceSystemVersion: (data.deviceSystemVersion) ? data.deviceSystemVersion : "",
+		deviceToken: (data.deviceToken) ? data.deviceToken : "",
+		//TODO: Add new geoip Geoip now removed from lib
+		// country: (data.ip) ? utils.getCountryByIp(data.ip) : "",
 
-			clientVersion: (data.clientVersion) ? data.clientVersion : "",
-			ip: (data.ip) ? data.ip : ""
-		}};
-	Mongo.update({collection: this.dbName, searchData: {_id: Mongo.objectId(this.userId)}, insertData: insertData, callback: function(rows) { callback(); }});
+		clientVersion: (data.clientVersion) ? data.clientVersion : "",
+		ip: (data.ip) ? data.ip : ""
+	};
+
+	mongoose.model(this.dbName).updateClientInfo(
+		this.userId, 
+		insertData, 
+		function() {
+			callback();
+		}
+	);
 };
 
 
@@ -297,18 +303,18 @@ User.prototype.updateClientInfo = function(data, callback) {
 User.prototype.authorization = function(data, callback) {
 	var queues = [];
 	// проверяем на то что такой пользователь есть и верно введены данные для авторизации
-	if(
-		data.autoConfigData && 
-		((data.autoConfigData.email && data.autoConfigData.email !== "") ||
-		(data.autoConfigData.password && data.autoConfigData.password !== ""))
-	) {
-		// Тут проверка без учета самого пользователя, который может проверять
-		queues.push(this.check.bind(this, data.autoConfigData));
-	}
-	else {
+	// if(
+	// 	data.autoConfigData && 
+	// 	((data.autoConfigData.email && data.autoConfigData.email !== "") ||
+	// 	(data.autoConfigData.password && data.autoConfigData.password !== ""))
+	// ) {
+	// 	// Тут проверка без учета самого пользователя, который может проверять
+	// 	queues.push(this.check.bind(this, data.autoConfigData));
+	// }
+	// else {
 		// проверка на то что мы делаем нового гостя. поля мейл и пароль пусты
 		queues.push(this.createNewUser.bind(this, data));
-	}
+	// }
 	
 	// Обновление инфы об пользователе. Uid, ip etc.
 	queues.push(this.updateClientInfo.bind(this, data));
@@ -369,35 +375,30 @@ User.prototype.authorization = function(data, callback) {
 	* @author pcemma
 */
 User.prototype.getUserData = function(callback) {
-	console.log("this.userId", this.userId, typeof(this.userId));
-	Mongo.find({
-		collection: this.dbName, 
-		searchData: {_id: Mongo.objectId(this.userId)}, 
-		fields: {userData: true}, 
-		callback: function(rows) {
-			if(rows.length > 0) {
-				//TODO: отдельно в метод setUserData
-				this.userData = rows[0].userData;
+	mongoose.model(this.dbName).getUserData(this.userId, function(userData) {
+		this.setUserData(userData, callback);
+	}.bind(this));
+};
 
-				this.userData.stats = new StatsManagerClass(rows[0].userData.stats);
-				
-				this.userData.levels = new LevelsManagerClass(rows[0].userData.levels);
 
-				var queues = [
-					// Собираем вещи юзера. Данные про вещи текущие в коллеции game_WorldItems
-					this.getItems.bind(this)
-				];
-				
-				async.waterfall(
-					queues,
-					function(err) {
-						console.log("Get userData");
-						callback();
-					}.bind(this)
-				);
-			}
+User.prototype.setUserData = function(data, callback) {
+	var userData = data.userData;
+	this.userData = userData;
+
+	this.userData.stats = new StatsManagerClass(userData.stats);
+	this.userData.levels = new LevelsManagerClass(userData.levels);
+
+	var queues = [
+		// Собираем вещи юзера. Данные про вещи текущие в коллеции game_WorldItems
+		this.getItems.bind(this)
+	];
+	
+	async.waterfall(
+		queues,
+		function(err) {
+			callback();
 		}.bind(this)
-	});	
+	);
 };
 
 
@@ -764,7 +765,7 @@ User.prototype.calculateCompletionHeroExp = function(callback) {
 */
 User.prototype.getItems = function(callback) {
 	console.log("GET ITEMS!!!");
-	Mongo.find({collection: 'game_WorldItems', searchData: {userId: Mongo.objectId(this.userId)}, callback: function(rows) {
+	Mongo.find({collection: 'game_WorldItems', searchData: {userId: this.userId}, callback: function(rows) {
 		this.userData.items = {};
 		this.userData.stuff = new StuffItemsManagerClass();
 
@@ -772,6 +773,7 @@ User.prototype.getItems = function(callback) {
 			var worldItemId = rows[i]._id.toHexString();
 			this.userData.items[worldItemId] = new ItemClass(rows[i]);
 			
+			//TODO: this is duplicate of add item to stuff functional. Change it!
 			for(var j in rows[i].inventorySlotId) {
 				var inventorySlotId = String(rows[i].inventorySlotId[j]);
 				var stuffItem = {
@@ -797,10 +799,8 @@ User.prototype.getItems = function(callback) {
 */
 User.prototype.addItem = function(data, callback) {
 	if(GLOBAL.isItemExist(data.itemId)) {
-		
 		// Если предмет исчесляемый, то если он есть надо увеличить количество.
 		if(GLOBAL.DATA.items[data.itemId].countableFlag) {
-			
 			
 		}
 		else {
@@ -1035,7 +1035,7 @@ User.prototype.updateStatsInDb = function(updatedStats, callback) {
 	});
 	Mongo.update({
 		collection: this.dbName,
-		searchData: {_id: Mongo.objectId(this.userId)},
+		searchData: {_id: this.userId},
 		insertData: {$inc: insertData},
 		callback: function() {
 			// console.log("AFTER:", this.userData.stats);

@@ -18,9 +18,11 @@ function StatsManagerClass(data) {
 	* @author pcemma
 */
 StatsManagerClass.prototype.__constructor = function(data) {
-	Object.keys(data).forEach(function(stat) {
-		this[stat] = data[stat];
-	}.bind(this));
+	if(data) {
+		Object.keys(data).forEach(function(stat) {
+			this[stat] = data[stat];
+		}.bind(this));
+	}
 };
 
 
