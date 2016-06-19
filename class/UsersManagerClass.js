@@ -61,6 +61,7 @@ UsersManagerClass.prototype.sendDataToUsers = function(data) {
 UsersManagerClass.prototype.authorization = function(data) {
 	var newUser = new UserClass(),
 		queues = [
+			newUser.check.bind(newUser, data),
 			newUser.authorization.bind(newUser, data),
 			this.addUserToGlobalUsersArray.bind(this, newUser)
 		];
@@ -68,8 +69,33 @@ UsersManagerClass.prototype.authorization = function(data) {
 		queues,
 		function(err){
 			console.log("authorization");
-			// console.log(data.autoConfigData);
-			// console.log(this.USERS);
+		}
+	)
+};
+
+
+
+/*
+	* Description:
+	* function makes new user account and auth
+	*	
+	*	@data: 	object, Data from client
+	*	
+	*
+	* @since  20.06.16
+	* @author pcemma
+*/
+UsersManagerClass.prototype.createNewAccount = function(data) {
+	var newUser = new UserClass(),
+		queues = [
+			newUser.createNewAccount.bind(newUser, data),
+			newUser.authorization.bind(newUser, data),
+			this.addUserToGlobalUsersArray.bind(this, newUser)
+		];
+	async.waterfall(
+		queues,
+		function(err){
+			console.log("createNewAccount");
 		}
 	)
 };

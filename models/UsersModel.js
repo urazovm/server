@@ -1,9 +1,10 @@
-var mongoose = require("mongoose"),
+var mongoose    = require("mongoose"),
   autoIncrement = require('mongoose-auto-increment'),
-  config = require("../config/personal_config.js"),
-  Schema = mongoose.Schema,
-  connection = mongoose.createConnection(config.dbConfig.name);
-  usersSchema = new Schema({
+  config        = require("../config/personal_config.js"),
+  crypto        = require('crypto'),
+  Schema        = mongoose.Schema,
+  connection    = mongoose.createConnection(config.dbConfig.name),
+  usersSchema   = new Schema({
     email : String,
     password : String,
     registrationDate : String,
@@ -36,7 +37,7 @@ usersSchema.plugin(autoIncrement.plugin, {
 
 /*
   * Description:
-  *   Get all hero classes from db
+  *   Update client info 
   *   
   *   @callback: func, call back function
   *   
@@ -46,20 +47,29 @@ usersSchema.plugin(autoIncrement.plugin, {
   * @author pcemma
 */
 usersSchema.statics.updateClientInfo = function(_id, insertData, callback) {
-  console.log("SCHEMA updateClientInfo");
-  console.log(typeof(callback), " !!!!!!! ");
-  this.findByIdAndUpdate(Number(_id), { $set: insertData}, [], callback);
+  this.findByIdAndUpdate(Number(_id), { $set: insertData}, [], function(err) {
+    callback(); 
+  });
 }  
 
 
 usersSchema.statics.getUserData = function(_id, callback) {
-  console.log("SCHEMA getUserData");
   this.findById(Number(_id), 'userData', function (err, userData) {
-    console.log("SCHEMA getUserData response", userData);
     callback(userData);
   });
 } 
 
+
+usersSchema.statics.checkUserByEmailAndPassword = function(config, callback) {
+  var searchData = {
+    email: config.email.toLowerCase(),
+    password: crypto.createHash('md5').update(String(config.password)).digest('hex')
+  };
+
+  this.findOne(searchData, {_id: true}, function(err, rows) {
+    callback(rows || {});
+  });
+}
 
 
 mongoose.model('game_users', usersSchema);

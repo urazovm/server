@@ -30,6 +30,7 @@ Router.prototype.route = function(pathname, data) {
 		// GLOBAL CHECKING IF USER EXIST AND VERIFYING
 		if( pathname === 'getGlobalData' || 
 				pathname === 'authorization' || 
+				pathname === 'createNewAccount' || 
 				pathname === 'makeClientsErrorLogs' || 
 				UsersManager.isUserVerified(data.userId, data.verifyHash)) {
 
@@ -95,6 +96,21 @@ Router.prototype.authorization = function (data) {
 	UsersManager.authorization(data);
 };	
 	
+
+/*
+	* Description:
+	*	function that make new user account and auth
+	*	
+	*	@data: 	object, Data from client
+	*	
+	*
+	* @since  20.06.16
+	* @author pcemma
+*/
+Router.prototype.createNewAccount = function (data) {
+	UsersManager.createNewAccount(data);
+};	
+
 
 /*
 	* Description:

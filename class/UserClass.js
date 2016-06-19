@@ -70,28 +70,24 @@ User.prototype.socketWrite = function (data) {
 	* @since  25.01.15
 	* @author pcemma
 */
-User.prototype.check = function(autoConfigData, callback) {
+User.prototype.check = function(data, callback) {
+	var autoConfigData = data.autoConfigData;
 	if(
 		autoConfigData && 
 		autoConfigData.email && autoConfigData.email !== "" &&
 		autoConfigData.password && autoConfigData.password !== ""
 	) {
-		// console.log(autoConfigData.email.toLowerCase(), crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex'));
-		Mongo.find({
-			collection: this.dbName, 
-			searchData: {
-				email: autoConfigData.email.toLowerCase(), 
-				password: crypto.createHash('md5').update(String(autoConfigData.password)).digest('hex')
-			},
-			fields: {_id: true},
-			callback: function (rows) {
-				console.log("CHECK USER!!!");
-				if(rows.length > 0) {
-					this.userId = rows[0]._id;
-				}
+		mongoose.model(this.dbName).checkUserByEmailAndPassword(autoConfigData, function(rows) {
+			if('_id' in rows) {
+				this.userId = rows._id;
 				callback();
-			}.bind(this)
-		});
+			} else {
+				var sendData = {incorrectFlag: true, err: "Not such user!!!"};
+				this.socket = data.socket;
+				// not valid data
+				this.socketWrite({f: "authorizationResponse", p: sendData});
+			}
+		}.bind(this));
 	}
 };
 
@@ -126,13 +122,12 @@ User.prototype.check = function(autoConfigData, callback) {
 	* @since  25.01.15
 	* @author pcemma
 */
-User.prototype.createNewUser = function(data, callback) {
+User.prototype.createNewAccount = function(data, callback) {
 	console.log("ADD NEW USER!!!");
 	var queues = [
 		this.addDefaultUser.bind(this, data),
 		this.addDefaultItems.bind(this),
 	];
-	
 	async.waterfall(
 		queues,
 		function(err) {
@@ -159,6 +154,7 @@ User.prototype.createNewUser = function(data, callback) {
 User.prototype.addDefaultUser = function(data, callback) {
 	var currentTime = Math.floor(+new Date() / 1000),
 		login =	"guest"+(+new Date());
+	//TODO: here add data formuser when user will create new account
 	this.autoConfigData = {
 		password: 	Math.random().toString(36).substr(2, 10),
 		login:	login,
@@ -268,18 +264,11 @@ User.prototype.updateClientInfo = function(data, callback) {
 		deviceToken: (data.deviceToken) ? data.deviceToken : "",
 		//TODO: Add new geoip Geoip now removed from lib
 		// country: (data.ip) ? utils.getCountryByIp(data.ip) : "",
-
 		clientVersion: (data.clientVersion) ? data.clientVersion : "",
 		ip: (data.ip) ? data.ip : ""
 	};
 
-	mongoose.model(this.dbName).updateClientInfo(
-		this.userId, 
-		insertData, 
-		function() {
-			callback();
-		}
-	);
+	mongoose.model(this.dbName).updateClientInfo(this.userId, data, callback);
 };
 
 
@@ -302,32 +291,16 @@ User.prototype.updateClientInfo = function(data, callback) {
 */
 User.prototype.authorization = function(data, callback) {
 	var queues = [];
-	// проверяем на то что такой пользователь есть и верно введены данные для авторизации
-	// if(
-	// 	data.autoConfigData && 
-	// 	((data.autoConfigData.email && data.autoConfigData.email !== "") ||
-	// 	(data.autoConfigData.password && data.autoConfigData.password !== ""))
-	// ) {
-	// 	// Тут проверка без учета самого пользователя, который может проверять
-	// 	queues.push(this.check.bind(this, data.autoConfigData));
-	// }
-	// else {
-		// проверка на то что мы делаем нового гостя. поля мейл и пароль пусты
-		queues.push(this.createNewUser.bind(this, data));
-	// }
 	
 	// Обновление инфы об пользователе. Uid, ip etc.
 	queues.push(this.updateClientInfo.bind(this, data));
 	
-
-
 	// queues.push(this.addItem.bind(this, {
 	// 	stats: GLOBAL.DATA.items["57529dcd89b8546c31c2e79e"].stats,
 	// 	itemId: "57529dcd89b8546c31c2e79e",
 	// 	count: 1
 	// }));
 	
-
 	// Сбор данных о юзере.
 	queues.push(this.getUserData.bind(this));
 	
@@ -342,7 +315,7 @@ User.prototype.authorization = function(data, callback) {
 				this.socket = data.socket;
 				this.verifyHash = crypto.createHash('md5').update(String(+new Date()) + secretHashString + this.userId).digest('hex');
 				// this.ping = Math.floor(+new Date() / 1000);
-				//TODO: стоит удалять this.autoConfigData, на всякий случай :)
+				//TODO: стоит удалять this.autoConfigData, на всякий случай
 				sendData =  {
 					userData: this.userData, 
 					userId: this.userId, 
@@ -350,14 +323,8 @@ User.prototype.authorization = function(data, callback) {
 					autoConfigData: this.autoConfigData
 				};	
 			}
-			else {
-				// Ответ что у мы не можем авторизоваться (не верные данные)
-				console.log("Not such user!!!");
-				sendData = {incorrectFlag: true};
-			}
 
 			this.socketWrite({f: "authorizationResponse", p: sendData});
-
 			callback();
 		}.bind(this)
 	)
@@ -389,7 +356,7 @@ User.prototype.setUserData = function(data, callback) {
 	this.userData.levels = new LevelsManagerClass(userData.levels);
 
 	var queues = [
-		// Собираем вещи юзера. Данные про вещи текущие в коллеции game_WorldItems
+		// Collect user items from game_WorldItems
 		this.getItems.bind(this)
 	];
 	

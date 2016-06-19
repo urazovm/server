@@ -38,7 +38,7 @@ function runScript() {
     // addItems,
 
 
-    addHeroClasses
+    // addHeroClasses
   ];
   async.waterfall(
     queues,

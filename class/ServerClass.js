@@ -126,8 +126,8 @@ ServerClass.prototype.onSocketRequest = function(socket) {
 				var data = JSON.parse(n);
 				// console.log(data);
 				
-				// Для авторизации надо передать сокет
-				if(data.route === "authorization" || data.route === "getGlobalData") {
+				// TODO: WTF??? o_O
+				if(data.route === "authorization" || data.route === "getGlobalData" || data.route === "createNewAccount") {
 					data.p.socket = socket;
 				}
 				router.route(data.route, data.p);

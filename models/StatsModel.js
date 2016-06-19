@@ -2,7 +2,7 @@ var mongoose = require("mongoose"),
 	autoIncrement = require('mongoose-auto-increment'),
 	config = require("../config/personal_config.js"),
 	Schema = mongoose.Schema,
-	connection = mongoose.createConnection(config.dbConfig.name);
+	connection = mongoose.createConnection(config.dbConfig.name),
 	statsSchema = new Schema({
     name : String,
     group : String,

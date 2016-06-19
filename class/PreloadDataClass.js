@@ -66,7 +66,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		function(err) {
 			// All tasks are done now
 			console.log("GLOBAL is initialized!!!");
-			console.log(this.DATA.heroClasses);
+			// console.log(this.DATA.heroClasses);
 			callback();
 		}.bind(this)
 	)

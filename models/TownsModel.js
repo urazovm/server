@@ -2,7 +2,7 @@ var mongoose = require("mongoose"),
 	autoIncrement = require('mongoose-auto-increment'),
 	config = require("../config/personal_config.js"),
 	Schema = mongoose.Schema,
-	connection = mongoose.createConnection(config.dbConfig.name);
+	connection = mongoose.createConnection(config.dbConfig.name),
 	townsSchema = new Schema({
     name: String,
     buildings: [{ type: Number, ref: 'game_townsBuildings' }]
