@@ -1000,6 +1000,9 @@ User.prototype.updateStatsInDb = function(updatedStats, callback) {
 	Object.keys(updatedStats).forEach(function(stat) {
 		insertData["userData.stats." + stat] = updatedStats[stat];
 	});
+
+	
+
 	Mongo.update({
 		collection: this.dbName,
 		searchData: {_id: this.userId},
