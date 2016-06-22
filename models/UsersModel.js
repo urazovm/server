@@ -65,11 +65,26 @@ usersSchema.statics.checkUserByEmailAndPassword = function(config, callback) {
     email: config.email.toLowerCase(),
     password: crypto.createHash('md5').update(String(config.password)).digest('hex')
   };
-
   this.findOne(searchData, {_id: true}, function(err, rows) {
-    callback(rows || {});
+    callback(rows);
   });
 }
+
+
+usersSchema.statics.updateStats = function(_id, updatedStats, callback) {
+  var insertData = {};
+  Object.keys(updatedStats).forEach(function(stat) {
+    insertData["userData.stats." + stat] = updatedStats[stat];
+  });
+
+  this.findByIdAndUpdate(Number(_id), { $set: insertData}, [], function(err) {
+    callback(); 
+  });
+}
+
+
+
+
 
 
 mongoose.model('game_users', usersSchema);

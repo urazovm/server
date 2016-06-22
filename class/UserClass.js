@@ -78,7 +78,8 @@ User.prototype.check = function(data, callback) {
 		autoConfigData.password && autoConfigData.password !== ""
 	) {
 		mongoose.model(this.dbName).checkUserByEmailAndPassword(autoConfigData, function(rows) {
-			if('_id' in rows) {
+			console.log(rows);
+			if(rows && '_id' in rows) {
 				this.userId = rows._id;
 				callback();
 			} else {
@@ -325,7 +326,10 @@ User.prototype.authorization = function(data, callback) {
 			}
 
 			this.socketWrite({f: "authorizationResponse", p: sendData});
-			callback();
+
+			this.updateExp(30, "heroLevel", callback);
+
+			// callback();
 		}.bind(this)
 	)
 };
@@ -735,7 +739,7 @@ User.prototype.getItems = function(callback) {
 	Mongo.find({collection: 'game_WorldItems', searchData: {userId: this.userId}, callback: function(rows) {
 		this.userData.items = {};
 		this.userData.stuff = new StuffItemsManagerClass();
-
+		console.log("ITEMS: ", rows);
 		for(var i in rows) {
 			var worldItemId = rows[i]._id.toHexString();
 			this.userData.items[worldItemId] = new ItemClass(rows[i]);
@@ -996,23 +1000,11 @@ User.prototype.updateStats = function(data, callback) {
 	* @author pcemma
 */
 User.prototype.updateStatsInDb = function(updatedStats, callback) {
-	var insertData = {};
-	Object.keys(updatedStats).forEach(function(stat) {
-		insertData["userData.stats." + stat] = updatedStats[stat];
-	});
-
-	
-
-	Mongo.update({
-		collection: this.dbName,
-		searchData: {_id: this.userId},
-		insertData: {$inc: insertData},
-		callback: function() {
-			// console.log("AFTER:", this.userData.stats);
-			// console.log("========================");
-			if(callback) { callback(); }
-		}.bind(this)
-	});
+	mongoose.model(this.dbName).updateStats(this.userId, updatedStats, function() {
+    // console.log("AFTER:", this.userData.stats);
+    // console.log("========================");
+    if(callback) { callback(); }
+  }.bind(this));
 };
 
 
