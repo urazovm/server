@@ -28,6 +28,7 @@ function ServerClass() {
 ServerClass.prototype.start = function() {
 	
 	mongoose.connect("mongodb://127.0.0.1/pcemmaDb");
+	
 
 	
 

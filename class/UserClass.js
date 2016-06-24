@@ -77,8 +77,11 @@ User.prototype.check = function(data, callback) {
 		autoConfigData.email && autoConfigData.email !== "" &&
 		autoConfigData.password && autoConfigData.password !== ""
 	) {
-		mongoose.model(this.dbName).checkUserByEmailAndPassword(autoConfigData, function(rows) {
-			console.log(rows);
+		mongoose.model(this.dbName).checkUserByEmailAndPassword(autoConfigData, function(err, rows) {
+			if(err) {
+				console.trace(err);
+			}
+
 			if(rows && '_id' in rows) {
 				this.userId = rows._id;
 				callback();
@@ -161,7 +164,7 @@ User.prototype.addDefaultUser = function(data, callback) {
 		login:	login,
 		email:	login+"@bew.net"
 	};
-	
+
 	var insertData = {
 		email: this.autoConfigData.email,
 		password: crypto.createHash('md5').update(String(this.autoConfigData.password)).digest('hex'),
@@ -252,19 +255,9 @@ User.prototype.addDefaultItems = function(callback) {
 	* @author pcemma
 */
 User.prototype.updateClientInfo = function(data, callback) {
-	var insertData = {
-		uid: (data.uid) ? data.uid : "",
-		langLocale: (data.langLocale) ? data.langLocale : "",
-		device: (data.device) ? data.device : "",
-		deviceSystemVersion: (data.deviceSystemVersion) ? data.deviceSystemVersion : "",
-		deviceToken: (data.deviceToken) ? data.deviceToken : "",
-		//TODO: Add new geoip Geoip now removed from lib
-		// country: (data.ip) ? utils.getCountryByIp(data.ip) : "",
-		clientVersion: (data.clientVersion) ? data.clientVersion : "",
-		ip: (data.ip) ? data.ip : ""
-	};
-
-	mongoose.model(this.dbName).updateClientInfo(this.userId, data, callback);
+	mongoose.model(this.dbName).updateClientInfo(this.userId, data, function(err) {
+		callback();
+	});
 };
 
 
@@ -341,18 +334,20 @@ User.prototype.authorization = function(data, callback) {
 	* @author pcemma
 */
 User.prototype.getUserData = function(callback) {
-	mongoose.model(this.dbName).getUserData(this.userId, function(userData) {
-		this.setUserData(userData, callback);
+	mongoose.model(this.dbName).getUserData(this.userId, function(err, userData) {
+		if(err){
+			console.trace(err);
+		}
+		this.convertUserData(userData, callback);
 	}.bind(this));
 };
 
 
-User.prototype.setUserData = function(data, callback) {
+User.prototype.convertUserData = function(data, callback) {
 	var userData = data.userData;
 	this.userData = userData;
 
 	this.userData.stats = new StatsManagerClass(userData.stats);
-	console.log("userData.levels", userData.levels);
 	this.userData.levels = new LevelsManagerClass(userData.levels);
 
 	var queues = [
@@ -979,28 +974,17 @@ User.prototype.updateStats = function(data, callback) {
 	// console.log("BEFORE:", this.userData.stats);
 	// console.log("========================");
 	var updatedStats = this.userData.stats.update(data);
-	this.updateStatsInDb(updatedStats, callback);
-};
-
-
-/*
-	* Description:
-	*	Update stats in db for user
-	*	
-	*	@updatedStats:	obj, список статов ввиде {statName: value}
-	*		
-	*
-	* @since  25.09.15
-	* @author pcemma
-*/
-User.prototype.updateStatsInDb = function(updatedStats, callback) {
-	mongoose.model(this.dbName).updateStats(this.userId, updatedStats, function() {
+	mongoose.model(this.dbName).updateStats(this.userId, updatedStats, function(err) {
+    if(err){
+    	console.trace(err);
+    }
     // console.log("AFTER:", this.userData.stats);
     // console.log("========================");
-    if(callback) { callback(); }
+    if(callback) { 
+    	callback(); 
+    }
   }.bind(this));
 };
-
 
 
 
@@ -1020,35 +1004,16 @@ User.prototype.updateStatsInDb = function(updatedStats, callback) {
 User.prototype.updateExp = function(exp, levelName, callback) {
 	if(this.isUser) {
 		this.userData.levels.updateExp(exp, levelName);
-		console.log("\n\n updateExp");
-		this.updateExpInDb(levelName, callback);
+		mongoose.model(this.dbName).updateExp(this.userId, levelName, this.userData.levels[levelName], function(err){
+			if(err) {
+				console.trace(err);
+			}
+			callback();
+		});
 	} else {
 		callback();
 	}
 }
 
-
-/*
-	* Description:
-	*	Update level in db for user
-	*	
-	*
-	*		
-	*
-	* @since  02.05.16
-	* @author pcemma
-*/
-User.prototype.updateExpInDb = function(levelName, callback) {
-	var insertData = {};
-	insertData["userData.levels." + levelName] = this.userData.levels[levelName];
-	Mongo.update({
-		collection: this.dbName,
-		searchData: {_id: Mongo.objectId(this.userId)},
-		insertData: {$set: insertData},
-		callback: function() {
-			if(callback) { callback(); }
-		}.bind(this)
-	});
-};
 
 module.exports = User;

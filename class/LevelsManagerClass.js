@@ -24,9 +24,7 @@ function LevelsManagerClass(data) {
 	* @author pcemma
 */
 LevelsManagerClass.prototype.__constructor = function(data) {
-	console.log("!!!!!!!!!!!!!", Object.keys(data), data);
 	Object.keys(data).forEach(function(levelName) {
-		console.log("levelName", levelName);
 		this[levelName] = new LevelClass(data[levelName]);
 	}.bind(this));
 };
