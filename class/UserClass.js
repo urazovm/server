@@ -726,26 +726,50 @@ User.prototype.calculateCompletionHeroExp = function(callback) {
 	* @author pcemma
 */
 User.prototype.getItems = function(callback) {
-	Mongo.find({collection: 'game_WorldItems', searchData: {userId: Number(this.userId)}, callback: function(rows) {
+	mongoose.model('game_worldItems').getUsersItems(this.userId, function(err, items){
+		if(err){
+			console.trace(err);
+		}
 		this.userData.items = {};
 		this.userData.stuff = new StuffItemsManagerClass();
-		for(var i in rows) {
-			var worldItemId = rows[i]._id.toHexString();
-			this.userData.items[worldItemId] = new ItemClass(rows[i]);
+		for(var i in items) {
+			var worldItemId = String(items[i]._id);
+			this.userData.items[worldItemId] = new ItemClass(items[i]);
 			
 			//TODO: this is duplicate of add item to stuff functional. Change it!
-			for(var j in rows[i].inventorySlotId) {
-				var inventorySlotId = String(rows[i].inventorySlotId[j]);
+			for(var j in items[i].inventorySlotId) {
+				var inventorySlotId = String(items[i].inventorySlotId[j]);
 				var stuffItem = {
 					userItemId: worldItemId,
-					itemId: 		rows[i].itemId,
+					itemId: 		items[i].itemId,
 					inventorySlotId: inventorySlotId
 				};
 				this.userData.stuff.addItem(stuffItem);
 			}
 		}
 		callback();
-	}.bind(this)});
+	}.bind(this));
+
+	// Mongo.find({collection: 'game_WorldItems', searchData: {userId: Number(this.userId)}, callback: function(rows) {
+	// 	this.userData.items = {};
+	// 	this.userData.stuff = new StuffItemsManagerClass();
+	// 	for(var i in rows) {
+	// 		var worldItemId = rows[i]._id.toHexString();
+	// 		this.userData.items[worldItemId] = new ItemClass(rows[i]);
+			
+	// 		//TODO: this is duplicate of add item to stuff functional. Change it!
+	// 		for(var j in rows[i].inventorySlotId) {
+	// 			var inventorySlotId = String(rows[i].inventorySlotId[j]);
+	// 			var stuffItem = {
+	// 				userItemId: worldItemId,
+	// 				itemId: 		rows[i].itemId,
+	// 				inventorySlotId: inventorySlotId
+	// 			};
+	// 			this.userData.stuff.addItem(stuffItem);
+	// 		}
+	// 	}
+	// 	callback();
+	// }.bind(this)});
 };
 
 
@@ -764,19 +788,13 @@ User.prototype.addItem = function(data, callback) {
 			
 		}
 		else {
-			Mongo.insert({
-				collection: "game_WorldItems", 
-				insertData: {
-					stats: data.stats,
-					itemId: data.itemId,
-					count: data.count,
-					userId: this.userId,
-					inventorySlotId: data.inventorySlotId || []
-				},  
-				callback: function(rows) {
-					callback();
-				}.bind(this)
-			}); 
+			data.userId = this.userId;
+			mongoose.model("game_worldItems").createItem(data, function(err){
+				if(err) {
+					console.trace(err);
+				}
+				callback();
+			});
 		}
 	}
 };

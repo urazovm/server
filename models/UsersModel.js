@@ -92,6 +92,7 @@ usersSchema.statics.updateClientInfo = function(_id, data, callback) {
 */
 usersSchema.statics.getUserData = function(_id, callback) {
   this.findById(Number(_id), 'userData', function (err, userData) {
+    console.log(userData.items);
     callback(err, userData.toObject());
   });
 } 
