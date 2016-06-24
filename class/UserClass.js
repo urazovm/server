@@ -173,12 +173,7 @@ User.prototype.addDefaultUser = function(data, callback) {
 			isAliveFlag: true,
 			items:{},
 			stuff: {},
-			levels: {
-				heroLevel: {
-					exp: 0, 
-					level: 1
-				}
-			},
+			levels: {},
 			// TODO: это переделать!
 			stats: this.getDefaultStats("1") 
 		}
@@ -357,6 +352,7 @@ User.prototype.setUserData = function(data, callback) {
 	this.userData = userData;
 
 	this.userData.stats = new StatsManagerClass(userData.stats);
+	console.log("userData.levels", userData.levels);
 	this.userData.levels = new LevelsManagerClass(userData.levels);
 
 	var queues = [
@@ -735,11 +731,9 @@ User.prototype.calculateCompletionHeroExp = function(callback) {
 	* @author pcemma
 */
 User.prototype.getItems = function(callback) {
-	console.log("GET ITEMS!!!");
-	Mongo.find({collection: 'game_WorldItems', searchData: {userId: this.userId}, callback: function(rows) {
+	Mongo.find({collection: 'game_WorldItems', searchData: {userId: Number(this.userId)}, callback: function(rows) {
 		this.userData.items = {};
 		this.userData.stuff = new StuffItemsManagerClass();
-		console.log("ITEMS: ", rows);
 		for(var i in rows) {
 			var worldItemId = rows[i]._id.toHexString();
 			this.userData.items[worldItemId] = new ItemClass(rows[i]);

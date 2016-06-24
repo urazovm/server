@@ -15,7 +15,12 @@ var mongoose    = require("mongoose"),
       isAliveFlag : Boolean,
       items : Schema.Types.Mixed,
       stuff : Schema.Types.Mixed,
-      levels : Schema.Types.Mixed,
+      levels : {
+        heroLevel : {
+          level : {type: Number, default: 1},
+          exp : {type: Number, default: 101}
+        }
+      },
       stats : Schema.Types.Mixed
     },
     uid : String,
@@ -78,10 +83,12 @@ usersSchema.statics.updateStats = function(_id, updatedStats, callback) {
   });
 
   this.findByIdAndUpdate(Number(_id), { $set: insertData}, [], function(err) {
+    if(err) { 
+      console.log(err);
+    }
     callback(); 
   });
 }
-
 
 
 
