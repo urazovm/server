@@ -20,6 +20,7 @@ require("../models/WorldItemsModel");
 
 
 require("../models/ShotsInfoModel");
+require("../models/GlobalConstantsModel");
 
 
 
@@ -72,7 +73,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		function(err) {
 			// All tasks are done now
 			console.log("GLOBAL is initialized!!!");
-			// console.log(this.DATA.shotsInfo);
+			console.log(this.globalConstants);
 			callback();
 		}.bind(this)
 	)
@@ -400,16 +401,10 @@ PreloadDataClass.prototype.getHeroLevels = function(callback) {
 */
 PreloadDataClass.prototype.createGlobalConstants = function(callback) {
 	this.globalConstants = {};
-	Mongo.find({collection: 'game_GlobalConstants', callback: function(rows) {
-		for(var i in rows) {
-			// get client version
-			if(rows[i].name === "clientVersion") {
-				rows[i].value = rows[i].value.split(".");
-			}
-			this.globalConstants[rows[i].name] = rows[i].value;
-		}
+	mongoose.model('game_globalConstants').getAll(function(globalConstants){
+		this.globalConstants = globalConstants;
 		callback();
-	}.bind(this)});
+	}.bind(this));
 };
 
 

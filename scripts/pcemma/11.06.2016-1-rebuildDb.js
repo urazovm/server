@@ -14,6 +14,7 @@ require("../../models/HeroClassesModel");
 
 
 require("../../models/ShotsInfoModel");
+require("../../models/GlobalConstantsModel");
 
 
 
@@ -43,7 +44,8 @@ function runScript() {
     // addHeroClasses,
 
 
-    addShotsInfo
+    // addShotsInfo,
+    addGlobalConstatns
   ];
   async.waterfall(
     queues,
@@ -833,6 +835,38 @@ function addShotsInfo (callback) {
     queues,
     function(err) {
       console.log("Shots were added.");
+      callback();
+    }
+  )
+}
+
+
+function addGlobalConstatns (callback) {
+  var queues = [];
+  var arr = [
+    {
+      "name" : "clientVersion",
+      "value" : "0.0.1"
+    },
+    {
+      "name" : "globalDataVersion",
+      "value" : 1
+    }
+  ];
+
+  arr.forEach(function (element, index, array) {
+    queues.push(function (cb) {
+      mongoose.model('game_globalConstants').create(element, function (err, rows) {
+        console.log(rows);
+        cb();
+      });
+    });
+  });
+
+  async.waterfall(
+    queues,
+    function(err) {
+      console.log("Global Constants were added.");
       callback();
     }
   )

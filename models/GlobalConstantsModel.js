@@ -3,17 +3,15 @@ var mongoose = require("mongoose"),
 	config = require("../config/personal_config.js"),
 	Schema = mongoose.Schema,
 	connection = mongoose.createConnection(config.dbConfig.name),
-	shotsSchema = new Schema({
-    imageId : String,
-    speed : Number,
-    w : Number,
-    h : Number
+	gcSchema = new Schema({
+    name : String,
+    value : Schema.Types.Mixed
 });
 
 autoIncrement.initialize(connection);
 
-shotsSchema.plugin(autoIncrement.plugin, {
-	model: 'game_shots', 
+gcSchema.plugin(autoIncrement.plugin, {
+	model: 'game_globalConstants', 
 	startAt: 1
 });
 
@@ -29,24 +27,20 @@ shotsSchema.plugin(autoIncrement.plugin, {
 	* @since  14.06.16
 	* @author pcemma
 */
-shotsSchema.statics.getAll = function(callback) {
-	var shotsObject = {};
+gcSchema.statics.getAll = function(callback) {
+	var globalConstants = {};
 	this.find(function (err, rows) {
 		if(err){
 			console.trace(err);
 		} 
 		rows.forEach(function (element, index, array) {
-			element._id = String(element._id);
-			
-			shotsObject[element._id] = {
-				name: element.name,
-				speed: element.speed,
-				w: element.w,
-				h: element.h
-			};
+			if(element.name === "clientVersion") {
+				element.value = element.value.split(".");
+			}
+			globalConstants[element.name] = element.value
 		});
-		callback(shotsObject);
+		callback(globalConstants);
 	});
 }
 
-mongoose.model('game_shots', shotsSchema);
+mongoose.model('game_globalConstants', gcSchema);
