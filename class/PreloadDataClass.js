@@ -19,6 +19,9 @@ require("../models/UsersModel");
 require("../models/WorldItemsModel");
 
 
+require("../models/ShotsInfoModel");
+
+
 
 
 
@@ -69,7 +72,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		function(err) {
 			// All tasks are done now
 			console.log("GLOBAL is initialized!!!");
-			// console.log(this.DATA.heroClasses);
+			// console.log(this.DATA.shotsInfo);
 			callback();
 		}.bind(this)
 	)
@@ -308,13 +311,10 @@ PreloadDataClass.prototype.getBattleInfo = function(callback) {
 */
 PreloadDataClass.prototype.getShotsInfo = function(callback) {
 	this.DATA.shotsInfo = {};
-	Mongo.find({collection: 'game_ShotsInfo', callback: function(rows) {
-		for(var i in rows) { 
-			var shotId = String(rows[i]._id);
-			this.DATA.shotsInfo[shotId] = rows[i];
-		}
+	mongoose.model("game_shots").getAll(function(shotsInfo){
+		this.DATA.shotsInfo = shotsInfo;
 		callback();
-	}.bind(this)});
+	}.bind(this));
 };
 
 

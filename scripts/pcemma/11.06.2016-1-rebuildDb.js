@@ -13,6 +13,9 @@ require("../../models/ItemsModel");
 require("../../models/HeroClassesModel");
 
 
+require("../../models/ShotsInfoModel");
+
+
 
 var async = require("async"),
   mongoose = require("mongoose"),
@@ -37,8 +40,10 @@ function runScript() {
 
     // addItems,
 
+    // addHeroClasses,
 
-    // addHeroClasses
+
+    addShotsInfo
   ];
   async.waterfall(
     queues,
@@ -798,6 +803,36 @@ function addHeroClasses (callback) {
     queues,
     function(err) {
       console.log("Hero classes were added.");
+      callback();
+    }
+  )
+}
+
+
+function addShotsInfo (callback) {
+  var queues = [];
+  var arr = [
+    {
+      "imageId" : "1",
+      "speed" : 2,
+      "w" : 178,
+      "h" : 112
+    }
+  ];
+
+  arr.forEach(function (element, index, array) {
+    queues.push(function (cb) {
+      mongoose.model('game_shots').create(element, function (err, rows) {
+        console.log(rows);
+        cb();
+      });
+    });
+  });
+
+  async.waterfall(
+    queues,
+    function(err) {
+      console.log("Shots were added.");
       callback();
     }
   )
