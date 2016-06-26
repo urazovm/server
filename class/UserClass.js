@@ -103,7 +103,7 @@ User.prototype.check = function(data, callback) {
 
 /*
 	* Description:
-	*	function Создаем нового пользователя. Заполняем все необходимые данные в базе данных. 
+	*	function Create new user. Fill all in db
 	*	
 	*
 	*	@data:				array
@@ -117,11 +117,6 @@ User.prototype.check = function(data, callback) {
 	*		@deviceToken:		
 	*		@clientVersion:		
 	*	
-	*
-	*
-	*
-	*
-	*
 	*
 	* @since  25.01.15
 	* @author pcemma
@@ -732,44 +727,26 @@ User.prototype.getItems = function(callback) {
 		}
 		this.userData.items = {};
 		this.userData.stuff = new StuffItemsManagerClass();
-		for(var i in items) {
-			var worldItemId = String(items[i]._id);
-			this.userData.items[worldItemId] = new ItemClass(items[i]);
+
+		items.forEach(function(item){
+			item = item.toObject();
+			var worldItemId = String(item._id);
+			this.userData.items[worldItemId] = new ItemClass(item);
 			
 			//TODO: this is duplicate of add item to stuff functional. Change it!
-			for(var j in items[i].inventorySlotId) {
-				var inventorySlotId = String(items[i].inventorySlotId[j]);
+			for(var j in item.inventorySlotId) {
+				var inventorySlotId = String(item.inventorySlotId[j]);
 				var stuffItem = {
 					userItemId: worldItemId,
-					itemId: 		items[i].itemId,
+					itemId: 		item.itemId,
 					inventorySlotId: inventorySlotId
 				};
 				this.userData.stuff.addItem(stuffItem);
 			}
-		}
+		}.bind(this));
+		
 		callback();
 	}.bind(this));
-
-	// Mongo.find({collection: 'game_WorldItems', searchData: {userId: Number(this.userId)}, callback: function(rows) {
-	// 	this.userData.items = {};
-	// 	this.userData.stuff = new StuffItemsManagerClass();
-	// 	for(var i in rows) {
-	// 		var worldItemId = rows[i]._id.toHexString();
-	// 		this.userData.items[worldItemId] = new ItemClass(rows[i]);
-			
-	// 		//TODO: this is duplicate of add item to stuff functional. Change it!
-	// 		for(var j in rows[i].inventorySlotId) {
-	// 			var inventorySlotId = String(rows[i].inventorySlotId[j]);
-	// 			var stuffItem = {
-	// 				userItemId: worldItemId,
-	// 				itemId: 		rows[i].itemId,
-	// 				inventorySlotId: inventorySlotId
-	// 			};
-	// 			this.userData.stuff.addItem(stuffItem);
-	// 		}
-	// 	}
-	// 	callback();
-	// }.bind(this)});
 };
 
 

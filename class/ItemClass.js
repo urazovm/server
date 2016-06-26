@@ -1,7 +1,8 @@
 console.log("ItemClass CLASS is connected");	
 
 var StatsManagerClass = require("./StatsManagerClass.js"),
-	Mongo = require("./MongoDBClass.js");
+		mongoose 					= require("mongoose");
+	// Mongo = require("./MongoDBClass.js");
 
 
 function ItemClass(data) {
@@ -31,24 +32,20 @@ ItemClass.prototype.__constructor = function(data) {
 	* Description:
 	*	function Добавляет итем в слот инвентаря. Надевает вещь.
 	*	
-	*	@inventorySlotsArray: 	arr, массив ид слотов в инвентаре в которые надета вещь [inventorySlotId]
-	*	@callback: 				func, функция ответа
+	*	@inventorySlotId: arr, array of the items slots ids [inventorySlotId]
+	*	@callback: 				func, callback function
 	*		
 	*
 	* @since  11.10.15
 	* @author pcemma
 */
-ItemClass.prototype.setToInventorySlot = function(inventorySlotsArray, callback) {
-	var	inventorySlots = inventorySlotsArray || [];
-	
-	// Обновляем слот ид в массиве свойств вещи пользователя.
-	this.inventorySlotId = inventorySlots;
-	
-	Mongo.update({
-		collection: 'game_WorldItems', 
-		searchData: {_id: Mongo.objectId(this._id)}, 
-		insertData: {$set:{inventorySlotId: inventorySlots}},
-		callback: function(rows) { callback(); }
+ItemClass.prototype.setToInventorySlot = function(inventorySlotId, callback) {
+	this.inventorySlotId = inventorySlotId || [];
+	mongoose.model("game_worldItems").setInventorySlot(this._id, this.inventorySlotId, function(err) {
+		if(err) {
+			console.trace(err);
+		}
+		callback();
 	});
 };
 

@@ -52,10 +52,27 @@ worldItemsSchema.statics.createItem = function(item, callback) {
 */
 worldItemsSchema.statics.getUsersItems = function(userId, callback) {
   this.find({ userId: Number(userId) }, function(err, items){
-    callback(err, items.toObject());
+    callback(err, items);
   });
 }  
 
+
+/*
+  * Description:
+  *   Update world item. set it's slots ids
+  *   
+  *   @_id: int, id of item in game_worldItems
+  *   @inventorySlotId: arr, list of items slots ids
+  *   @callback: func, call back function
+  *   
+  * @since  25.06.16
+  * @author pcemma
+*/
+worldItemsSchema.statics.setInventorySlot = function(_id, inventorySlotId, callback) {
+  this.findByIdAndUpdate(Number(_id), { $set:{inventorySlotId: inventorySlotId} }, [], function(err) {
+    callback(err); 
+  });
+}
 
 
 
