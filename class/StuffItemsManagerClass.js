@@ -12,7 +12,7 @@ function StuffItemsManagerClass() {
 	*	function add item to stuff
 	*	
 	*	@item: obj, 
-	*		@userItemId: 			str, id of the item from the game_WorldItems,
+	*		@worldItemId: 		str, id of the item from the game_WorldItems,
 	*		@itemId: 					str, id of the item,
 	*		@inventorySlotId: str, id of the slot in inventory
 	*	
@@ -31,16 +31,16 @@ StuffItemsManagerClass.prototype.addItem = function(item) {
 	*	function remove item to stuff
 	*	
 	*	@inventorySlotId: str, id of the slot remove item from
-	*	@userItemId: 			str, id of the item from game_WorldItems
+	*	@worldItemId: 		str, id of the item from game_WorldItems
 	*		
 	*
 	* @since  03.06.16
 	* @author pcemma
 */
-StuffItemsManagerClass.prototype.removeItem = function(inventorySlotId, userItemId) {
+StuffItemsManagerClass.prototype.removeItem = function(inventorySlotId, worldItemId) {
 	if(
 			this.isInventorySlotFull(inventorySlotId) && // Check is slot free
-			this.getUserItemId(inventorySlotId) === userItemId // Check is the same item we want to wear off
+			this.getWorldItemIdFromWearItem(inventorySlotId) === worldItemId // Check is the same item we want to wear off
 		) {
 			delete this[inventorySlotId];
 		}
@@ -57,8 +57,8 @@ StuffItemsManagerClass.prototype.removeItem = function(inventorySlotId, userItem
 	* @since  03.06.16
 	* @author pcemma
 */
-StuffItemsManagerClass.prototype.getUserItemId = function(inventorySlotId) {
-	return this[inventorySlotId].userItemId;
+StuffItemsManagerClass.prototype.getWorldItemIdFromWearItem = function(inventorySlotId) {
+	return this[inventorySlotId].worldItemId;
 };
 
 

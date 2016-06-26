@@ -737,9 +737,9 @@ User.prototype.getItems = function(callback) {
 			for(var j in item.inventorySlotId) {
 				var inventorySlotId = String(item.inventorySlotId[j]);
 				var stuffItem = {
-					userItemId: worldItemId,
-					itemId: 		item.itemId,
-					inventorySlotId: inventorySlotId
+					worldItemId: 			worldItemId,
+					itemId: 					item.itemId,
+					inventorySlotId: 	inventorySlotId
 				};
 				this.userData.stuff.addItem(stuffItem);
 			}
@@ -803,7 +803,7 @@ User.prototype.wearOnItem = function(data) {
 		queues = [
 			this.wearOffItems.bind(this, GLOBAL.DATA.items[itemId].inventorySlots),
 			this.updateStats.bind(this, this.userData.items[worldItemId].stats), //GLOBAL.DATA.items[itemId].stats
-			this.addItemToStuff.bind(this, {userItemId: worldItemId, itemId: itemId})
+			this.addItemToStuff.bind(this, {worldItemId: worldItemId, itemId: itemId})
 		];
 		
 		async.waterfall(queues, function(err) {
@@ -830,8 +830,8 @@ User.prototype.wearOffItems = function(inventorySlots, callback) {
 	var queues = [];
 	for(var inventorySlotId in inventorySlots) {
 		if(this.userData.stuff.isInventorySlotFull(inventorySlotId)) {
-			var userItemId = this.userData.stuff.getUserItemId(inventorySlotId);
-			queues.push(this.wearOffItem.bind(this, {itemId: userItemId}));
+			var worldItemId = this.userData.stuff.getWorldItemIdFromWearItem(inventorySlotId);
+			queues.push(this.wearOffItem.bind(this, {itemId: worldItemId}));
 		}
 	}
 	async.waterfall(queues, function(err) {
@@ -863,7 +863,7 @@ User.prototype.wearOffItem = function(data, callback) {
 		
 		queues = [
 			this.updateStats.bind(this, this.userData.items[worldItemId].revertStats()),
-			this.removeItemFromStuff.bind(this, {userItemId: worldItemId, itemId: itemId})
+			this.removeItemFromStuff.bind(this, {worldItemId: worldItemId, itemId: itemId})
 		];
 
 		async.waterfall(queues, function(err) {
@@ -871,8 +871,7 @@ User.prototype.wearOffItem = function(data, callback) {
 				f: "userWearOffItem", 
 				p: {itemId: worldItemId}
 			});
-			//TODO: проверить корректно ли так проверять callback
-			if(callback) {
+			if (typeof callback === "function") {
 				callback();
 			}
 		}.bind(this));
@@ -885,8 +884,8 @@ User.prototype.wearOffItem = function(data, callback) {
 	*	Добавляет вещь в стафф героя
 	*	
 	*	@data: arr,
-	*		@userItemId: 	str, ид вещи из таблицы game_WorldItems
-	*		@itemId: 		str, ид вещи из таблицы game_Items
+	*		@worldItemId: str, ид вещи из таблицы game_WorldItems
+	*		@itemId: 			str, ид вещи из таблицы game_Items
 	*	
 	*
 	* @since  20.09.15
@@ -894,7 +893,7 @@ User.prototype.wearOffItem = function(data, callback) {
 */
 User.prototype.addItemToStuff = function(data, callback) {
 	var inventorySlotsArray = [],
-		userItemId = data.userItemId,
+		worldItemId = data.worldItemId,
 		itemId = data.itemId;
 	// Проход по всем слотам, в которые надо надеть вещь, и добавление данных о вещи.
 	for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots) {
@@ -903,7 +902,7 @@ User.prototype.addItemToStuff = function(data, callback) {
 		this.userData.stuff.addItem(data);
 	}
 
-	this.userData.items[userItemId].setToInventorySlot(inventorySlotsArray, callback);
+	this.userData.items[worldItemId].setToInventorySlot(inventorySlotsArray, callback);
 };
 
 
@@ -912,21 +911,21 @@ User.prototype.addItemToStuff = function(data, callback) {
 	*	Удаляет вещь из стаффа героя
 	*	
 	*	@data: arr,
-	*		@userItemId: 	str, ид вещи из таблицы game_WorldItems
-	*		@itemId: 		str, ид вещи из таблицы game_Items
+	*		@worldItemId: str, ид вещи из таблицы game_WorldItems
+	*		@itemId: 			str, ид вещи из таблицы game_Items
 	*	
 	*
 	* @since  20.09.15
 	* @author pcemma
 */
 User.prototype.removeItemFromStuff = function(data, callback) {
-	var userItemId = data.userItemId,
+	var worldItemId = data.worldItemId,
 		itemId = data.itemId;
 	// Проход по всем слотам, в которых надета вещь, и удаление данных о вещи.
 	for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots) {
-		this.userData.stuff.removeItem(inventorySlotId, userItemId);
+		this.userData.stuff.removeItem(inventorySlotId, worldItemId);
 	}
-	this.userData.items[userItemId].setToInventorySlot([], callback);
+	this.userData.items[worldItemId].setToInventorySlot([], callback);
 };
 
 
@@ -975,7 +974,7 @@ User.prototype.updateStats = function(data, callback) {
     }
     // console.log("AFTER:", this.userData.stats);
     // console.log("========================");
-    if(callback) { 
+    if (typeof callback === "function") {
     	callback(); 
     }
   }.bind(this));
