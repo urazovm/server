@@ -3,8 +3,8 @@
 var GLOBAL = require("./PreloadDataClass.js"),
 	HexagonClass = require("./HexagonClass.js");
 
-function GridClass() {
-	this.__constructor();
+function GridClass(data) {
+	this.__constructor(data);
 }
 
 
@@ -12,14 +12,18 @@ function GridClass() {
 	* Description:
 	*	function Конструктор класса.
 	*	
+	*	@data: obj,
+	*		@battleType: str, type of battle
+	*
 	*
 	*
 	* @since  16.09.15
 	* @author pcemma
 */
-GridClass.prototype.__constructor = function() {
+GridClass.prototype.__constructor = function(data) {
 	this.hexesInRow = 8;
 	this.hexesInCol = 7;
+	this.battleType = data.battleType;
 	this.obstructionsHexes = this.createobstructionsHexes();
 	this.hexes = this.fill();
 };	
@@ -35,11 +39,14 @@ GridClass.prototype.__constructor = function() {
 	* @author pcemma
 */
 GridClass.prototype.createobstructionsHexes = function() {
-	var tmpArray = {};
-	for (var i= 1; i <= Math.floor(Math.random() * (3 - 1 + 1)) + 1; i++ ) {
-		var x = Math.floor(Math.random() * (this.hexesInRow + 1)),
-			y = Math.floor(Math.random() * (this.hexesInCol + 1));
-		tmpArray[x+"."+y] = String(Math.floor(Math.random() * (Object.keys(GLOBAL.DATA.battleInfo.obstructions).length - 1 + 1)) + 1);
+	var tmpArray = {},
+		obstructionsCount = Math.floor(Math.random() * 3) + 1;
+	//TODO: sometimes obstructions are on the same hex
+	for (var i= 1; i <= obstructionsCount; i++ ) {
+		var x = Math.floor(Math.random() * (this.hexesInRow)),
+			y = Math.floor(Math.random() * (this.hexesInCol)),
+			randElem = Math.floor(Math.random() * GLOBAL.DATA.battleInfo[this.battleType].obstructions.length);
+		tmpArray[x+"."+y] = GLOBAL.DATA.battleInfo[this.battleType].obstructions[randElem];
 	}
 	return tmpArray;
 };

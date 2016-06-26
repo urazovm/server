@@ -3,24 +3,23 @@ var mongoose = require("mongoose"),
 	config = require("../config/personal_config.js"),
 	Schema = mongoose.Schema,
 	connection = mongoose.createConnection(config.dbConfig.name),
-	shotsSchema = new Schema({
-    imageId : String,
-    speed : Number,
-    w : Number,
-    h : Number
-});
+	InfobattlesSchema = new Schema({
+		backGroundImageId: String,
+		hexImageId: String,
+    obstructions: [{ type: String, ref: 'game_battleObstructions' }]
+	});
 
 autoIncrement.initialize(connection);
 
-shotsSchema.plugin(autoIncrement.plugin, {
-	model: 'game_shots', 
+InfobattlesSchema.plugin(autoIncrement.plugin, {
+	model: 'game_infoBattles', 
 	startAt: 1
 });
 
 
 /*
 	* Description:
-	*	Get all shots from db
+	*	Get all battle info from db
 	*	
 	*	@callback: func, call back function
 	*	
@@ -29,24 +28,18 @@ shotsSchema.plugin(autoIncrement.plugin, {
 	* @since  26.06.16
 	* @author pcemma
 */
-shotsSchema.statics.getAll = function(callback) {
-	var shotsObject = {};
+InfobattlesSchema.statics.getAll = function(callback) {
+	var battleInfo = {};
 	this.find(function (err, rows) {
 		if(err){
 			console.trace(err);
 		} 
 		rows.forEach(function (element, index, array) {
 			element._id = String(element._id);
-			
-			shotsObject[element._id] = {
-				name: element.name,
-				speed: element.speed,
-				w: element.w,
-				h: element.h
-			};
+			battleInfo[element._id] = element;
 		});
-		callback(shotsObject);
+		callback(battleInfo);
 	});
 }
 
-mongoose.model('game_shots', shotsSchema);
+mongoose.model('game_infoBattles', InfobattlesSchema);

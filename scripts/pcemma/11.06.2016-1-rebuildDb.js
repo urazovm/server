@@ -15,6 +15,8 @@ require("../../models/HeroClassesModel");
 
 require("../../models/ShotsInfoModel");
 require("../../models/GlobalConstantsModel");
+require("../../models/BattleObstructionsModel");
+require("../../models/InfoBattlesModel");
 
 
 
@@ -45,7 +47,10 @@ function runScript() {
 
 
     // addShotsInfo,
-    addGlobalConstatns
+    // addGlobalConstatns,
+    // addBattleObstructions,
+    addBattleInfo
+
   ];
   async.waterfall(
     queues,
@@ -867,6 +872,67 @@ function addGlobalConstatns (callback) {
     queues,
     function(err) {
       console.log("Global Constants were added.");
+      callback();
+    }
+  )
+}
+
+
+function addBattleObstructions (callback) {
+  var queues = [];
+  var arr = [
+    {
+      "name" : "Stone",
+      "imageId" : '1'
+    },
+    {
+      "name" : "Barrel",
+      "imageId" : '2'
+    }
+  ];
+
+  arr.forEach(function (element, index, array) {
+    queues.push(function (cb) {
+      mongoose.model('game_battleObstructions').create(element, function (err, rows) {
+        console.log(rows);
+        cb();
+      });
+    });
+  });
+
+  async.waterfall(
+    queues,
+    function(err) {
+      console.log("Battle Obstructions were added.");
+      callback();
+    }
+  )
+}
+
+
+function addBattleInfo (callback) {
+  var queues = [];
+  var arr = [
+    {
+      backGroundImageId: "1",
+      hexImageId: "1",
+      obstructions: [1, 2]
+    }
+  ];
+
+  arr.forEach(function (element, index, array) {
+    queues.push(function (cb) {
+      mongoose.model('game_infoBattles').create(element, function (err, rows) {
+        console.log(rows);
+        cb();
+      });
+    });
+  });
+
+  async.waterfall(
+    queues,
+    function(err) {
+      console.log("Battle Infos were added.");
       callback();
     }
   )

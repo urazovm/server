@@ -29,7 +29,9 @@ BattleClass.prototype.__constructor = function() {
 	this.startTime = currentTime;
 	this.endFlag = false;
 
-	this.grid = new GridClass();
+	this.battleType = "1"; //TODO: some functionailty to check what type should be
+
+	this.grid = new GridClass({battleType: this.battleType});
 
 	// this.hexes = this.createGrid();
 	
@@ -509,10 +511,11 @@ BattleClass.prototype.isHeroExistInBattle = function(heroId) {
 */
 BattleClass.prototype.getBattleStatus = function() {
 	var battleInfo = {
-		id: 				this.id,
-		heroes: 			this.getHeroesData(),
+		id: 								this.id,
+		battleType: 				this.battleType,
+		heroes: 						this.getHeroesData(),
 		obstructionsHexes: 	this.grid.obstructionsHexes,
-		teams:				this.teams	
+		teams:							this.teams	
 	};
 	
 	return battleInfo;

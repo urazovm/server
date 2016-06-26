@@ -21,6 +21,8 @@ require("../models/WorldItemsModel");
 
 require("../models/ShotsInfoModel");
 require("../models/GlobalConstantsModel");
+require("../models/BattleObstructionsModel");
+require("../models/InfoBattlesModel");
 
 
 
@@ -54,6 +56,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		this.getHeroLevels.bind(this),
 
 		//BATTLE
+		this.getBattleObstructions.bind(this),
 		this.getBattleInfo.bind(this),
 		this.getShotsInfo.bind(this),
 		
@@ -73,7 +76,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		function(err) {
 			// All tasks are done now
 			console.log("GLOBAL is initialized!!!");
-			console.log(this.globalConstants);
+			console.log(this.DATA.battleInfo);
 			callback();
 		}.bind(this)
 	)
@@ -280,7 +283,27 @@ PreloadDataClass.prototype.fillNpcsCollectionWithData = function(callback) {
 
 
 
-/**************** BATTLE INFO ************/	
+/**************** BATTLE ************/	
+
+
+/*
+	* Description:
+	*	Инфа по бивте
+	*		Объеты на поле боя (препятствия)
+	*	
+	*	
+	*
+	* @since  08.02.15
+	* @author pcemma
+*/
+PreloadDataClass.prototype.getBattleObstructions = function(callback) {
+	this.DATA.battleObstructions = {};
+	mongoose.model('game_battleObstructions').getAll(function(battleObstructions){
+		this.DATA.battleObstructions = battleObstructions;
+		callback();
+	}.bind(this));
+};
+
 
 /*
 	* Description:
@@ -294,10 +317,14 @@ PreloadDataClass.prototype.fillNpcsCollectionWithData = function(callback) {
 */
 PreloadDataClass.prototype.getBattleInfo = function(callback) {
 	this.DATA.battleInfo = {};
-	Mongo.find({collection: 'game_BattleInfo', callback: function(rows) {
-		this.DATA.battleInfo = rows[0];
+	mongoose.model('game_infoBattles').getAll(function(battleInfo) {
+		this.DATA.battleInfo = battleInfo;
 		callback();
-	}.bind(this)});
+	}.bind(this));
+	// Mongo.find({collection: 'game_BattleInfo', callback: function(rows) {
+	// 	this.DATA.battleInfo = rows[0];
+	// 	callback();
+	// }.bind(this)});
 };
 
 

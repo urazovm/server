@@ -3,24 +3,22 @@ var mongoose = require("mongoose"),
 	config = require("../config/personal_config.js"),
 	Schema = mongoose.Schema,
 	connection = mongoose.createConnection(config.dbConfig.name),
-	shotsSchema = new Schema({
-    imageId : String,
-    speed : Number,
-    w : Number,
-    h : Number
-});
+	battleObstructionsSchema = new Schema({
+    name : String,
+    imageId : String
+	});
 
 autoIncrement.initialize(connection);
 
-shotsSchema.plugin(autoIncrement.plugin, {
-	model: 'game_shots', 
+battleObstructionsSchema.plugin(autoIncrement.plugin, {
+	model: 'game_battleObstructions', 
 	startAt: 1
 });
 
 
 /*
 	* Description:
-	*	Get all shots from db
+	*	Get all obstructions from db
 	*	
 	*	@callback: func, call back function
 	*	
@@ -29,24 +27,18 @@ shotsSchema.plugin(autoIncrement.plugin, {
 	* @since  26.06.16
 	* @author pcemma
 */
-shotsSchema.statics.getAll = function(callback) {
-	var shotsObject = {};
+battleObstructionsSchema.statics.getAll = function(callback) {
+	var battleObstructions = {};
 	this.find(function (err, rows) {
 		if(err){
 			console.trace(err);
 		} 
 		rows.forEach(function (element, index, array) {
 			element._id = String(element._id);
-			
-			shotsObject[element._id] = {
-				name: element.name,
-				speed: element.speed,
-				w: element.w,
-				h: element.h
-			};
+			battleObstructions[element._id] = element;
 		});
-		callback(shotsObject);
+		callback(battleObstructions);
 	});
 }
 
-mongoose.model('game_shots', shotsSchema);
+mongoose.model('game_battleObstructions', battleObstructionsSchema);

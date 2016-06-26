@@ -5,6 +5,7 @@ var express = require('express'),
 	io = require('socket.io'),
 	domain = require('domain'),
 	async = require('async'),
+	mongoose = require("mongoose"),
 
 	// add personal config package
 	config = require("./../config/personal_config.js"),
@@ -26,6 +27,9 @@ function ServerBattleClass() {
 
 
 ServerBattleClass.prototype.start = function() {
+	
+	mongoose.connect("mongodb://127.0.0.1/pcemmaDb");
+
 	var queues = [
 		Mongo.connect.bind(Mongo),
 		GLOBAL.initialize.bind(GLOBAL),

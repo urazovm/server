@@ -18,13 +18,13 @@ gcSchema.plugin(autoIncrement.plugin, {
 
 /*
 	* Description:
-	*	Get all shots from db
+	*	Get all global constatns from db
 	*	
 	*	@callback: func, call back function
 	*	
 	*	
 	*	
-	* @since  14.06.16
+	* @since  26.06.16
 	* @author pcemma
 */
 gcSchema.statics.getAll = function(callback) {
