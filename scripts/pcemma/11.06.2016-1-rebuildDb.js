@@ -17,6 +17,7 @@ require("../../models/ShotsInfoModel");
 require("../../models/GlobalConstantsModel");
 require("../../models/BattleObstructionsModel");
 require("../../models/InfoBattlesModel");
+require("../../models/InfoNpcsModel");
 
 
 
@@ -49,7 +50,8 @@ function runScript() {
     // addShotsInfo,
     // addGlobalConstatns,
     // addBattleObstructions,
-    // addBattleInfo
+    // addBattleInfo,
+    addNpcsInfo
 
   ];
   async.waterfall(
@@ -933,6 +935,73 @@ function addBattleInfo (callback) {
     queues,
     function(err) {
       console.log("Battle Infos were added.");
+      callback();
+    }
+  )
+}
+
+
+function addNpcsInfo (callback) {
+  var queues = [];
+  var arr = [
+    {
+      "name" : "littleRedDragon",
+      "enName" : "little Red Dragon",
+      "ruName" : "Красный малый дракон",
+      "count" : 10,
+      "shotId" : "1",
+      "items" : {},
+      "stats" : {
+        "strength" : 1,
+        "agility" : 1,
+        "intuition" : 1,
+        "wisdom" : 1,
+        "intellect" : 1,
+        "stamina" : 1,
+        "luck" : 1,
+        "minDamage" : 10,
+        "maxDamage" : 15,
+        "dodge" : 0,
+        "antiDodge" : 0,
+        "criticalHit" : 0,
+        "antiCriticalHit" : 0,
+        "mana" : 0,
+        "currentMana" : 0,
+        "minMagicDamage" : 0,
+        "maxMagicDamage" : 0,
+        "hp" : 20,
+        "currentHp" : 20,
+        "capacity" : 0,
+        "currentCapacity" : 0,
+        "chance" : 0,
+        "moveActionTime" : 2,
+        "hitActionTime" : 2,
+        "actionTime" : 1,
+        "moveRadius" : 1,
+        "attackRadius" : 2
+      },
+      "levels" : {
+        "heroLevel" : {
+          "exp" : 0,
+          "level" : 3
+        }
+      }
+    }
+  ];
+
+  arr.forEach(function (element, index, array) {
+    queues.push(function (cb) {
+      mongoose.model('game_infoNpcs').create(element, function (err, rows) {
+        console.log(rows);
+        cb();
+      });
+    });
+  });
+
+  async.waterfall(
+    queues,
+    function(err) {
+      console.log("Npcs Infos were added.");
       callback();
     }
   )

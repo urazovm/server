@@ -3,29 +3,28 @@ var mongoose = require("mongoose"),
 	config = require("../config/personal_config.js"),
 	Schema = mongoose.Schema,
 	connection = mongoose.createConnection(config.dbConfig.name),
-	itemsSchema = new Schema({
+	infoNpcsSchema = new Schema({
     name : String,
-    imageId : Number,
-    rarity : Number,
-    countableFlag : Boolean,
-    shotId: { type: String, ref: 'game_shots' },
-    categories : [String],
+    enName : String,
+    ruName : String,
+   	count : Number,
+    shotId : String,
+    items : Schema.Types.Mixed,
     stats : Schema.Types.Mixed,
-    attachments : Schema.Types.Mixed,
-    inventorySlots : Schema.Types.Mixed
-});
+    levels : Schema.Types.Mixed, 
+	});
 
 autoIncrement.initialize(connection);
 
-itemsSchema.plugin(autoIncrement.plugin, {
-	model: 'game_items', 
+infoNpcsSchema.plugin(autoIncrement.plugin, {
+	model: 'game_infoNpcs', 
 	startAt: 1
 });
 
 
 /*
 	* Description:
-	*	Get all items from db
+	*	Get all npcs info from db
 	*	
 	*	@callback: func, call back function
 	*	
@@ -34,19 +33,15 @@ itemsSchema.plugin(autoIncrement.plugin, {
 	* @since  16.06.16
 	* @author pcemma
 */
-itemsSchema.statics.getAll = function(callback) {
-	var itemsObject = {};
+infoNpcsSchema.statics.getAll = function(callback) {
+	var npcsInfo = {};
 	this.find(function (err, rows) {
 		rows.forEach(function (element, index, array) {
 			element._id = String(element._id);
-			//TODO: check delete!
-			delete element['__v'];
-			itemsObject[element._id] = element;
+			npcsInfo[element._id] = element;
 		});
-		callback(itemsObject);
+		callback(npcsInfo);
 	});
 }
 
-
-
-mongoose.model('game_items', itemsSchema);
+mongoose.model('game_infoNpcs', infoNpcsSchema);

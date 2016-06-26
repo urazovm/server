@@ -24,6 +24,7 @@ require("../models/GlobalConstantsModel");
 require("../models/BattleObstructionsModel");
 require("../models/InfoBattlesModel");
 require("../models/BattlesModel");
+require("../models/InfoNpcsModel");
 
 
 
@@ -31,10 +32,6 @@ require("../models/BattlesModel");
 
 var async = require("async"),
 	mongoose = require("mongoose"),
-
-	
-
-	Mongo = require("./MongoDBClass.js"),
 	utils = require("./UtilsClass.js");
 
 function PreloadDataClass() {
@@ -77,7 +74,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		function(err) {
 			// All tasks are done now
 			console.log("GLOBAL is initialized!!!");
-			// console.log(this.DATA.battleInfo);
+			console.log(this.DATA.npcsInfo);
 			callback();
 		}.bind(this)
 	)
@@ -251,12 +248,10 @@ PreloadDataClass.prototype.isItemExist = function(itemId) {
 */
 PreloadDataClass.prototype.getNpcsInfo = function(callback) {
 	this.DATA.npcsInfo = {};
-	Mongo.find({collection: 'game_NpcsInfo', callback: function(rows) {
-		for(var i in rows) {
-			this.DATA.npcsInfo[rows[i]._id] = rows[i];
-		}
+	mongoose.model('game_infoNpcs').getAll(function(npcsInfo){
+		this.DATA.npcsInfo = npcsInfo;
 		callback();
-	}.bind(this)});
+	}.bind(this));
 };
 
 
