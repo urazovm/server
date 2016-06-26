@@ -23,6 +23,7 @@ require("../models/ShotsInfoModel");
 require("../models/GlobalConstantsModel");
 require("../models/BattleObstructionsModel");
 require("../models/InfoBattlesModel");
+require("../models/BattlesModel");
 
 
 
@@ -76,7 +77,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		function(err) {
 			// All tasks are done now
 			console.log("GLOBAL is initialized!!!");
-			console.log(this.DATA.battleInfo);
+			// console.log(this.DATA.battleInfo);
 			callback();
 		}.bind(this)
 	)

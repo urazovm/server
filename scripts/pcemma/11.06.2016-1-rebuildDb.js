@@ -49,7 +49,7 @@ function runScript() {
     // addShotsInfo,
     // addGlobalConstatns,
     // addBattleObstructions,
-    addBattleInfo
+    // addBattleInfo
 
   ];
   async.waterfall(

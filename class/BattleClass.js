@@ -1,13 +1,13 @@
 console.log("BattleClass CLASS is connected");	
 
-var async = require("async"),
-	redis = require('redis'),
-	Mongo = require("./MongoDBClass.js"),
-	GridClass = require("./GridClass.js"),
-	UserClass = require("./UserClass.js"),
-	NpcClass = require("./NpcClass.js"),
-	eventEmitter = require("./EventEmitterClass");
-	redisPub = redis.createClient();
+var async 			= require("async"),
+	redis 				= require('redis'),
+	mongoose 			= require("mongoose"),
+	GridClass 		= require("./GridClass.js"),
+	UserClass 		= require("./UserClass.js"),
+	NpcClass 			= require("./NpcClass.js"),
+	eventEmitter 	= require("./EventEmitterClass");
+	redisPub 			= redis.createClient();
 
 function BattleClass() {
 	this.__constructor();
@@ -53,20 +53,13 @@ BattleClass.prototype.__constructor = function() {
 	* @author pcemma
 */
 BattleClass.prototype.create = function(callback) {
-	Mongo.insert({
-		collection: "game_Battles", 
-		insertData: {
-			startTime: this.startTime,
-			endFlag: this.endFlag,
-			hexesInRow: this.grid.hexesInRow,
-			hexesInCol: this.grid.hexesInCol,
-			teams: this.teams
-		}, 
-		callback: function(rows) {
-			this.id = rows.ops[0]._id;
-			callback();
-		}.bind(this)
-	}); 
+	mongoose.model('game_battles').create(this, function(err, battle){
+		if(err) {
+			console.trace(err);
+		}
+		this.id = battle._id;
+		callback();
+	}.bind(this));
 };
 
 
@@ -136,14 +129,12 @@ BattleClass.prototype.completion = function(data) {
 
 	async.waterfall(queues,
 		function(err) { 
-			Mongo.update({
-				collection: 'game_Battles', 
-				searchData: {_id: Mongo.objectId(this.id)}, 
-				insertData: {$set: {endFlag: true}},
-				callback: function() {
-					eventEmitter.emit("endBattle", {id: this.id}); 
-				}.bind(this)
-			});			
+			mongoose.model('game_battles').endBattle(this.id, function(err) {
+				if(err) {
+					console.trace(err);
+				}
+				eventEmitter.emit("endBattle", {id: this.id}); 
+			}.bind(this));
 		}.bind(this)
 	);
 };

@@ -4,7 +4,6 @@ var async 								= require("async"),
 	crypto 									= require('crypto'),
 	eventemitter2 					= require("eventemitter2"),
 	mongoose 								= require("mongoose"),
-	Mongo 									= require("./MongoDBClass.js"),
 	GLOBAL 									= require("./PreloadDataClass.js"),
 	StatsManagerClass 			= require("./StatsManagerClass.js"),
 	LevelsManagerClass 			= require("./LevelsManagerClass.js"),
@@ -310,9 +309,9 @@ User.prototype.authorization = function(data, callback) {
 
 			this.socketWrite({f: "authorizationResponse", p: sendData});
 
-			this.updateExp(30, "heroLevel", callback);
-
-			// callback();
+			// this.updateExp(30, "heroLevel", callback);
+			callback();
+		
 		}.bind(this)
 	)
 };

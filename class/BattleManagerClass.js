@@ -1,10 +1,10 @@
 console.log("BattleManagerClass CLASS is connected");	
 
-var async = require("async"),
-	Mongo = require("./MongoDBClass.js"),
-	GLOBAL = require("./PreloadDataClass.js"),
-	BattleClass	= require("./BattleClass.js"),
-	eventEmitter = require("./EventEmitterClass");
+var async 			= require("async"),
+	mongoose 			= require("mongoose"),
+	GLOBAL 				= require("./PreloadDataClass.js"),
+	BattleClass		= require("./BattleClass.js"),
+	eventEmitter 	= require("./EventEmitterClass");
 
 function BMClass() {
 	
@@ -24,7 +24,7 @@ BMClass.prototype.initialize = function(callback)
 {
 	this.battles = {};
 	// TODO: Need rebuild this. It's only for test!
-	this.deleteAllNotEndedBattles();
+	this.endAllNotEndedBattles();
 
 	eventEmitter.on("enterBattle", this.enterBattle.bind(this));
 	eventEmitter.on("battleMoveHero", this.moveHero.bind(this));
@@ -219,9 +219,13 @@ BMClass.prototype.isBattleExist = function(data) {
 	* @since  08.03.15
 	* @author pcemma
 */
-BMClass.prototype.deleteAllNotEndedBattles = function() {
-	console.log("FINISH ALL OLD BATTLES!!");
-	Mongo.update({collection: 'game_Battles', insertData: {$set:{endFlag: true}}, options: {multi: true}}); 
+BMClass.prototype.endAllNotEndedBattles = function() {
+	mongoose.model('game_battles').endAllNotEndedBattles(function(err) {
+		if(err) {
+			console.trace(err);
+		}
+		console.log("FINISH ALL OLD BATTLES!!");
+	});
 };
 
 

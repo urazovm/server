@@ -3,7 +3,7 @@ var mongoose = require("mongoose"),
 	config = require("../config/personal_config.js"),
 	Schema = mongoose.Schema,
 	connection = mongoose.createConnection(config.dbConfig.name),
-	InfobattlesSchema = new Schema({
+	infoBattlesSchema = new Schema({
 		backGroundImageId: String,
 		hexImageId: String,
     obstructions: [{ type: String, ref: 'game_battleObstructions' }]
@@ -11,7 +11,7 @@ var mongoose = require("mongoose"),
 
 autoIncrement.initialize(connection);
 
-InfobattlesSchema.plugin(autoIncrement.plugin, {
+infoBattlesSchema.plugin(autoIncrement.plugin, {
 	model: 'game_infoBattles', 
 	startAt: 1
 });
@@ -28,7 +28,7 @@ InfobattlesSchema.plugin(autoIncrement.plugin, {
 	* @since  26.06.16
 	* @author pcemma
 */
-InfobattlesSchema.statics.getAll = function(callback) {
+infoBattlesSchema.statics.getAll = function(callback) {
 	var battleInfo = {};
 	this.find(function (err, rows) {
 		if(err){
@@ -42,4 +42,4 @@ InfobattlesSchema.statics.getAll = function(callback) {
 	});
 }
 
-mongoose.model('game_infoBattles', InfobattlesSchema);
+mongoose.model('game_infoBattles', infoBattlesSchema);
