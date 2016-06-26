@@ -288,8 +288,7 @@ PreloadDataClass.prototype.fillNpcsCollectionWithData = function(callback) {
 
 /*
 	* Description:
-	*	Инфа по бивте
-	*		Объеты на поле боя (препятствия)
+	*		Get list of battle obstructions
 	*	
 	*	
 	*
@@ -307,8 +306,7 @@ PreloadDataClass.prototype.getBattleObstructions = function(callback) {
 
 /*
 	* Description:
-	*	Инфа по бивте
-	*		Объеты на поле боя (препятствия)
+	*	Get list of battle types with standart information for this type
 	*	
 	*	
 	*
@@ -321,10 +319,6 @@ PreloadDataClass.prototype.getBattleInfo = function(callback) {
 		this.DATA.battleInfo = battleInfo;
 		callback();
 	}.bind(this));
-	// Mongo.find({collection: 'game_BattleInfo', callback: function(rows) {
-	// 	this.DATA.battleInfo = rows[0];
-	// 	callback();
-	// }.bind(this)});
 };
 
 
