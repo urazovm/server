@@ -1,7 +1,7 @@
 console.log("ItemClass CLASS is connected");	
 
-var StatsManagerClass = require("./StatsManagerClass.js"),
-		mongoose 					= require("mongoose");
+var mongoose 				= require("mongoose"),
+	StatsManagerClass = require("./StatsManagerClass");
 
 
 function ItemClass(data) {

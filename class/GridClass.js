@@ -1,7 +1,7 @@
 ﻿console.log("GridClass CLASS is connected");
 
-var GLOBAL = require("./PreloadDataClass.js"),
-	HexagonClass = require("./HexagonClass.js");
+var GLOBAL = require("./PreloadDataClass"),
+	HexagonClass = require("./HexagonClass");
 
 function GridClass(data) {
 	this.__constructor(data);

@@ -2,7 +2,7 @@ console.log("RedisRouterServerClass CLASS is connected");
 
 var redis = require('redis'),
 	domain = require('domain'),
-	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
+	ErrorHandlerClass = require("./ErrorHandlerClass"),
 	eventEmitter = require("./EventEmitterClass"),
 	errorHandler = new ErrorHandlerClass();
 

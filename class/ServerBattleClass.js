@@ -8,15 +8,15 @@ var express = require('express'),
 	mongoose = require("mongoose"),
 
 	// add personal config package
-	config = require("./../config/personal_config.js"),
+	config = require("./../config/personal_config"),
 
-	Mongo = require("./MongoDBClass.js"),
-	GLOBAL = require("./PreloadDataClass.js"),
-	utils = require("./UtilsClass.js"),
-	battlesManager = require("./BattleManagerClass.js"),
+	Mongo = require("./MongoDBClass"),
+	GLOBAL = require("./PreloadDataClass"),
+	utils = require("./UtilsClass"),
+	battlesManager = require("./BattleManagerClass"),
 
-	RedisRouterServerClass = require("./RedisRouterServerClass.js"),
-	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
+	RedisRouterServerClass = require("./RedisRouterServerClass"),
+	ErrorHandlerClass = require("./ErrorHandlerClass"),
 	errorHandler = new ErrorHandlerClass(),
 	redisRouter = new RedisRouterServerClass();
 

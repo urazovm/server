@@ -1,17 +1,17 @@
 console.log("Npc CLASS is connected");	
 
-var GLOBAL = require("./PreloadDataClass.js"),
-	eventEmitter = require("./EventEmitterClass.js"),
-	UserClass = require("./UserClass.js");
+var mongoose 		= require("mongoose"),
+	GLOBAL 				= require("./PreloadDataClass"),
+	eventEmitter 	= require("./EventEmitterClass"),
+	UserClass 		= require("./UserClass");
+
 
 function Npc() {
 	UserClass.call(this);
 
-	this.dbName = 'game_Npcs';
+	this.dbName = 'game_npcs';
 	this.isUser = false;
 
-	// USER DATA
-	// this.userData = {};
 
 	this.on('addToBattleListener', this.addToBattleListener.bind(this));
 	this.on('removeFromBattleListener', this.removeFromBattleListener.bind(this));
@@ -28,7 +28,7 @@ Npc.prototype.constructor = Npc;
 
 /*
 	* Description:
-	*	function Заполняем все необходимые данные в базе данных о новом нпц. 
+	*	function Fill npc collection with new document
 	*	
 	*
 	*	@data:				array
@@ -40,26 +40,32 @@ Npc.prototype.constructor = Npc;
 */
 Npc.prototype.addDefaultUser = function(data, callback) {
 	this.npcId = data.npcId;
-	Mongo.insert({
-		collection: "game_Npcs", 
-		insertData: {
-			userData: {
-				npcId: data.npcId,
-				login: GLOBAL.DATA.npcsInfo[data.npcId].name,
-				level: GLOBAL.DATA.npcsInfo[data.npcId].level,
-				lastActionTime: 0,
-				inBattleFlag: false,
-				isAliveFlag: true,
-				items:{},
-				stuff: {},
-				stats: this.getDefaultStats()
-			},
-		}, 
-		callback: function(rows) {
-			this.userId = rows.ops[0]._id;
-			callback();
-		}.bind(this)
-	}); 		
+
+	var npcId = data.npcId,
+		insertData = {
+		userData: {
+			npcId: npcId,
+			lastActionTime: 0,
+			inBattleFlag: false,
+			isAliveFlag: true,
+			items:{},
+			stuff: {},
+			shotId: GLOBAL.DATA.npcsInfo[npcId].shotId,
+			levels : {
+        heroLevel : {
+          level : GLOBAL.DATA.npcsInfo[npcId].level
+        }
+      },
+			stats: this.getDefaultStats()
+		}
+	};
+
+	
+
+	mongoose.model(this.dbName).create(insertData, function (err, rows) {
+    this.userId = String(rows._id);
+  	callback();
+  }.bind(this)); 		
 };
 
 
@@ -74,37 +80,25 @@ Npc.prototype.addDefaultUser = function(data, callback) {
 	* @author pcemma
 */
 Npc.prototype.getDefaultStats = function() {
+	console.log("GLOBAL.DATA.npcsInfo[this.npcId]", GLOBAL.DATA.npcsInfo);
 	return GLOBAL.DATA.npcsInfo[this.npcId].stats;
 };
 
 
 /*
 	* Description:
-	*	Добавляем вещи новому нпц
+	*	Get default items array for new npc
 	*	
 	*	
+	*	
+	*	return: array, of the defaults items for npc
 	*
-	* @since  10.08.15
+	* @since  28.06.16
 	* @author pcemma
 */
-Npc.prototype.addDefaultItems = function(callback) {
-	for(var i in GLOBAL.DATA.npcsInfo[this.npcId].items) {
-		var itemId = defaultItemsArray[i],
-			inventorySlotArray = [];
-		for(var inventorySlotId in GLOBAL.DATA.items[itemId].inventorySlots) {
-			inventorySlotArray.push(inventorySlotId);
-		}	
-		
-		this.addItem({
-			stats: GLOBAL.DATA.items[itemId].stats,
-			itemId: itemId,
-			count: 1,
-			inventorySlotId: inventorySlotArray
-		}, callback);
-	}	
+Npc.prototype.getDefaultItems = function() {
+	return GLOBAL.DATA.npcsInfo[this.npcId].items || [];
 };
-
-
 
 
 
@@ -147,7 +141,7 @@ Npc.prototype.removeFromBattleListener = function() {
 
 /*
 	* Description:
-	*	Поиск врагов в области удара.
+	*	Search enemies in attack radius
 	*	
 	*
 	* @since  15.05.15

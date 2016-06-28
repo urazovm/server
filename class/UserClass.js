@@ -4,29 +4,19 @@ var async 								= require("async"),
 	crypto 									= require('crypto'),
 	eventemitter2 					= require("eventemitter2"),
 	mongoose 								= require("mongoose"),
-	GLOBAL 									= require("./PreloadDataClass.js"),
-	StatsManagerClass 			= require("./StatsManagerClass.js"),
-	LevelsManagerClass 			= require("./LevelsManagerClass.js"),
-	StuffItemsManagerClass 	= require("./StuffItemsManagerClass.js"),
-	ItemClass 							= require("./ItemClass.js"),
-	utils 									= require("./UtilsClass.js");
-
+	GLOBAL 									= require("./PreloadDataClass"),
+	StatsManagerClass 			= require("./StatsManagerClass"),
+	LevelsManagerClass 			= require("./LevelsManagerClass"),
+	StuffItemsManagerClass 	= require("./StuffItemsManagerClass"),
+	ItemClass 							= require("./ItemClass"),
+	utils 									= require("./UtilsClass");
 
 function User() {
-
 	this.dbName = 'game_users';
 	this.isUser = true;
 
-
 	// USER DATA
 	this.autoConfigData = {};
-	
-	this.userData = {
-						// items: {}, 	// Предметы
-						// stuff: {}, 	// Надетые вещи
-						// stats: {} 	// Статы юзера
-					};
-
 	// this.on("test", this.test.bind(this));
 }
 
@@ -211,8 +201,8 @@ User.prototype.getDefaultStats = function(heroClassId) {
 */
 User.prototype.addDefaultItems = function(callback) {
 	// TODO: добавить стандартный массив вещей, который дается сразу юзеру при старте. 
-	var defaultItemsArray = ["1", "2", "4", "5", "6", "7", "8", "9"];
-	var queues = [];
+	var defaultItemsArray = this.getDefaultItems(),
+		queues = [];
 	defaultItemsArray.forEach(function (itemId, index, array) {
 		var itemData = {
 			stats: GLOBAL.DATA.items[itemId].stats,
@@ -228,6 +218,22 @@ User.prototype.addDefaultItems = function(callback) {
 			callback();
 		}
 	)
+};
+
+
+/*
+	* Description:
+	*	Get default items array for new user
+	*	
+	*	
+	*	
+	*	return: array, of the defaults items for user
+	*
+	* @since  28.06.16
+	* @author pcemma
+*/
+User.prototype.getDefaultItems = function() {
+	return ["1", "2", "4", "5", "6", "7", "8", "9"];
 };
 
 

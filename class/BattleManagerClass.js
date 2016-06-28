@@ -2,8 +2,8 @@ console.log("BattleManagerClass CLASS is connected");
 
 var async 			= require("async"),
 	mongoose 			= require("mongoose"),
-	GLOBAL 				= require("./PreloadDataClass.js"),
-	BattleClass		= require("./BattleClass.js"),
+	GLOBAL 				= require("./PreloadDataClass"),
+	BattleClass		= require("./BattleClass"),
 	eventEmitter 	= require("./EventEmitterClass");
 
 function BMClass() {
@@ -115,7 +115,7 @@ BMClass.prototype.enterBattle = function(data) {
 		//TODO: временно добавляем нпц в бой сразу за героем. Для тестов и показа издателю.
 		// добавляем первого нпц тупо.
 		if(data.battleType === "npc") {
-			var npcsIdArray = ["55d20675e8e93ce757cc5688", "55d20675e8e93ce757cc5689", "55d20675e8e93ce757cc568a"];
+			var npcsIdArray = ["5772ddbf0b171b7c2ad250a3", "5772ddbf0b171b7c2ad250a4", "5772ddbf0b171b7c2ad250a5"];
 			// var npcsIdArray = ["55d20675e8e93ce757cc5688"];
 
 			npcsIdArray.forEach(function(npcId) {

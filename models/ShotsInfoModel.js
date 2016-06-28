@@ -1,6 +1,6 @@
 var mongoose = require("mongoose"),
 	autoIncrement = require('mongoose-auto-increment'),
-	config = require("../config/personal_config.js"),
+	config = require("../config/personal_config"),
 	Schema = mongoose.Schema,
 	connection = mongoose.createConnection(config.dbConfig.name),
 	shotsSchema = new Schema({
@@ -39,7 +39,7 @@ shotsSchema.statics.getAll = function(callback) {
 			element._id = String(element._id);
 			
 			shotsObject[element._id] = {
-				name: element.name,
+				imageId: element.imageId,
 				speed: element.speed,
 				w: element.w,
 				h: element.h

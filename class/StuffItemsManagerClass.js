@@ -1,6 +1,6 @@
 console.log("StuffItemsManagerClass CLASS is connected");	
 
-var GLOBAL = require("./PreloadDataClass.js");
+var GLOBAL = require("./PreloadDataClass");
 
 function StuffItemsManagerClass() {
 	

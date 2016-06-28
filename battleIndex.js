@@ -1,1 +1,1 @@
-require("./class/ServerBattleClass.js");
+require("./class/ServerBattleClass");

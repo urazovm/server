@@ -1,11 +1,11 @@
 console.log("Router CLASS is connected");	
 
-var GLOBAL = require("./PreloadDataClass.js"),
-	UsersManager = require("./UsersManagerClass.js"),
-	RedisRouterClientClass = require("./RedisRouterClientClass.js"),
-	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
-	errorHandler = new ErrorHandlerClass();
-	redisRouter = new RedisRouterClientClass();
+var GLOBAL 								= require("./PreloadDataClass"),
+	UsersManager 						= require("./UsersManagerClass"),
+	RedisRouterClientClass	= require("./RedisRouterClientClass"),
+	ErrorHandlerClass 			= require("./ErrorHandlerClass"),
+	errorHandler 						= new ErrorHandlerClass();
+	redisRouter 						= new RedisRouterClientClass();
 
 function Router() {
 

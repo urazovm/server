@@ -1,6 +1,6 @@
 console.log("StatsManagerClass CLASS is connected");	
 
-var GLOBAL = require("./PreloadDataClass.js");
+var GLOBAL = require("./PreloadDataClass");
 
 function StatsManagerClass(data) {
 	this.__constructor(data);

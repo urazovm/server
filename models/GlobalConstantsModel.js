@@ -1,6 +1,6 @@
 var mongoose = require("mongoose"),
 	autoIncrement = require('mongoose-auto-increment'),
-	config = require("../config/personal_config.js"),
+	config = require("../config/personal_config"),
 	Schema = mongoose.Schema,
 	connection = mongoose.createConnection(config.dbConfig.name),
 	gcSchema = new Schema({

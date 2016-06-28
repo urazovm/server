@@ -1,7 +1,7 @@
 console.log("LevelsManagerClass CLASS is connected");	
 
-var GLOBAL = require("./PreloadDataClass.js"),
-	LevelClass = require("./LevelClass.js"),
+var GLOBAL = require("./PreloadDataClass"),
+	LevelClass = require("./LevelClass"),
 	compareLevels = {
 		heroLevels: ["heroLevel"],
 		professionLevels: [],

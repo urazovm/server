@@ -1,7 +1,7 @@
 console.log("Users Manager CLASS is connected");
 
 var async = require("async"),
-	UserClass = require("./UserClass.js");
+	UserClass = require("./UserClass");
 
 function UsersManagerClass() {
 	this.USERS = {};

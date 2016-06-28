@@ -3,36 +3,29 @@ console.log("PreloadData CLASS is connected");
 require("../models/TownsModel");
 require("../models/TownsBuildingsModel");
 require("../models/TownsBuildingsTypesModel");
-
 require("../models/StatsModel");
 require("../models/HeroLevelsModel");
 require("../models/InventorySlotsListModel");
 require("../models/ItemsSpineSlotsModel");
-
 require("../models/ItemsModel");
-
-
 require("../models/HeroClassesModel");
 require("../models/UsersModel");
-
-
 require("../models/WorldItemsModel");
-
-
 require("../models/ShotsInfoModel");
 require("../models/GlobalConstantsModel");
 require("../models/BattleObstructionsModel");
 require("../models/InfoBattlesModel");
 require("../models/BattlesModel");
 require("../models/InfoNpcsModel");
+require("../models/NpcsModel");
 
 
 
 
 
-var async = require("async"),
-	mongoose = require("mongoose"),
-	utils = require("./UtilsClass.js");
+var async 	= require("async"),
+	mongoose 	= require("mongoose"),
+	utils 		= require("./UtilsClass");
 
 function PreloadDataClass() {
 	this.DATA = {};
@@ -74,7 +67,7 @@ PreloadDataClass.prototype.initialize = function(callback) {
 		function(err) {
 			// All tasks are done now
 			console.log("GLOBAL is initialized!!!");
-			console.log(this.DATA.npcsInfo);
+			// console.log(this.DATA.shotsInfo);
 			callback();
 		}.bind(this)
 	)
@@ -265,16 +258,23 @@ PreloadDataClass.prototype.getNpcsInfo = function(callback) {
 	* @since  16.08.15
 	* @author pcemma
 */
-/*
 PreloadDataClass.prototype.fillNpcsCollectionWithData = function(callback) {
+	var queues = [];
 	for(var npcId in this.DATA.npcsInfo) {
 		for(var count = 1; count <= this.DATA.npcsInfo[npcId].count; count++) {
 			var newNpc = new NpcClass();
-			newNpc.createNewUser({npcId: npcId}, callback);
+			queues.push(newNpc.createNewAccount.bind(newNpc, {npcId: npcId}));
 		}
 	}
+	async.waterfall(
+		queues,
+		function(err) {
+			console.log("all npcs were created");
+			callback();
+		}.bind(this)
+	)
 };
-*/
+
 
 
 

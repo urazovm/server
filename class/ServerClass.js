@@ -6,15 +6,13 @@ var net = require('net'),
 
 
 	// add personal config package
-	config = require("./../config/personal_config.js"),
+	config = require("./../config/personal_config"),
 
-	Mongo = require("./MongoDBClass.js"),
-	GLOBAL = require("./PreloadDataClass.js"),
-	utils = require("./UtilsClass.js"),
-	RouterClass = require("./RouterClass.js"),
-	ErrorHandlerClass = require("./ErrorHandlerClass.js"),
-	
-
+	Mongo = require("./MongoDBClass"),
+	GLOBAL = require("./PreloadDataClass"),
+	utils = require("./UtilsClass"),
+	RouterClass = require("./RouterClass"),
+	ErrorHandlerClass = require("./ErrorHandlerClass"),
 	errorHandler = new ErrorHandlerClass(),
 	router = new RouterClass();
 
@@ -28,7 +26,7 @@ function ServerClass() {
 ServerClass.prototype.start = function() {
 	
 	mongoose.connect("mongodb://127.0.0.1/pcemmaDb");
-	
+	console.log("BEFORE", GLOBAL);
 	var queues = [
 		Mongo.connect.bind(Mongo),
 		GLOBAL.initialize.bind(GLOBAL),

@@ -1,1 +1,1 @@
-require("./class/ServerClass.js");
+require("./class/ServerClass");

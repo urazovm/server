@@ -1,13 +1,14 @@
 var mongoose    = require("mongoose"),
   autoIncrement = require('mongoose-auto-increment'),
-  config        = require("../config/personal_config.js"),
+  config        = require("../config/personal_config"),
   Schema        = mongoose.Schema,
+  ObjectId      = mongoose.Types.ObjectId,
   connection    = mongoose.createConnection(config.dbConfig.name),
   worldItemsSchema   = new Schema({
     stats : Schema.Types.Mixed,
     itemId : { type: Number, ref: 'game_items' },
     count : { type: Number, default: 1 },
-    userId : { type: Number, ref: 'game_users' },
+    userId : { type: Schema.Types.ObjectId, ref: 'game_users' },
     inventorySlotId : { type: [String], default: [] }
   });
 
@@ -51,7 +52,7 @@ worldItemsSchema.statics.createItem = function(item, callback) {
   * @author pcemma
 */
 worldItemsSchema.statics.getUsersItems = function(userId, callback) {
-  this.find({ userId: Number(userId) }, function(err, items){
+  this.find({ userId: ObjectId(userId) }, function(err, items){
     callback(err, items);
   });
 }  
