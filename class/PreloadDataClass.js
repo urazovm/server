@@ -20,6 +20,11 @@ require("../models/InfoNpcsModel");
 require("../models/NpcsModel");
 
 
+require("../models/ServerListErrorsModel");
+require("../models/ServerErrorsModel");
+
+require("../models/ClientListErrorsModel");
+require("../models/ClientErrorsModel");
 
 
 

@@ -9,8 +9,6 @@ var express = require('express'),
 
 	// add personal config package
 	config = require("./../config/personal_config"),
-
-	Mongo = require("./MongoDBClass"),
 	GLOBAL = require("./PreloadDataClass"),
 	utils = require("./UtilsClass"),
 	battlesManager = require("./BattleManagerClass"),
@@ -31,7 +29,6 @@ ServerBattleClass.prototype.start = function() {
 	mongoose.connect("mongodb://127.0.0.1/pcemmaDb");
 
 	var queues = [
-		Mongo.connect.bind(Mongo),
 		GLOBAL.initialize.bind(GLOBAL),
 		battlesManager.initialize.bind(battlesManager),
 		this.startServer.bind(this)
