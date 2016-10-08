@@ -11,5 +11,4 @@ var mongoose          = require("mongoose"),
     }
   });
 
-
 mongoose.model('game_npcs', npcsSchema);

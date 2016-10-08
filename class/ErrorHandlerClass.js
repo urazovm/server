@@ -1,13 +1,9 @@
 console.log("ErrorHandlerClass CLASS is connected");  
 
-// var Mongo = require("./MongoDBClass"),
 var mongoose  = require("mongoose"),
   GLOBAL      = require("./PreloadDataClass");
 
-
-function ErrorHandlerClass () {
-
-}
+function ErrorHandlerClass () {};
 
 
 /*

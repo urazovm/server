@@ -6,13 +6,10 @@ var express = require('express'),
 	domain = require('domain'),
 	async = require('async'),
 	mongoose = require("mongoose"),
-
-	// add personal config package
 	config = require("./../config/personal_config"),
 	GLOBAL = require("./PreloadDataClass"),
 	utils = require("./UtilsClass"),
 	battlesManager = require("./BattleManagerClass"),
-
 	RedisRouterServerClass = require("./RedisRouterServerClass"),
 	ErrorHandlerClass = require("./ErrorHandlerClass"),
 	errorHandler = new ErrorHandlerClass(),
@@ -25,15 +22,12 @@ function ServerBattleClass() {
 
 
 ServerBattleClass.prototype.start = function() {
-	
 	mongoose.connect("mongodb://127.0.0.1/pcemmaDb");
-
 	var queues = [
 		GLOBAL.initialize.bind(GLOBAL),
 		battlesManager.initialize.bind(battlesManager),
 		this.startServer.bind(this)
 	];
-
 	async.waterfall(
 		queues,
 		function(err) {
